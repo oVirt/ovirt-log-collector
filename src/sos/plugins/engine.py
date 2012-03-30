@@ -5,14 +5,16 @@ class engine(sos.plugintools.PluginBase):
     """oVirt related information"""
 
     optionList = [
-         ("vdsmlogs",  'Directory containing all of the SOS logs from the RHEV hypervisor(s)', '', False),
+         ("vdsmlogs",  'Directory containing all of the SOS logs from the hypervisor(s)', '', False),
          ("prefix", "Prefix the sosreport archive", '', False)
     ]
 
     def setup(self):
         # Copy engine config files.
-        self.addCopySpec("/etc/engine")
-        self.addCopySpec("/var/log/engine")
+        self.addCopySpec("/etc/ovirt-engine")
+        self.addCopySpec("/var/log/ovirt-engine")
+        self.addCopySpec("/etc/rhevm")
+        self.addCopySpec("/var/log/rhevm/")
         if self.getOption("vdsmlogs"):
             self.addCopySpec(self.getOption("vdsmlogs"))
 
@@ -24,7 +26,11 @@ class engine(sos.plugintools.PluginBase):
         Obfuscate passwords.
         """
 
-        self.doRegexSub("/etc/engine/engine-config/engine-config.properties",
+        self.doRegexSub("/etc/ovirt-engine/engine-config/engine-config.properties",
+                        r"Password.type=(.*)",
+                        r'Password.type=********')
+
+        self.doRegexSub("/etc/rhevm/rhevm-config/rhevm-config.properties",
                         r"Password.type=(.*)",
                         r'Password.type=********')
 

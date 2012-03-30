@@ -1,7 +1,7 @@
 .\" engine-log-collector - oVirt Engine Tool for Collecting Data
 .TH "engine-log-collector" "8" "" "Keith Robertson" ""
 .SH "NAME"
-engine\-log\-collector \- oVirt Enterprise Virtualization Engine Manager (RHEV\-M) Log Collector
+engine\-log\-collector \- oVirt Log Collector
 
 .SH "SYNOPSIS"
 \fBengine\-log\-collector\fP [options] list
@@ -13,23 +13,23 @@ engine\-log\-collector \- oVirt Enterprise Virtualization Engine Manager (RHEV\-
 .SH "DESCRIPTION"
 .PP
 
-The \fBengine\-log\-collector\fP command gathers data from many different components (logs, databases, and environmental information) associated with an instance of a oVirt Enterprise Virtualization Engine Manager (RHEV\-M). The tool is intended to be run from the Linux system on which the RHEV\-M is running as the root user.\&
+The \fBengine\-log\-collector\fP command gathers data from many different components (logs, databases, and environmental information) associated with an instance of a oVirt Enterprise Virtualization Engine Manager. The tool is intended to be run from the Linux system on which the is running as the root user.\&
 
 .PP
-The \fBengine\-log\-collector\fP will, by default, attempt to interact with the RHEV\-M REST API. This command typically gets the RHEV\-M's hostname and port number (engine=) and user name (user=) from the \fB/etc/engine/logcollector.conf\fP file. Alternatively, you can provide the user name and password from the command line. The user name and password are authenticated by the authentication service associated with the RHEV\-M.  Currently, a special local account (admin), Red Hat IPA server, and Microsoft Active Directory server is supported for this task.
+The \fBengine\-log\-collector\fP will, by default, attempt to interact with the oVirt Engine REST API. This command typically gets the oVirt Engine's hostname and port number (engine=) and user name (user=) from the \fB/etc/engine/logcollector.conf\fP file. Alternatively, you can provide the user name and password from the command line. The user name and password are authenticated by the authentication service associated with the oVirt Engine.  Currently, a special local account (admin), Red Hat IPA server, and Microsoft Active Directory server is supported for this task.
 .PP
 
-Central to the \fBengine\-log\-collector\fP command is a series of plug\-ins to the \fBsosreport\fP(1) application. These plug\-ins and other components gather information about hypervisors managed by the RHEV\-M into a single archive (a sort of \fBsosreport\fP(1) of sosreports).
+Central to the \fBengine\-log\-collector\fP command is a series of plug\-ins to the \fBsosreport\fP(1) application. These plug\-ins and other components gather information about hypervisors managed by the oVirt Engine into a single archive (a sort of \fBsosreport\fP(1) of sosreports).
 
 .PP
 
-The \fBlist\fP option lists hypervisors controlled by the RHEV\-M, while \fBcollect\fP (default) actually runs the collection. The result of running \fBengine\-log\-collector\fP is a compressed archive that contains logs and other information from some or all of the following:
+The \fBlist\fP option lists hypervisors controlled by the oVirt Engine, while \fBcollect\fP (default) actually runs the collection. The result of running \fBengine\-log\-collector\fP is a compressed archive that contains logs and other information from some or all of the following:
 
 .\' Describe engine\-slimmed
 
 .IP "\fB* Hypervisor Log Collection\fP"
 
-Logs from all RHEV\-H and RHEL\-H hypervisors managed by the RHEV\-M are gathered by default. The \-\-no\-hypervisors option lets you choose to not collect any hypervisor information. Other options let you limit log collection to specific clusters, data centers or hosts. Some options require that the log collector communicate with the RHEV\-M RESTful API. The communication is needed to retrieve the list of hosts in a cluster or datacenter, and is transparent to the user.\&
+Logs from all nodes managed by the oVirt Engine are gathered by default. The \-\-no\-hypervisors option lets you choose to not collect any hypervisor information. Other options let you limit log collection to specific clusters, data centers or hosts. Some options require that the log collector communicate with the oVirt Engine RESTful API. The communication is needed to retrieve the list of hosts in a cluster or datacenter, and is transparent to the user.\&
 
 .IP "\fB* PostgreSQL Log Collection\fP"
 
@@ -39,11 +39,11 @@ postgresql\-sosreport\-rhel6\-20110613221045\-f914.ta r.xz.\&
 
 .IP "\fB* JBoss Log Collection\fP"
 
-The log collector always attempt to gather some information from JBoss. The JBoss \fBsosreport\fP(1) plug\-in is extensive and it will capture logs, configuration information, datasource files and other information by default. If the user supplies a JMX console administrator user ID and password even more information will be captured (e.g. memory and thread information). The RHEV\-M installer does not configure a JMX console administrator by default. Follow the instructions in the JBoss manuals to securely enable the JMX console administrator to collect this useful information, otherwise press Control\-D to skip the collection of this information when prompted.\&
+The log collector always attempt to gather some information from JBoss. The JBoss \fBsosreport\fP(1) plug\-in is extensive and it will capture logs, configuration information, datasource files and other information by default. If the user supplies a JMX console administrator user ID and password even more information will be captured (e.g. memory and thread information). The oVirt Engine installer does not configure a JMX console administrator by default. Follow the instructions in the JBoss manuals to securely enable the JMX console administrator to collect this useful information, otherwise press Control\-D to skip the collection of this information when prompted.\&
 
 .IP "\fB* Clock Skew\fP"
 
-To deal with cases where hypervisors are not syncronized with NTP, a file called time_diff.txt is created to list the clock skew of each hypervisor relative to the RHEV\-M.  This file is included in the report whenever you elect to collect information from a hypervisor.
+To deal with cases where hypervisors are not syncronized with NTP, a file called time_diff.txt is created to list the clock skew of each hypervisor relative to the oVirt Engine.  This file is included in the report whenever you elect to collect information from a hypervisor.
 
 .PP
 
@@ -87,7 +87,7 @@ Path to \fBengine\-log\-collector\fP log file (default=/var/log/engine\-log\-col
 Display verbose output.\&
 
 .SH "oVirt Engine CONFIGURATION OPTIONS"
-The options in the RHEV\-M configuration group can be used to filter log collection from one or more RHEV\-H or RHEL\-H systems. If the \-\-no\-hypervisors option is specified, data is not collected from any RHEV\-H. Wild card globbing (*, ?, []) can be used to match names.\&
+The options in the oVirt Engine configuration group can be used to filter log collection from one or more hypervisors. If the \-\-no\-hypervisors option is specified, data is not collected from any hypervisor. Wild card globbing (*, ?, []) can be used to match names.\&
 
 .IP "\fB\-\-no\-hypervisors\fP"
 
@@ -99,7 +99,7 @@ Indicates the user name to use with the REST API. This should be in UPN format.\
 
 .IP "\fB\-r engine.example.com, \-\-engine=engine.example.com\fP"
 
-Hostname or IP address of the RHEV\-M (default=localhost:8443).\&
+Hostname or IP address of the oVirt Engine (default=localhost:8443).\&
 
 .IP "\fB\-c CLUSTER, \-\-cluster=CLUSTER\fP"
 
@@ -111,7 +111,7 @@ Replace DATACENTER with a pattern, or comma separated list of patterns, to filte
 
 .IP "\fB\-H HOST_LIST, \-\-hosts=HOST_LIST\fP"
 
-Replace HOST_LIST with a pattern, or comma separated list of hostnames, hostname patterns, FQDNs, FQDN patterns, IP addresses, or IP address patterns from which the log collector should collect RHEV\-H logs (default=None).\&
+Replace HOST_LIST with a pattern, or comma separated list of hostnames, hostname patterns, FQDNs, FQDN patterns, IP addresses, or IP address patterns from which the log collector should collect hypervisor logs (default=None).\&
 
 .SH "SOSREPORT OPTIONS"
 The JBoss \fBsosreport\fP(1) plug\-in is always executed. To activate data collection from JBoss's JMX console java\-home, jboss\-user, and jboss\-pass must also be specified. If no jboss\-pass is supplied in the configuration file then it will be asked for prior to collection time.
@@ -157,7 +157,7 @@ Collect JBoss twiddle data (default=on).\&
 Comma separated list of application's whose XML descriptors you want (default=all).\&
 
 .SH "SSH CONFIGURATION"
-The options in the SSH configuration group can be used to specify the maximum number of concurrent SSH connections to RHEV\-H(s) for log collection, the SSH port, and a identity file to be used.\&
+The options in the SSH configuration group can be used to specify the maximum number of concurrent SSH connections to hypervisors(s) for log collection, the SSH port, and a identity file to be used.\&
 
 .IP "\fB\-\-ssh\-port=PORT\fP"
 
@@ -165,14 +165,14 @@ The port used for ssh and scp communications.\&
 
 .IP "\fB\-k KEYFILE, \-\-key\-file=KEYFILE\fP"
 
-The identity file (private key) to be used for accessing the RHEV\-H systems (default=/etc/pki/engine/keys/engine_id_rsa). If an identity file is not supplied the program will prompt for a password. It is strongly recommended to use key\-based authentication with SSH because the program may make multiple SSH connections resulting in multiple requests for the SSH password.\&
+The identity file (private key) to be used for accessing the hypervisors (default=/etc/pki/engine/keys/engine_id_rsa). If an identity file is not supplied the program will prompt for a password. It is strongly recommended to use key\-based authentication with SSH because the program may make multiple SSH connections resulting in multiple requests for the SSH password.\&
 
 .IP "\fB\-\-max\-connections=MAX_CONNECTIONS\fP"
 
-Maximum concurrent connections for fetching RHEV\-H logs (default=10).\&
+Maximum concurrent connections for fetching hypervisor logs (default=10).\&
 
 .SH "POSTGRESQL DATABASE CONFIGURATION"
-The log collector will connect to the RHEV\-M PostgreSQL database and dump the data for inclusion in the log report, unless \-\-no\-postgresql is specified. The PostgreSQL user ID and database name can be specified if they are different from the defaults. If the PostgreSQL database is not on the localhost, set pg\-dbhost, provide a pg\-ssh\-user, and optionally supply pg\-host\-key and the log collector will gather remote PostgreSQL logs. The PostgreSQL \fBsosreport\fP(1) plug\-in must be installed on pg\-dbhost for successful remote log collection.\&
+The log collector will connect to the oVirt Engine PostgreSQL database and dump the data for inclusion in the log report, unless \-\-no\-postgresql is specified. The PostgreSQL user ID and database name can be specified if they are different from the defaults. If the PostgreSQL database is not on the localhost, set pg\-dbhost, provide a pg\-ssh\-user, and optionally supply pg\-host\-key and the log collector will gather remote PostgreSQL logs. The PostgreSQL \fBsosreport\fP(1) plug\-in must be installed on pg\-dbhost for successful remote log collection.\&
 
 .IP "\fB\-\-no\-postgresql\fP"
 
@@ -199,7 +199,7 @@ The SSH user that will be used to connect to the server upon which the remote Po
 The identity file (private key) to be used for accessing the host upon which the PostgreSQL database lives (default=not needed if using localhost).\&
 
 .SH "EXAMPLES"
-Before running \fBengine\-log\-collector\fP to collect data, you should run one or more list commands, to hone in on the data you want. Here's an example of the the output using a list option to see all hosts managed by the RHEV\-M:
+Before running \fBengine\-log\-collector\fP to collect data, you should run one or more list commands, to hone in on the data you want. Here's an example of the the output using a list option to see all hosts managed by the oVirt Engine:
 
 .PP
 
@@ -235,7 +235,7 @@ Legacy               | LegacyCluster        | 192.168.122.11
 
 .PP
 
-Instead of having log collector collect logs from all hypervisors managed by the RHEV\-M (default), you can use the same options you used with \fBlist\fP to limit data collection to specific hosts (or datacenters or clusters). Here, all hosts with IP addresses ending in .11 are matched:\&
+Instead of having log collector collect logs from all hypervisors managed by the oVirt Engine (default), you can use the same options you used with \fBlist\fP to limit data collection to specific hosts (or datacenters or clusters). Here, all hosts with IP addresses ending in .11 are matched:\&
 
 .PP
 
@@ -286,7 +286,7 @@ To get configuration information, \fBengine\-log\-collector\fP refers to the \fB
 
 .br
 
-###  RHEV\-M Configuration:
+###  oVirt Engine Configuration:
 
 .br
 
@@ -306,14 +306,14 @@ passwd=L1ghtNingFst1!
 
 .br
 
-## hostname or IP address of the RHEV\-M
+## hostname or IP address of the oVirt Engine
 
 .br
 
 engine=myengine.example.com:8443
 
 .SH "ERRORS"
-* If JBoss is down for the RHEV\-M, it limits the scope of what you can collect.\&
+* If JBoss is down for the oVirt Engine, it limits the scope of what you can collect.\&
 
 .br
 

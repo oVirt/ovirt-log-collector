@@ -5,18 +5,13 @@ import os
 from optparse import OptionParser, OptionGroup, SUPPRESS_HELP
 import subprocess
 import shlex
-import urllib
-import urllib2
-import base64
 import pprint
 import fnmatch
 import traceback
-import tempfile
 import shutil
 import logging
 import getpass
-
-from schemas import hypervisors
+from helper import hypervisors
 
 versionNum="1.0.0"
 STREAM_LOG_FORMAT = '%(levelname)s: %(message)s'
@@ -845,8 +840,8 @@ if __name__ == '__main__':
 
     engine_group = OptionGroup(parser,
                               "oVirt Engine Configuration",
-"""The options in the oVirt Engine configuration group can be used to filter log collection from one or more RHEV-H.
-If the --no-hypervisors option is specified, data is not collected from any RHEV-H.""")
+"""The options in the oVirt Engine configuration group can be used to filter log collection from one or more hypervisors.
+If the --no-hypervisors option is specified, data is not collected from any hypervisor.""")
 
     engine_group.add_option("", "--no-hypervisors",
             help="skip collection from hypervisors (default=False)",
@@ -885,11 +880,11 @@ If the --no-hypervisors option is specified, data is not collected from any RHEV
             callback=comma_separated_list,
             type="string",
             help="""comma separated list of hostnames, hostname patterns, FQDNs, FQDN patterns,
-IP addresses, or IP address patterns from which the log collector should collect RHEV-H logs (default=None)""")
+IP addresses, or IP address patterns from which the log collector should collect hypervisor logs (default=None)""")
 
     ssh_group = OptionGroup(parser, "SSH Configuration",
 """The options in the SSH configuration group can be used to specify the maximum
-number of concurrent SSH connections to RHEV-H(s) for log collection, the
+number of concurrent SSH connections to hypervisor(s) for log collection, the
 SSH port, and a identity file to be used.""")
 
     ssh_group.add_option("", "--ssh-port", dest="ssh_port",
@@ -897,7 +892,7 @@ SSH port, and a identity file to be used.""")
             default=22)
 
     ssh_group.add_option("-k", "--key-file", dest="key_file",
-            help="""the identity file (private key) to be used for accessing the RHEV-Hs (default=%s).
+            help="""the identity file (private key) to be used for accessing the hypervisors (default=%s).
 If a identity file is not supplied the program will prompt for a password.  It is strongly recommended to
 use key based authentication with SSH because the program may make multiple SSH connections
 resulting in multiple requests for the SSH password.""" % DEFAULT_SSH_KEY,
@@ -905,7 +900,7 @@ resulting in multiple requests for the SSH password.""" % DEFAULT_SSH_KEY,
             default=DEFAULT_SSH_KEY)
 
     ssh_group.add_option("", "--max-connections", dest="max_connections",
-            help="max concurrent connections for fetching RHEV-H logs (default = 10)",
+            help="max concurrent connections for fetching hypervisor logs (default = 10)",
             default=10)
 
     db_group = OptionGroup(parser, "PostgreSQL Database Configuration",
@@ -1047,7 +1042,7 @@ it will be asked for prior to collection time.""")
             os.makedirs(conf["local_scratch_dir"])
         else:
             if len(os.listdir(conf["local_scratch_dir"])) != 0:
-                raise Exception("""the scratch directory for temporary storage of RHEVH reports is not empty.
+                raise Exception("""the scratch directory for temporary storage of hypervisor reports is not empty.
 It should be empty so that reports from a prior invocation of the log collector are not collected again.
 The directory is: %s'""" % (conf["local_scratch_dir"]))
 
