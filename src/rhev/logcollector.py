@@ -422,9 +422,9 @@ class HyperVisorData(CollectorBase):
         cmd = """%(ssh_cmd)s "
         VERSION=`/bin/rpm -q --qf '[%%{VERSION}]' sos | /bin/sed 's/\.//'`;
         if [ "$VERSION" -ge "22" ]; then
-            /usr/sbin/sosreport --batch -o %(reports)s
+            /usr/sbin/sosreport --batch -k general.all_logs=True -o %(reports)s
         elif [ "$VERSION" -ge "17" ]; then
-            /usr/sbin/sosreport --no-progressbar -o %(bc_reports)s
+            /usr/sbin/sosreport --no-progressbar -k general.all_logs=True -o %(bc_reports)s
         else
             /bin/echo "No valid version of sosreport found." 1>&2
             exit 1
@@ -512,7 +512,7 @@ class ENGINEData(CollectorBase):
             "kernel",
         ))
         self.configuration["sos_options"] = self.build_options()
-        stdout = self.caller.call('/usr/sbin/sosreport --batch --report --tmp-dir=%(local_tmp_dir)s  -o %(reports)s %(sos_options)s')
+        stdout = self.caller.call('/usr/sbin/sosreport --batch -k general.all_logs=True --report --tmp-dir=%(local_tmp_dir)s  -o %(reports)s %(sos_options)s')
         self.parse_sosreport_stdout(stdout)
         if os.path.exists(self.configuration["path"]):
             archiveSize = '%.1fM' % (float(os.path.getsize(self.configuration["path"])) / (1 << 20))
