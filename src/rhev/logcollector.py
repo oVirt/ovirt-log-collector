@@ -484,7 +484,9 @@ class ENGINEData(CollectorBase):
     def build_options(self):
         opts = ["-k rpm.rpmva=off",
                 "-k engine.vdsmlogs=%s" % self.configuration.get("local_scratch_dir"),
-                "-k engine.prefix=on"]
+                "-k engine.prefix=on",
+                "-k general.all_logs=True",
+                "-k apache.log=True"]
         for key, value in self.configuration.iteritems():
             if key.startswith("java") or key.startswith("jboss"):
                 opts.append('-k %s="%s"' % (key,value))
@@ -512,9 +514,10 @@ class ENGINEData(CollectorBase):
             "devicemapper",
             "selinux",
             "kernel",
+            "apache",
         ))
         self.configuration["sos_options"] = self.build_options()
-        stdout = self.caller.call('/usr/sbin/sosreport --batch -k general.all_logs=True --report --tmp-dir=%(local_tmp_dir)s  -o %(reports)s %(sos_options)s')
+        stdout = self.caller.call('/usr/sbin/sosreport --batch --report --tmp-dir=%(local_tmp_dir)s  -o %(reports)s %(sos_options)s')
         self.parse_sosreport_stdout(stdout)
         if os.path.exists(self.configuration["path"]):
             archiveSize = '%.1fM' % (float(os.path.getsize(self.configuration["path"])) / (1 << 20))
