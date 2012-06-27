@@ -400,6 +400,7 @@ class HyperVisorData(CollectorBase):
             "devicemapper",
             "selinux",
             "kernel",
+            "memory",
             ))
 
         # these are the reports that will work with rhev2.2 hosts
@@ -515,6 +516,7 @@ class ENGINEData(CollectorBase):
             "selinux",
             "kernel",
             "apache",
+            "memory",
         ))
         self.configuration["sos_options"] = self.build_options()
         stdout = self.caller.call('/usr/sbin/sosreport --batch --report --tmp-dir=%(local_tmp_dir)s  -o %(reports)s %(sos_options)s')
