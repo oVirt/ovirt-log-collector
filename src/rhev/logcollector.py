@@ -12,6 +12,9 @@ import shutil
 import logging
 import gettext
 import getpass
+import datetime
+import dateutil.parser
+import dateutil.tz as tz
 from helper import hypervisors
 
 versionNum="1.0.0"
@@ -373,6 +376,11 @@ class CollectorBase(object):
 
 
 class HyperVisorData(CollectorBase):
+    TIME_DRIFT_FORMAT = "%-17s : %-33s : %-33s : %-35s"
+    TIME_DRIFT_HEADER = TIME_DRIFT_FORMAT %  ('Node',
+                      'Node Time',
+                      'Engine Time',
+                      'Clock Drift Between Engine and Node')
 
     def __init__(self,
                  hostname,
@@ -407,19 +415,25 @@ class HyperVisorData(CollectorBase):
         self.configuration['bc_reports'] = "vdsm,general,networking,hardware,process,yum,filesys"
 
     def get_time_diff(self, stdout):
-        import datetime
-        h_time = datetime.datetime.strptime(
-                stdout.strip(), "%a, %d %b %Y %H:%M:%S +0000")
-        l_time = datetime.datetime.utcnow()
+        h_time = dateutil.parser.parse(stdout.strip())
+        l_time = datetime.datetime.now(tz=tz.tzlocal())
 
         logging.debug("host <%s> time: %s" % (self.configuration["hostname"], h_time.isoformat()))
         logging.debug("local <%s> time: %s" % ("localhost", l_time.isoformat(),))
 
-        time_diff = "%(hostname)s " % self.configuration
         if h_time > l_time:
-            self.queue.append(time_diff + "+%s" % (h_time - l_time))
+            tmp = self.TIME_DRIFT_FORMAT % ("%(hostname)s " % self.configuration,
+                                h_time,
+                                l_time,
+                                "+%s" % (h_time - l_time))
+
+            self.queue.append(tmp)
         else:
-            self.queue.append(time_diff + "-%s" % (l_time - h_time))
+            tmp = self.TIME_DRIFT_FORMAT % ("%(hostname)s " % self.configuration,
+                                h_time,
+                                l_time,
+                                "-%s" % (l_time - h_time))
+            self.queue.append(tmp)
 
     def sosreport(self):
         cmd = """%(ssh_cmd)s "
@@ -457,7 +471,7 @@ class HyperVisorData(CollectorBase):
             p2 = subprocess.Popen(md5sum_cmd, stdin=p1.stdout, stdout=subprocess.PIPE)
             result = p2.communicate()[0]
 
-            stdout = self.caller.call('%(ssh_cmd)s "/bin/date -uR"')
+            stdout = self.caller.call('%(ssh_cmd)s "date --iso-8601=seconds"')
             try:
                 self.get_time_diff(stdout)
             except ValueError, e:
@@ -599,6 +613,7 @@ class LogCollector(object):
         local_scratch_dir = self.conf.get("local_scratch_dir")
 
         with open(os.path.join(local_scratch_dir, DEFAULT_TIME_SHIFT_FILE), "w") as fd:
+            fd.write(HyperVisorData.TIME_DRIFT_HEADER + "\n")
             for record in queue:
                 fd.write(record + "\n")
 

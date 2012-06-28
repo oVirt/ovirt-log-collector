@@ -12,6 +12,7 @@ BuildRequires: python-devel
 Requires: python-lxml
 Requires: ovirt-engine-sdk
 Requires: sos
+Requires: python-dateutil
 
 %description
 Log Collector tool for oVirt Engine
