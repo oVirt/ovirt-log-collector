@@ -10,6 +10,7 @@ import fnmatch
 import traceback
 import shutil
 import logging
+import gettext
 import getpass
 from helper import hypervisors
 
@@ -23,7 +24,8 @@ DEFAULT_CONFIGURATION_FILE = "/etc/ovirt-engine/logcollector.conf"
 DEFAULT_SCRATCH_DIR='/tmp/logcollector'
 DEFAULT_LOG_FILE='/var/log/ovirt-engine/engine-log-collector.log'
 DEFAULT_TIME_SHIFT_FILE='time_diff.txt'
-
+t = gettext.translation('logcollector', fallback=True)
+_ = t.ugettext
 
 def multilog(logger, msg):
     for line in str(msg).splitlines():

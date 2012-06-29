@@ -3,8 +3,13 @@ import logging
 import urllib2
 import base64
 import threading
+import gettext
 from ovirtsdk.api import API
 from ovirtsdk.xml import params
+from ovirtsdk.infrastructure.errors import RequestError, ConnectionError
+
+t = gettext.translation('hypervisors', fallback=True)
+_ = t.ugettext
 
 class ENGINETree(object):
 
@@ -120,8 +125,13 @@ def _initialize_api(hostname, username, password):
                                 pi.get_version().get_revision())
             logging.debug("API Vendor(%s)\tAPI Version(%s)" %  (pi.get_vendor(), vrm))
         else:
-            logging.error(_("Unable to connect to REST API."))
-            return None
+            api.test(throw_exception=True)
+    except RequestError, re:
+        logging.error(_("Unable to connect to REST API.  Reason: %s") %  re.reason)
+        return None
+    except ConnectionError:
+        logging.error(_("Problem connecting to the REST API.  Is the service available?"))
+        return None
     except Exception, e:
         logging.error(_("Unable to connect to REST API.  Message: %s") %  e)
         return None
@@ -141,8 +151,11 @@ def get_all(hostname, username, password):
             for host in api.hosts.list():
                 tree.add_host(host)
             return set(tree.get_sortable())
+    except RequestError, re:
+        logging.error(_("Unable to connect to REST API.  Reason: %s") %  re.reason)
+    except ConnectionError:
+        logging.error(_("Problem connecting to the REST API.  Is the service available?"))
     except Exception, e:
         logging.error(_("Failure fetching information about hypervisors from API . Error: %s") % e)
-
     return set()
 
