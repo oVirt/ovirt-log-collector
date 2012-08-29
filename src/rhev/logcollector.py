@@ -570,12 +570,12 @@ class PostgresData(CollectorBase):
 
 
     def sosreport(self):
-        if self.configuration.get("pg_pass"):
-            opt = '-k postgresql.dbname=%(pg_dbname)s -k postgresql.username=%(pg_user)s -k postgresql.password=%(pg_pass)s'
-        else:
-            opt = ""
+        opt = ""
 
         if self.hostname == "localhost":
+            if self.configuration.get("pg_pass"):
+                opt = '-k postgresql.dbname=%(pg_dbname)s -k postgresql.username=%(pg_user)s -k postgresql.password=%(pg_pass)s'
+
             stdout = self.caller.call('/usr/sbin/sosreport --batch --report -o postgresql '
                         '--tmp-dir=%(local_scratch_dir)s ' + opt)
             self.parse_sosreport_stdout(stdout)
@@ -589,11 +589,20 @@ class PostgresData(CollectorBase):
                                    "postgresql-%s.md5" % self.configuration["filename"]))
         else:
             # The PG database is on a remote host
-            cmd = '%(ssh_cmd)s "/usr/sbin/sosreport --batch --report -o postgresql ' + opt
-            stdout = self.caller.call(cmd)
+            opt = '-k postgresql.dbname=%(pg_dbname)s -k postgresql.dbhost=%(pg_dbhost)s -k postgresql.dbport=%(pg_dbport)s -k postgresql.username=%(pg_user)s -k postgresql.password=%(pg_pass)s '
+            # REMOVE the following 3 lines when SoS starts shipping psql.py
+            stdout = self.caller.call('/usr/sbin/sosreport --batch --report -o postgresql '
+                        '--tmp-dir=%(local_scratch_dir)s ' + opt)
             self.parse_sosreport_stdout(stdout)
-            self.caller.call('%(scp_cmd)s:%(path)s %(local_scratch_dir)s')
-            self.caller.call('%(ssh_cmd)s "rm %(path)s*"')
+            os.rename("%s.md5" % (self.configuration["path"]),
+                      os.path.join(self.configuration["local_scratch_dir"],
+                                   "postgresql-%s.md5" % self.configuration["filename"]))
+# Uncomment the code below when base SoS gets the psql.py plug-in
+#            cmd = '%(ssh_cmd)s "/usr/sbin/sosreport --batch --report -o postgresql ' + opt
+#            stdout = self.caller.call(cmd)
+#            self.parse_sosreport_stdout(stdout)
+#            self.caller.call('%(scp_cmd)s:%(path)s %(local_scratch_dir)s')
+#            self.caller.call('%(ssh_cmd)s "rm %(path)s*"')
 
         # Prepend postgresql- to the PostgreSQL SOS report
         # so that it is easy to distinguished from the other N reports
@@ -957,6 +966,11 @@ successful remote log collection.""")
             help="PostgreSQL database hostname or IP address (default=localhost)",
             metavar="localhost",
             default="localhost")
+
+    db_group.add_option("", "--pg-dbport", dest="pg_dbport",
+            help="PostgreSQL server port number (default=5432)",
+            metavar="5432",
+            default="5432")
 
     db_group.add_option("", "--pg-ssh-user", dest="pg_ssh_user",
             help="""the SSH user that will be used to connect to the
