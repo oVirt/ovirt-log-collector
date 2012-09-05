@@ -6,7 +6,7 @@ import threading
 import gettext
 from ovirtsdk.api import API
 from ovirtsdk.xml import params
-from ovirtsdk.infrastructure.errors import RequestError, ConnectionError
+from ovirtsdk.infrastructure.errors import RequestError, ConnectionError, NoCertificatesError
 
 t = gettext.translation('hypervisors', fallback=True)
 _ = t.ugettext
@@ -109,14 +109,16 @@ class ENGINETree(object):
                     for host in cluster.hosts]
 
 
-def _initialize_api(hostname, username, password):
+def _initialize_api(hostname, username, password, ca, insecure):
     """
     Initialize the oVirt RESTful API
     """
     url = "https://" + hostname + "/api"
     api = API(url=url,
               username=username,
-              password=password)
+              password=password,
+              ca_file=ca,
+              insecure=insecure)
     try:
         pi = api.get_product_info()
         if pi is not None:
@@ -130,19 +132,22 @@ def _initialize_api(hostname, username, password):
         logging.error(_("Unable to connect to REST API.  Reason: %s") %  re.reason)
         return None
     except ConnectionError:
-        logging.error(_("Problem connecting to the REST API.  Is the service available?"))
+        logging.error(_("Problem connecting to the REST API.  Is the service available and does the CA certificate exist?"))
+        return None
+    except NoCertificatesError:
+        logging.error(_("Problem connecting to the REST API.  The CA is invalid.  To override use the \'insecure\' option."))
         return None
     except Exception, e:
         logging.error(_("Unable to connect to REST API.  Message: %s") %  e)
         return None
     return api
 
-def get_all(hostname, username, password):
+def get_all(hostname, username, password, ca, insecure=False):
 
     tree = ENGINETree()
 
     try:
-        api = _initialize_api(hostname, username, password)
+        api = _initialize_api(hostname, username, password, ca, insecure)
         if api is not None:
             for dc in api.datacenters.list():
                 tree.add_datacenter(dc)

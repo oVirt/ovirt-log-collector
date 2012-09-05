@@ -641,7 +641,9 @@ class LogCollector(object):
         try:
             return hypervisors.get_all(self.conf.get("engine"),
                                        self.conf.get("user"),
-                                       self.conf.get("passwd"))
+                                       self.conf.get("passwd"),
+                                       self.conf.get("engine_ca"),
+                                       self.conf.get("insecure"))
         except Exception, e:
             ExitCodes.exit_code=ExitCodes.WARN
             logging.error("_get_hypervisors_from_api: %s" % e)
@@ -865,6 +867,16 @@ if __name__ == '__main__':
                       help="path to log file (default=%s)" % DEFAULT_LOG_FILE,
                       metavar="PATH",
                       default=DEFAULT_LOG_FILE)
+
+    parser.add_option("", "--engine-ca", dest="engine_ca",
+            help="The CA certificate used to validate the engine. (default=/etc/pki/ovirt-engine/ca.pem)",
+            metavar="/etc/pki/ovirt-engine/ca.pem",
+            default="/etc/pki/ovirt-engine/ca.pem")
+
+    parser.add_option("", "--insecure", dest="insecure",
+            help="Do not make an attempt to verify the engine.",
+            action="store_true",
+            default=False)
 
     parser.add_option("-v", "--verbose", dest="verbose",
             action="store_true", default=False)
