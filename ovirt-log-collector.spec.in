@@ -28,7 +28,6 @@ make PREFIX=%{buildroot}/ install
 %files
 %{_datadir}/ovirt-engine/log-collector
 %{python_sitelib}/sos/plugins/engine.py*
-%{python_sitelib}/sos/plugins/jboss.py*
 %{python_sitelib}/sos/plugins/postgresql.py*
 %{_bindir}/engine-log-collector
 %config(noreplace) %{_sysconfdir}/ovirt-engine/logcollector.conf

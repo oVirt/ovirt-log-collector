@@ -74,7 +74,6 @@ install_log_collector:
 	install -D -m 0755 ./src/rhev/helper/hypervisors.py $(PREFIX)/usr/share/ovirt-engine/log-collector/helper/hypervisors.py
 	install -D -m 0755 ./src/rhev/helper/__init__.py $(PREFIX)/usr/share/ovirt-engine/log-collector/helper/__init__.py
 	install -D -m 0755 ./src/sos/plugins/engine.py $(PREFIX)/$(PYTHON_SITELIB)/sos/plugins/engine.py
-	install -D -m 0755 ./src/sos/plugins/jboss.py $(PREFIX)/$(PYTHON_SITELIB)/sos/plugins/jboss.py
 	install -D -m 0755 ./src/sos/plugins/postgresql.py $(PREFIX)/$(PYTHON_SITELIB)/sos/plugins/postgresql.py
 	/usr/bin/gzip -c ./src/rhev/engine-log-collector.8 > $(PREFIX)/usr/share/man/man8/engine-log-collector.8.gz
 	chmod 644 $(PREFIX)/usr/share/man/man8/engine-log-collector.8.gz

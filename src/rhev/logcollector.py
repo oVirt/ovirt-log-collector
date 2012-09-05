@@ -502,9 +502,6 @@ class ENGINEData(CollectorBase):
                 "-k engine.prefix=on",
                 "-k general.all_logs=True",
                 "-k apache.log=True"]
-        for key, value in self.configuration.iteritems():
-            if key.startswith("java") or key.startswith("jboss"):
-                opts.append('-k %s="%s"' % (key,value))
 
         if self.configuration.get("ticket_number"):
             opts.append("--ticket-number=%s" % self.configuration.get("ticket_number"))
@@ -516,7 +513,6 @@ class ENGINEData(CollectorBase):
 
     def sosreport(self):
         self.configuration["reports"] = ",".join((
-            "jboss",
             "engine",
             "rpm",
             "libvirt",
@@ -809,11 +805,6 @@ class LogCollector(object):
 
     def get_engine_data(self):
         logging.info("Gathering oVirt Engine information...")
-        if self.conf.get("enable_jmx"):
-            try:
-                self.conf.getpass("jboss.pass", msg="password for the JBoss JMX user")
-            except Configuration.SkipException:
-                logging.info("JBoss JMX information will not be collected because the JMX user's password was not supplied.")
         collector = ENGINEData("localhost",
                               configuration=self.conf)
         stdout = collector.sosreport()
@@ -995,75 +986,7 @@ server upon which the remote PostgreSQL database lives. (default=root)""",
 upon which the PostgreSQL database lives (default=not needed if using localhost)""",
             metavar="none")
 
-    jboss_group = OptionGroup(parser,
-                              "SOSReport Options",
-"""The JBoss SOS plug-in will always be executed.  To activate data collection
-from JBoss's JMX console enable-jmx, java-home, jboss-user, and jboss-pass must
-also be specified.  If no jboss-pass is supplied in the configuration file then
-it will be asked for prior to collection time.""")
-
-    jboss_group.add_option("", "--jboss-home", dest="jboss.home",
-        help="JBoss's installation dir (default=/var/lib/jbossas)",
-        metavar="/path/to/jbossas",
-        default="/var/lib/jbossas")
-
-    jboss_group.add_option("", "--java-home", dest="jboss.javahome",
-        help="Java's installation dir (default=/usr/lib/jvm/java)",
-        metavar="/path/to/java",
-        default="/usr/lib/jvm/java")
-
-    jboss_group.add_option("", "--jboss-profile",
-        dest="jboss.profile",
-        action="callback",
-        type="string",
-        help="comma separated list of server profiles to limit collection (default='engine-slimmed')",
-        callback=comma_separated_list,
-        metavar="PROFILE1, PROFILE2",
-        default="engine-slimmed")
-
-    jboss_group.add_option("", "--enable-jmx", dest="enable_jmx",
-            help="Enable the collection of run-time metrics from the oVirt Engine JBoss JMX interface",
-            action="store_true",
-            default=False)
-
-    jboss_group.add_option("", "--jboss-user", dest="jboss.user",
-        help="JBoss JMX username (default=admin)",
-        metavar="admin",
-        default="admin")
-
-    jboss_group.add_option("",
-                           "--jboss-pass",
-                           dest="jboss.pass",
-                           help=SUPPRESS_HELP)
-
-    jboss_group.add_option("", "--jboss-logsize", dest="jboss.logsize",
-        help="max size (MiB) to collect per log file (default=15)",
-        metavar="15",
-        default=15)
-
-    jboss_group.add_option("", "--jboss-stdjar", dest="jboss.stdjar",
-        metavar="on or off",
-        help="collect jar statistics for JBoss standard jars.(default=on)")
-
-    jboss_group.add_option("", "--jboss-servjar", dest="jboss.servjar",
-        metavar="on or off",
-        help="collect jar statistics from any server configuration dirs (default=on)")
-
-    jboss_group.add_option("", "--jboss-twiddle", dest="jboss.twiddle",
-        metavar="on or off",
-        help="collect twiddle data (default=on)")
-
-    jboss_group.add_option("", "--jboss-appxml",
-        dest="jboss.appxml",
-        action="callback",
-        type="string",
-        callback=comma_separated_list,
-        help="""comma separated list of application's whose XML descriptors you want (default=all)""",
-        metavar="APP, APP2",
-        default="all")
-
     parser.add_option_group(engine_group)
-    parser.add_option_group(jboss_group)
     parser.add_option_group(ssh_group)
     parser.add_option_group(db_group)
 

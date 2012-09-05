@@ -37,10 +37,6 @@ Log collector always tries to get some PostgreSQL information. Using a PostgreSQ
 
 postgresql\-sosreport\-rhel6\-20110613221045\-f914.ta r.xz.\&
 
-.IP "\fB* JBoss Log Collection\fP"
-
-The log collector always attempt to gather some information from JBoss. The JBoss \fBsosreport\fP(1) plug\-in is extensive and it will capture logs, configuration information, datasource files and other information by default. If the user supplies a JMX console administrator user ID and password even more information will be captured (e.g. memory and thread information). The oVirt Engine installer does not configure a JMX console administrator by default. Follow the instructions in the JBoss manuals to securely enable the JMX console administrator to collect this useful information, otherwise press Control\-D to skip the collection of this information when prompted.\&
-
 .IP "\fB* Clock Skew\fP"
 
 To deal with cases where hypervisors are not syncronized with NTP, a file called time_diff.txt is created to list the clock skew of each hypervisor relative to the oVirt Engine.  This file is included in the report whenever you elect to collect information from a hypervisor.
@@ -112,49 +108,6 @@ Replace DATACENTER with a pattern, or comma separated list of patterns, to filte
 .IP "\fB\-H HOST_LIST, \-\-hosts=HOST_LIST\fP"
 
 Replace HOST_LIST with a pattern, or comma separated list of hostnames, hostname patterns, FQDNs, FQDN patterns, IP addresses, or IP address patterns from which the log collector should collect hypervisor logs (default=None).\&
-
-.SH "SOSREPORT OPTIONS"
-The JBoss \fBsosreport\fP(1) plug\-in is always executed. To activate data collection from JBoss's JMX console java\-home, jboss\-user, and jboss\-pass must also be specified. If no jboss\-pass is supplied in the configuration file then it will be asked for prior to collection time.
-
-.IP "\fB\-\-jboss\-home=/path/to/jbossas\fP"
-
-JBoss's installation dir (default=/var/lib/jbossas).\&
-
-.IP "\fB\-\-java\-home=/path/to/java\fP"
-
-Java's installation dir (default=/usr/lib/jvm/java).\&
-
-.IP "\fB\-\-jboss\-profile=PROFILE1,PROFILE2\fP"
-
-Comma separated list of server profiles to limit
-
-collection (default=engine\-slimmed).\&
-
-.IP "\fB\-\-jboss\-user=admin\fP"
-
-JBoss JMX username (default=admin).\&
-
-.IP "\fB\-\-jboss\-logsize=15\fP"
-
-Maximum size (MiB) to collect per log file (default=15).\&
-
-.IP "\fB\-\-jboss\-stdjar=on or off\fP"
-
-Collect jar statistics for JBoss standard jars (default=on).\&
-
-.IP "\fB\-\-jboss\-servjar=on or off\fP"
-
-Collect jar statistics from any server configuration
-
-dirs (default=on).\&
-
-.IP "\fB\-\-jboss\-twiddle=on or off\fP"
-
-Collect JBoss twiddle data (default=on).\&
-
-.IP "\fB\-\-jboss\-appxml=APP, APP2\fP"
-
-Comma separated list of application's whose XML descriptors you want (default=all).\&
 
 .SH "SSH CONFIGURATION"
 The options in the SSH configuration group can be used to specify the maximum number of concurrent SSH connections to hypervisors(s) for log collection, the SSH port, and a identity file to be used.\&
@@ -312,9 +265,6 @@ passwd=L1ghtNingFst1!
 
 engine=myengine.example.com:8443
 
-.SH "ERRORS"
-* If JBoss is down for the oVirt Engine, it limits the scope of what you can collect.\&
-
 .br
 
 .SH "RETURN VALUES"
@@ -340,12 +290,6 @@ The program encountered a problem gathering data but was able to continue.\&
 /tmp/logcollector
 
 /var/log/engine\-log\-collector.log
-
-/var/lib/jbossas
-
-/usr/lib/jvm/java
-
-/etc/pki/engine/keys/engine_id_rsa
 
 .fi
 

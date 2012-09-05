@@ -12,14 +12,14 @@ class engine(sos.plugintools.PluginBase):
     def setup(self):
         # Copy engine config files.
         self.addCopySpec("/etc/ovirt-engine")
+        self.addCopySpec("/etc/rhevm")        
         self.addCopySpec("/var/log/ovirt-engine")
-        self.addCopySpec("/etc/rhevm")
-        self.addCopySpec("/var/log/rhevm/")
+        self.addCopySpec("/var/log/rhevm")
+        self.addCopySpec("/etc/sysconfig/ovirt-engine")        
+        self.addCopySpec("/usr/share/ovirt-engine/conf")
+        self.addCopySpec("/var/log/ovirt-guest-agent")       
         if self.getOption("vdsmlogs"):
             self.addCopySpec(self.getOption("vdsmlogs"))
-
-
-
 
     def postproc(self):
         """
