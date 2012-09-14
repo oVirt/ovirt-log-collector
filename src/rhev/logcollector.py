@@ -893,8 +893,8 @@ If the --no-hypervisors option is specified, data is not collected from any hype
                            help=SUPPRESS_HELP)
 
     engine_group.add_option("-r", "--engine", dest="engine", metavar="engine.example.com",
-            help="hostname or IP address of the oVirt Engine (default=localhost:8443)",
-            default="localhost:8443")
+            help="hostname or IP address of the oVirt Engine (default=localhost:443)",
+            default="localhost:443")
 
     engine_group.add_option("-c", "--cluster", dest="cluster",
             help="pattern, or comma separated list of patterns to filter the host list by cluster name (default=None)",
