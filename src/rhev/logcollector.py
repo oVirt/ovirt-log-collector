@@ -96,7 +96,7 @@ class Configuration(dict):
 
     def __init__(self,
                  parser=None):
-        self.command = "list"
+        self.command = "collect"
         self.parser = parser
         self.options = None
         self.args = None
