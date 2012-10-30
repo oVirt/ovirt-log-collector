@@ -27,6 +27,11 @@ DEFAULT_CONFIGURATION_FILE = "/etc/ovirt-engine/logcollector.conf"
 DEFAULT_SCRATCH_DIR='/tmp/logcollector'
 DEFAULT_LOG_FILE='/var/log/ovirt-engine/engine-log-collector.log'
 DEFAULT_TIME_SHIFT_FILE='time_diff.txt'
+FILE_PG_PASS="/etc/ovirt-engine/.pgpass"
+PGPASS_FILE_ADMIN_LINE = "DB ADMIN credentials"
+
+
+
 t = gettext.translation('logcollector', fallback=True)
 _ = t.ugettext
 
@@ -120,6 +125,7 @@ class Configuration(dict):
         if getattr(self.options, "verbose"):
             self.__initLogger(logging.DEBUG)
 
+        self.set_pg_db_attrs()
         self.load_config_file()
 
         if self.options:
@@ -145,6 +151,59 @@ class Configuration(dict):
 
     def __missing__(self, key):
         return None
+
+    def set_pg_db_attrs(self):
+        '''
+        This method will check for /etc/ovirt-engin/.pgpass and set the
+        values for the admin user, admin user pw, pg host, and pg port
+        in the configuration dictionary.
+        '''
+        try:
+            tmp = None
+            tmp = self._get_pg_var('admin')
+            if tmp:
+                self['pg_user'] = tmp
+                tmp = None
+            tmp = self._get_pg_var('pass')
+            if tmp:
+                self['pg_pass'] = tmp
+                tmp = None
+            tmp = self._get_pg_var('host')
+            if tmp:
+                self['pg_dbhost'] = tmp
+                tmp = None
+            tmp = self._get_pg_var('port')
+            if tmp:
+                self['pg_dbport'] = tmp
+                tmp = None
+        except Exception, e:
+            logging.debug(str(e))
+
+    def _get_pg_var(self, dbconf_param):
+        '''
+        Provides a mechanism to extract information from .pgpass.
+        '''
+        field = {'pass': 4, 'admin': 3, 'host': 0, 'port': 1}
+        if dbconf_param not in field.keys():
+            raise Exception("Error: unknown value type '%s' was requested" % \
+                            dbconf_param)
+
+        inDbAdminSection = False
+        if (os.path.exists(FILE_PG_PASS)):
+            logging.debug("found existing pgpass file, fetching DB %s value" % \
+                  dbconf_param)
+            with open(FILE_PG_PASS) as pgPassFile:
+                for line in pgPassFile:
+
+                    # find the line with "DB ADMIN"
+                    if PGPASS_FILE_ADMIN_LINE in line:
+                        inDbAdminSection = True
+                        continue
+
+                    if inDbAdminSection and not line.startswith("#"):
+                        # Means we're on DB ADMIN line, as it's for all DBs
+                        dbcreds = line.split(":", 4)
+                        return str(dbcreds[field[dbconf_param]]).strip()
 
     def load_config_file(self):
         """Loads the user-supplied config file or the system default.
@@ -785,9 +844,10 @@ class LogCollector(object):
         if self.conf.get("no_postgresql") == False:
             try:
                 try:
-                    self.conf.getpass("pg_pass", msg="password for the PostgreSQL user, %s, to dump the %s PostgreSQL database instance" %
-                                          (self.conf.get('pg_user'),
-                                           self.conf.get('pg_dbname')))
+                    if not self.conf.get("pg_pass"):
+                        self.conf.getpass("pg_pass", msg="password for the PostgreSQL user, %s, to dump the %s PostgreSQL database instance" %
+                                              (self.conf.get('pg_user'),
+                                               self.conf.get('pg_dbname')))
                     logging.info("Gathering PostgreSQL the oVirt Engine database and log files from %s..." % (self.conf.get("pg_dbhost")))
                 except Configuration.SkipException:
                     logging.info("PostgreSQL oVirt Engine database will not be collected.")
