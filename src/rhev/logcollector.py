@@ -521,25 +521,11 @@ class HyperVisorData(CollectorBase):
             self.caller.call('%(scp_cmd)s:%(path)s %(hypervisor_dir)s/%(archive_name)s')
             self.caller.call('%(ssh_cmd)s "/bin/rm %(path)s*"')
 
-            # setting up a pipeline since passing stdin to communicate doesn't seem to work
-            echo_cmd = self.caller.prep('/bin/echo "%(checksum)s  %(hypervisor_dir)s/%(archive_name)s"')
-            md5sum_cmd = self.caller.prep("/usr/bin/md5sum -c -")
-            result = None
-
-            p1 = subprocess.Popen(echo_cmd, stdout=subprocess.PIPE)
-            p2 = subprocess.Popen(md5sum_cmd, stdin=p1.stdout, stdout=subprocess.PIPE)
-            result = p2.communicate()[0]
-
             stdout = self.caller.call('%(ssh_cmd)s "date --iso-8601=seconds"')
             try:
                 self.get_time_diff(stdout)
             except ValueError, e:
                 logging.debug("get_time_diff: " + str(e))
-
-            if result and "OK" not in result:
-                logging.error("checksum test: " + result)
-                raise Exception("%(local_scratch_dir)s/%(filename)s failed checksum test!" % self.configuration)
-
         except Exception, e:
             ExitCodes.exit_code=ExitCodes.WARN
             logging.error("Failed to collect logs from: %s; %s" % (self.configuration.get("hostname"), e))
