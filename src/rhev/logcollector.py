@@ -446,10 +446,12 @@ class HyperVisorData(CollectorBase):
                  configuration=None,
                  semaphore=None,
                  queue=None,
+                 gluster_enabled=False,
                  **kwargs):
         super(HyperVisorData, self).__init__(hostname,configuration)
         self.semaphore = semaphore
         self.queue = queue
+        self.gluster_enabled = gluster_enabled
 
     def prep(self):
         self.configuration["hostname"] = self.hostname
@@ -495,6 +497,11 @@ class HyperVisorData(CollectorBase):
             self.queue.append(tmp)
 
     def sosreport(self):
+        # Add gluster to the list of sosreports required if gluster is enabled
+        if self.gluster_enabled:
+            logging.info("Gluster logs will be collected from %s" % self.hostname)
+            self.configuration['reports'] += ",gluster"
+
         cmd = """%(ssh_cmd)s "
         VERSION=`/bin/rpm -q --qf '[%%{VERSION}]' sos | /bin/sed 's/\.//'`;
         if [ "$VERSION" -ge "22" ]; then
@@ -716,7 +723,7 @@ class LogCollector(object):
                     if fnmatch.fnmatch(h, pattern)])
         elif which == "cluster":
             return set([(dc, cl, h) for dc, cl, h in self.conf.get("hosts")
-                    if fnmatch.fnmatch(cl, pattern)])
+                    if fnmatch.fnmatch(cl.name, pattern)])
         elif which == "datacenter":
             return set([(dc, cl, h) for dc, cl, h in self.conf.get("hosts")
                     if fnmatch.fnmatch(dc, pattern)])
@@ -816,7 +823,8 @@ class LogCollector(object):
                 collector = HyperVisorData(host.strip(),
                                            configuration=self.conf,
                                            semaphore=sem,
-                                           queue=time_diff_queue)
+                                           queue=time_diff_queue,
+                                           gluster_enabled=cluster.gluster_enabled)
                 thread = threading.Thread(target=collector.run)
                 thread.start()
                 threads.append(thread)

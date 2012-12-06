@@ -28,10 +28,11 @@ class ENGINETree(object):
 
     class Cluster(object):
 
-        def __init__(self, id, name):
+        def __init__(self, id, name, gluster_enabled=False):
             self.id = id
             self.name = name
             self.hosts = set()
+            self.gluster_enabled = gluster_enabled
 
         def add_host(self, host):
             self.hosts.add(host)
@@ -58,7 +59,7 @@ class ENGINETree(object):
         self.datacenters.add(dc_obj)
 
     def add_cluster(self, cluster):
-        c_obj = self.Cluster(cluster.id, cluster.name)
+        c_obj = self.Cluster(cluster.id, cluster.name, cluster.get_gluster_service())
         self.clusters.add(c_obj)
         if cluster.get_data_center() is not None:
             for dc in self.datacenters:
@@ -103,7 +104,7 @@ class ENGINETree(object):
                             for host in cluster.hosts])
 
     def get_sortable(self):
-        return [(dc.name, cluster.name, host.address)
+        return [(dc.name, cluster, host.address)
                     for dc in self.datacenters
                     for cluster in dc.clusters
                     for host in cluster.hosts]
