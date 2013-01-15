@@ -690,7 +690,7 @@ class LogCollector(object):
             return hypervisors.get_all(self.conf.get("engine"),
                                        self.conf.get("user"),
                                        self.conf.get("passwd"),
-                                       self.conf.get("engine_ca"),
+                                       self.conf.get("cert_file"),
                                        self.conf.get("insecure"))
         except Exception, e:
             ExitCodes.exit_code=ExitCodes.WARN
@@ -913,7 +913,7 @@ if __name__ == '__main__':
                       metavar="PATH",
                       default=DEFAULT_LOG_FILE)
 
-    parser.add_option("", "--engine-ca", dest="engine_ca",
+    parser.add_option("", "--cert-file", dest="cert_file",
             help="The CA certificate used to validate the engine. (default=/etc/pki/ovirt-engine/ca.pem)",
             metavar="/etc/pki/ovirt-engine/ca.pem",
             default="/etc/pki/ovirt-engine/ca.pem")
