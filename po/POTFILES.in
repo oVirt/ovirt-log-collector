@@ -1,0 +1,7 @@
+./src/helper/hypervisors.py
+./src/helper/__init__.py
+./src/__init__.py
+./src/__main__.py
+./src/sos/plugins/engine.py
+./src/sos/plugins/postgresql.py
+./src/tests.py

@@ -1,40 +1,71 @@
-Name: ovirt-log-collector
-Version: $version
-Release: 0%{?dist}
-Source0: http://ovirt.org/releases/stable/src/ovirt-log-collector-%{version}.tar.gz
-License: ASL 2.0
-Summary: Log Collector for oVirt Engine
-Group: Virtualization/Management
-URL: http://www.ovirt.org
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}
-BuildArch: noarch
-BuildRequires: python-devel
-Requires: python-lxml
-Requires: ovirt-engine-sdk
-Requires: sos
-Requires: python-dateutil
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+%global		package_version @PACKAGE_VERSION@
+%global		package_name @PACKAGE_NAME@
+
+Summary:	Log Collector for oVirt Engine
+Name:		%{package_name}
+Version:	@PACKAGE_RPM_VERSION@
+Release:	@PACKAGE_RPM_RELEASE@%{?release_suffix}%{?dist}
+License:	ASL 2.0
+URL:		http://www.ovirt.org
+Source:		http://resources.ovirt.org/releases/stable/src/%{package_name}-%{package_version}.tar.gz
+Group:		Virtualization/Management
+
+BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}
+BuildArch:	noarch
+Requires:	gettext
+Requires:	python
+Requires:	python-dateutil
+Requires:	python-lxml
+Requires:	ovirt-engine-sdk
+Requires:	sos
+BuildRequires:	gettext-devel
+BuildRequires:	python2-devel
 
 %description
 Log Collector tool for oVirt Engine
+
 %prep
-%setup -q
+%setup -q -n %{package_name}-%{package_version}
 
 %build
+%configure \
+	--docdir="%{_docdir}/%{package_name}-%{version}" \
+	--disable-python-syntax-check
+make %{?_smp_mflags}
 
 %install
-rm -rf %{buildroot}/*
-make PREFIX=%{buildroot}/ install
+rm -rf "%{buildroot}"
+make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 
 %files
-%{_datadir}/ovirt-engine/log-collector
-%{python_sitelib}/sos/plugins/engine.py*
-%{python_sitelib}/sos/plugins/postgresql.py*
-%{_bindir}/engine-log-collector
-%config(noreplace) %{_sysconfdir}/ovirt-engine/logcollector.conf
-%doc  %{_mandir}/man8/engine-log-collector.8.gz
 %doc AUTHORS
-%doc LICENSE
+%doc COPYING
+%config(noreplace) %{_sysconfdir}/ovirt-engine/logcollector.conf
+%{python_sitelib}/ovirt_log_collector/*.py*
+%{python_sitelib}/ovirt_log_collector/helper/*.py*
+%{python_sitelib}/sos/plugins/*.py*
+%{_bindir}/engine-log-collector
+%{_mandir}/man8/*
 
 %changelog
-* Thu Mar 29 2012 Keith Robertson <kroberts@redhat.com> - 1.0.0-0
+* Tue Oct 2 2012 Alon Bar-Lev <alonbl@redhat.com>
+- Rewrite build
+* Thu Mar 8 2012 Keith Robertson <kroberts@redhat.com> - 1.0.0-0
 - Initial build
