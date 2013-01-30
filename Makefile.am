@@ -28,7 +28,7 @@ MAINTAINERCLEANFILES = \
 	$(srcdir)/config.rpath \
 	$(srcdir)/ABOUT-NLS \
 	$(srcdir)/aclocal.m4 \
-	$(NULL)(
+	$(NULL)
 
 
 EXTRA_DIST = \
