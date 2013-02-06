@@ -46,6 +46,12 @@ DEFAULT_TIME_SHIFT_FILE='time_diff.txt'
 FILE_PG_PASS="/etc/ovirt-engine/.pgpass"
 PGPASS_FILE_ADMIN_LINE = "DB ADMIN credentials"
 
+# Default DB connection params
+pg_user = 'postgres'
+pg_pass = '12345'
+pg_dbname = 'engine'
+pg_dbhost = 'localhost'
+pg_dbport = '5432'
 
 
 t = gettext.translation('logcollector', fallback=True)
@@ -173,29 +179,19 @@ class Configuration(dict):
         This method will check for /etc/ovirt-engin/.pgpass and set the
         values for the admin user, admin user pw, pg host, and pg port
         in the configuration dictionary.
+
+        If values not found, use defaults.
         '''
+
         try:
-            tmp = None
-            tmp = self._get_pg_var('admin')
-            if tmp:
-                self['pg_user'] = tmp
-                tmp = None
-            tmp = self._get_pg_var('pass')
-            if tmp:
-                self['pg_pass'] = tmp
-                tmp = None
-            tmp = self._get_pg_var('host')
-            if tmp:
-                self['pg_dbhost'] = tmp
-                tmp = None
-            tmp = self._get_pg_var('port')
-            if tmp:
-                self['pg_dbport'] = tmp
-                tmp = None
+            self['pg_user'] = self._get_pg_var('admin') or pg_user
+            self['pg_pass'] = self._get_pg_var('pass', self['pg_user']) or pg_pass
+            self['pg_dbhost'] = self._get_pg_var('host') or pg_dbhost
+            self['pg_dbport'] = self._get_pg_var('port') or pg_dbport
         except Exception, e:
             logging.debug(str(e))
 
-    def _get_pg_var(self, dbconf_param):
+    def _get_pg_var(self, dbconf_param, user=None):
         '''
         Provides a mechanism to extract information from .pgpass.
         '''
@@ -220,6 +216,15 @@ class Configuration(dict):
                         # Means we're on DB ADMIN line, as it's for all DBs
                         dbcreds = line.split(":", 4)
                         return str(dbcreds[field[dbconf_param]]).strip()
+
+                    # Fetch the password if needed
+                    if dbconf_param == "pass" and user \
+                        and not line.startswith("#"):
+                            dbcreds = line.split(":", 4)
+                            if dbcreds[3] == user:
+                                return dbcreds[field[dbconf_param]]
+
+        return None
 
     def load_config_file(self):
         """Loads the user-supplied config file or the system default.
@@ -1021,9 +1026,9 @@ successful remote log collection.""")
             default=False)
 
     db_group.add_option("", "--pg-user", dest="pg_user",
-            help="PostgreSQL database user name (default=postgres)",
-            metavar="postgres",
-            default="postgres")
+            help="PostgreSQL database user name (default=%s)" % pg_user,
+            metavar=pg_user,
+            default=pg_user)
 
     db_group.add_option("",
                         "--pg-pass",
@@ -1031,19 +1036,19 @@ successful remote log collection.""")
                         help=SUPPRESS_HELP)
 
     db_group.add_option("", "--pg-dbname", dest="pg_dbname",
-            help="PostgreSQL database name (default=engine)",
-            metavar="engine",
-            default="engine")
+            help="PostgreSQL database name (default=%s)" % pg_dbname,
+            metavar=pg_dbname,
+            default=pg_dbname)
 
     db_group.add_option("", "--pg-dbhost", dest="pg_dbhost",
-            help="PostgreSQL database hostname or IP address (default=localhost)",
-            metavar="localhost",
-            default="localhost")
+            help="PostgreSQL database hostname or IP address (default=%s)" % pg_dbhost,
+            metavar=pg_dbhost,
+            default=pg_dbhost)
 
     db_group.add_option("", "--pg-dbport", dest="pg_dbport",
-            help="PostgreSQL server port number (default=5432)",
-            metavar="5432",
-            default="5432")
+            help="PostgreSQL server port number (default=%s)" % pg_dbport,
+            metavar=pg_dbport,
+            default=pg_dbport)
 
     db_group.add_option("", "--pg-ssh-user", dest="pg_ssh_user",
             help="""the SSH user that will be used to connect to the
