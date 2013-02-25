@@ -120,33 +120,23 @@ def _initialize_api(hostname, username, password, ca, insecure):
               password=password,
               ca_file=ca,
               insecure=insecure)
-    try:
-        pi = api.get_product_info()
-        if pi is not None:
-            vrm = '%s.%s.%s' % (pi.get_version().get_major(),
-                                pi.get_version().get_minor(),
-                                pi.get_version().get_revision())
-            logging.debug("API Vendor(%s)\tAPI Version(%s)" %  (pi.get_vendor(), vrm))
-        else:
-            api.test(throw_exception=True)
-    except RequestError, re:
-        logging.error(_("Unable to connect to REST API.  Reason: %s") %  re.reason)
-        return None
-    except ConnectionError:
-        logging.error(_("Problem connecting to the REST API.  Is the service available and does the CA certificate exist?"))
-        return None
-    except NoCertificatesError:
-        logging.error(_("Problem connecting to the REST API.  The CA is invalid.  To override use the \'insecure\' option."))
-        return None
-    except Exception, e:
-        logging.error(_("Unable to connect to REST API.  Message: %s") %  e)
-        return None
+    pi = api.get_product_info()
+    if pi is not None:
+        vrm = '%s.%s.%s' % (pi.get_version().get_major(),
+                            pi.get_version().get_minor(),
+                            pi.get_version().get_revision())
+        logging.debug("API Vendor(%s)\tAPI Version(%s)" %  (
+            pi.get_vendor(), vrm)
+        )
+    else:
+        api.test(throw_exception=True)
     return api
+
 
 def get_all(hostname, username, password, ca, insecure=False):
 
     tree = ENGINETree()
-
+    result = set()
     try:
         api = _initialize_api(hostname, username, password, ca, insecure)
         if api is not None:
@@ -156,12 +146,17 @@ def get_all(hostname, username, password, ca, insecure=False):
                 tree.add_cluster(cluster)
             for host in api.hosts.list():
                 tree.add_host(host)
-            return set(tree.get_sortable())
-    except RequestError, re:
+            result = set(tree.get_sortable())
+    except RequestError as re:
         logging.error(_("Unable to connect to REST API.  Reason: %s") %  re.reason)
-    except ConnectionError:
-        logging.error(_("Problem connecting to the REST API.  Is the service available?"))
-    except Exception, e:
+        raise re
+    except ConnectionError as ce:
+        logging.error(_("Problem connecting to the REST API. Is the service available and does the CA certificate exist?"))
+        raise ce
+    except NoCertificatesError as nce:
+        logging.error(_("Problem connecting to the REST API.  The CA is invalid.  To override use the \'insecure\' option."))
+        raise nce
+    except Exception as e:
         logging.error(_("Failure fetching information about hypervisors from API . Error: %s") % e)
-    return set()
-
+        raise e
+    return result
