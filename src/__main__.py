@@ -33,17 +33,20 @@ import dateutil.parser
 import dateutil.tz as tz
 from helper import hypervisors
 
-versionNum="1.0.0"
+
+versionNum = "1.0.0"
 STREAM_LOG_FORMAT = '%(levelname)s: %(message)s'
-FILE_LOG_FORMAT = '%(asctime)s::%(levelname)s::%(module)s::%(lineno)d::%(name)s:: %(message)s'
+FILE_LOG_FORMAT = \
+    '%(asctime)s::%(levelname)s::%(module)s::%(lineno)d::%(name)s:: \
+%(message)s'
 FILE_LOG_DSTMP = '%Y-%m-%d %H:%M:%S'
 DEFAULT_SSH_KEY = "/etc/pki/ovirt-engine/keys/engine_id_rsa"
 DEFAULT_SSH_USER = 'root'
 DEFAULT_CONFIGURATION_FILE = "/etc/ovirt-engine/logcollector.conf"
-DEFAULT_SCRATCH_DIR='/tmp/logcollector'
-DEFAULT_LOG_FILE='/var/log/ovirt-engine/engine-log-collector.log'
-DEFAULT_TIME_SHIFT_FILE='time_diff.txt'
-FILE_PG_PASS="/etc/ovirt-engine/.pgpass"
+DEFAULT_SCRATCH_DIR = '/tmp/logcollector'
+DEFAULT_LOG_FILE = '/var/log/ovirt-engine/engine-log-collector.log'
+DEFAULT_TIME_SHIFT_FILE = 'time_diff.txt'
+FILE_PG_PASS = "/etc/ovirt-engine/.pgpass"
 PGPASS_FILE_ADMIN_LINE = "DB ADMIN credentials"
 
 # Default DB connection params
@@ -64,12 +67,14 @@ def get_pg_var(dbconf_param, user=None):
     '''
     field = {'pass': 4, 'admin': 3, 'host': 0, 'port': 1}
     if dbconf_param not in field.keys():
-        raise ValueError("Error: unknown value type '%s' was requested" % \
-                        dbconf_param)
+        raise ValueError(
+            "Error: unknown value type '%s' was requested" % dbconf_param
+        )
     inDbAdminSection = False
     if (os.path.exists(FILE_PG_PASS)):
-        logging.debug("Found existing pgpass file, fetching DB %s value" % \
-                dbconf_param)
+        logging.debug(
+            "Found existing pgpass file, fetching DB %s value" % dbconf_param
+        )
         with open(FILE_PG_PASS) as pgPassFile:
             for line in pgPassFile:
 
@@ -84,8 +89,11 @@ def get_pg_var(dbconf_param, user=None):
                     return str(dbcreds[field[dbconf_param]]).strip()
 
                 # Fetch the password if needed
-                if dbconf_param == "pass" and user \
-                    and not line.startswith("#"):
+                if (
+                    dbconf_param == "pass" and
+                    user and
+                    not line.startswith("#")
+                ):
                         dbcreds = line.split(":", 4)
                         if dbcreds[3] == user:
                             return dbcreds[field[dbconf_param]]
@@ -117,6 +125,7 @@ def multilog(logger, msg):
     for line in str(msg).splitlines():
         logger(line)
 
+
 def get_from_prompt(msg, default=None, prompter=raw_input):
     try:
         value = prompter(msg)
@@ -133,10 +142,11 @@ class ExitCodes():
     """
     A simple psudo-enumeration class to hold the current and future exit codes
     """
-    NOERR=0
-    CRITICAL=1
-    WARN=2
-    exit_code=NOERR
+    NOERR = 0
+    CRITICAL = 1
+    WARN = 2
+    exit_code = NOERR
+
 
 class Caller(object):
     """
@@ -153,9 +163,11 @@ class Caller(object):
         """Uses the configuration to fork a subprocess and run cmds."""
         _cmds = self.prep(cmds)
         logging.debug("calling(%s)" % _cmds)
-        proc = subprocess.Popen(_cmds,
-                   stdout=subprocess.PIPE,
-                   stderr=subprocess.PIPE)
+        proc = subprocess.Popen(
+            _cmds,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
         stdout, stderr = proc.communicate()
         returncode = proc.returncode
         logging.debug("returncode(%s)" % returncode)
@@ -177,9 +189,7 @@ class Configuration(dict):
         "This exception is raised when the user aborts a prompt"
         pass
 
-
-    def __init__(self,
-                 parser=None):
+    def __init__(self, parser=None):
         self.command = "collect"
         self.parser = parser
         self.options = None
@@ -205,7 +215,9 @@ class Configuration(dict):
 
         if self.options:
             # Need to parse again to override conf file options
-            self.options, self.args = self.parser.parse_args(values=self.options)
+            self.options, self.args = self.parser.parse_args(
+                values=self.options
+            )
             self.from_options(self.options, self.parser)
             # Need to parse out options from the option groups.
             self.from_option_groups(self.options, self.parser)
@@ -213,11 +225,13 @@ class Configuration(dict):
         if self.args:
             self.from_args(self.args)
 
-        # Finally, all options from the command line and possibly a configuration
-        # file have been processed.  We need to re-initialize the logger if
-        # the user has supplied either --quiet processing or supplied a --log-file.
-        # This will ensure that any further log messages throughout the lifecycle
-        # of this program go to the log handlers that the user has specified.
+        # Finally, all options from the command line and possibly a
+        # configuration file have been processed.
+        # We need to re-initialize the logger if the user has supplied
+        # either --quiet processing or supplied a --log-file.
+        # This will ensure that any further log messages throughout the
+        # lifecycle of this program go to the log handlers that the user
+        # has specified.
         if self.options.log_file or self.options.quiet:
             level = logging.INFO
             if self.options.verbose:
@@ -235,13 +249,15 @@ class Configuration(dict):
             if os.path.isfile(self.options.conf_file):
                 self.from_file(self.options.conf_file)
             else:
-                raise Exception("The specified configuration file does not exist.  File=(%s)" %
-                                self.options.conf_file)
+                raise Exception(
+                    "The specified configuration file does not exist. \
+File=(%s)" % self.options.conf_file
+                )
 
         elif os.path.isfile(DEFAULT_CONFIGURATION_FILE):
             self.from_file(DEFAULT_CONFIGURATION_FILE)
 
-    def from_option_groups(self,options,parser):
+    def from_option_groups(self, options, parser):
         for optGrp in parser.option_groups:
             for optGrpOpts in optGrp.option_list:
                 opt_value = getattr(options, optGrpOpts.dest)
@@ -262,9 +278,12 @@ class Configuration(dict):
 
         # we want the items from the LogCollector section only
         try:
-            opts = ["--%s=%s" % (k,v)
-                       for k,v in cp.items("LogCollector")]
-            (new_options, args) = self.parser.parse_args(args=opts, values=self.options)
+            opts = [
+                "--%s=%s" % (k, v) for k, v in cp.items("LogCollector")
+            ]
+            (new_options, args) = self.parser.parse_args(
+                args=opts, values=self.options
+            )
             self.from_option_groups(new_options, self.parser)
             self.from_options(new_options, self.parser)
         except ConfigParser.NoSectionError:
@@ -285,10 +304,13 @@ class Configuration(dict):
 
     # This doesn't ask for CTRL+C to abort because KeyboardInterrupts don't
     # seem to behave the same way every time. Take a look at the link:
-    # http://stackoverflow.com/questions/4606942/why-cant-i-handle-a-keyboardinterrupt-in-python
+    # "http://stackoverflow.com/questions/4606942/\
+    #why-cant-i-handle-a-keyboardinterrupt-in-python"
     def _prompt(self, prompt_function, key, msg=None):
-        value = get_from_prompt(msg="Please provide the %s (CTRL+D to skip): " % msg,
-                prompter=prompt_function)
+        value = get_from_prompt(
+            msg="Please provide the %s (CTRL+D to skip): " % msg,
+            prompter=prompt_function
+        )
         if value:
             self[key] = value
         else:
@@ -352,15 +374,19 @@ class Configuration(dict):
                 # a file.  We will be *mostly* quiet but not completely.
                 # If there is an exception/error/critical we will print
                 # to stdout/stderr.
-                logging.basicConfig(level=logging.ERROR, format=STREAM_LOG_FORMAT)
+                logging.basicConfig(
+                    level=logging.ERROR,
+                    format=STREAM_LOG_FORMAT
+                )
         else:
             if logFile:
-                # Case: Not quiet and log file supplied.  Log to both file and
-                # stdout/stderr
+                # Case: Not quiet and log file supplied.
+                # Log to both file and stdout/stderr
                 self.__log_to_file(logFile, logLevel)
                 self.__log_to_stream(logLevel)
             else:
-                # Case: Not quiet and no log file supplied.  Log to only stdout/stderr
+                # Case: Not quiet and no log file supplied.
+                # Log to only stdout/stderr
                 logging.basicConfig(level=logLevel, format=STREAM_LOG_FORMAT)
 
 
@@ -387,7 +413,6 @@ class CollectorBase(object):
         def get_ssh_user(self):
             return "%s@" % DEFAULT_SSH_USER
 
-
         def parse_sosreport_stdout(self, stdout):
             def reportFinder(line):
                 if fnmatch.fnmatch(line, '*sosreport-*tar*'):
@@ -403,7 +428,7 @@ class CollectorBase(object):
 
             try:
                 lines = stdout.splitlines()
-                fileAry = filter(reportFinder,lines)
+                fileAry = filter(reportFinder, lines)
                 if fileAry is not None:
                     if fileAry[0] is not None and len(fileAry) > 0:
                         path = fileAry[0].strip()
@@ -412,7 +437,9 @@ class CollectorBase(object):
                         if os.path.isabs(path):
                             self.configuration["path"] = path
                         else:
-                            self.configuration["path"] = os.path.join(self.configuration["local_tmp_dir"], filename)
+                            self.configuration["path"] = os.path.join(
+                                self.configuration["local_tmp_dir"], filename
+                            )
                     else:
                         self.configuration["filename"] = None
                         self.configuration["path"] = None
@@ -420,7 +447,7 @@ class CollectorBase(object):
                     self.configuration["filename"] = None
                     self.configuration["path"] = None
 
-                fileAry = filter(md5Finder,lines)
+                fileAry = filter(md5Finder, lines)
                 if fileAry is not None and len(fileAry) > 0:
                     if fileAry[0] is not None:
                         md5sum = fileAry[0].partition(": ")[-1]
@@ -435,8 +462,12 @@ class CollectorBase(object):
                 logging.debug("checksum(%s)" % self.configuration["checksum"])
             except IndexError, e:
                 logging.debug("message(%s)" % e)
-                logging.debug("parse_sosreport_stdout: " + traceback.format_exc())
-                raise Exception("Could not parse sosreport output to determine filename")
+                logging.debug(
+                    "parse_sosreport_stdout: " + traceback.format_exc()
+                )
+                raise Exception(
+                    "Could not parse sosreport output to determine filename"
+                )
 
         def format_ssh_command(self, cmd="ssh"):
             cmd = "/usr/bin/%s " % cmd
@@ -458,10 +489,12 @@ class CollectorBase(object):
 
 class HyperVisorData(CollectorBase):
     TIME_DRIFT_FORMAT = "%-17s : %-33s : %-33s : %-35s"
-    TIME_DRIFT_HEADER = TIME_DRIFT_FORMAT %  ('Node',
-                      'Node Time',
-                      'Engine Time',
-                      'Clock Drift Between Engine and Node')
+    TIME_DRIFT_HEADER = TIME_DRIFT_FORMAT % (
+        'Node',
+        'Node Time',
+        'Engine Time',
+        'Clock Drift Between Engine and Node'
+    )
 
     def __init__(self,
                  hostname,
@@ -470,7 +503,7 @@ class HyperVisorData(CollectorBase):
                  queue=None,
                  gluster_enabled=False,
                  **kwargs):
-        super(HyperVisorData, self).__init__(hostname,configuration)
+        super(HyperVisorData, self).__init__(hostname, configuration)
         self.semaphore = semaphore
         self.queue = queue
         self.gluster_enabled = gluster_enabled
@@ -492,62 +525,87 @@ class HyperVisorData(CollectorBase):
             "selinux",
             "kernel",
             "memory",
-            ))
+        ))
 
         # these are the reports that will work with rhev2.2 hosts
-        self.configuration['bc_reports'] = "vdsm,general,networking,hardware,process,yum,filesys"
+        self.configuration['bc_reports'] = \
+            "vdsm,general,networking,hardware,process,yum,filesys"
 
     def get_time_diff(self, stdout):
         h_time = dateutil.parser.parse(stdout.strip())
         l_time = datetime.datetime.now(tz=tz.tzlocal())
 
-        logging.debug("host <%s> time: %s" % (self.configuration["hostname"], h_time.isoformat()))
-        logging.debug("local <%s> time: %s" % ("localhost", l_time.isoformat(),))
+        logging.debug(
+            "host <%s> time: %s" % (
+                self.configuration["hostname"],
+                h_time.isoformat()
+            )
+        )
+        logging.debug(
+            "local <%s> time: %s" % ("localhost", l_time.isoformat(),)
+        )
 
         if h_time > l_time:
-            tmp = self.TIME_DRIFT_FORMAT % ("%(hostname)s " % self.configuration,
-                                h_time,
-                                l_time,
-                                "+%s" % (h_time - l_time))
+            tmp = self.TIME_DRIFT_FORMAT % (
+                "%(hostname)s " % self.configuration,
+                h_time,
+                l_time,
+                "+%s" % (h_time - l_time)
+            )
 
             self.queue.append(tmp)
         else:
-            tmp = self.TIME_DRIFT_FORMAT % ("%(hostname)s " % self.configuration,
-                                h_time,
-                                l_time,
-                                "-%s" % (l_time - h_time))
+            tmp = self.TIME_DRIFT_FORMAT % (
+                "%(hostname)s " % self.configuration,
+                h_time,
+                l_time,
+                "-%s" % (l_time - h_time)
+            )
             self.queue.append(tmp)
 
     def sosreport(self):
         # Add gluster to the list of sosreports required if gluster is enabled
         if self.gluster_enabled:
-            logging.info("Gluster logs will be collected from %s" % self.hostname)
+            logging.info(
+                "Gluster logs will be collected from %s" % self.hostname
+            )
             self.configuration['reports'] += ",gluster"
 
         cmd = """%(ssh_cmd)s "
-        VERSION=`/bin/rpm -q --qf '[%%{VERSION}]' sos | /bin/sed 's/\.//'`;
-        if [ "$VERSION" -ge "22" ]; then
-            /usr/sbin/sosreport --batch -k general.all_logs=True -o %(reports)s
-        elif [ "$VERSION" -ge "17" ]; then
-            /usr/sbin/sosreport --no-progressbar -k general.all_logs=True -o %(bc_reports)s
-        else
-            /bin/echo "No valid version of sosreport found." 1>&2
-            exit 1
-        fi
-        "
+VERSION=`/bin/rpm -q --qf '[%%{VERSION}]' sos | /bin/sed 's/\.//'`;
+if [ "$VERSION" -ge "22" ]; then
+    /usr/sbin/sosreport --batch -k general.all_logs=True -o %(reports)s
+elif [ "$VERSION" -ge "17" ]; then
+    /usr/sbin/sosreport --no-progressbar -k general.all_logs=True \
+        -o %(bc_reports)s
+else
+    /bin/echo "No valid version of sosreport found." 1>&2
+    exit 1
+fi
+"
         """
         return self.caller.call(cmd)
 
     def run(self):
 
         try:
-            logging.info("collecting information from %(hostname)s" % self.configuration)
+            logging.info(
+                "collecting information from %(hostname)s" % self.configuration
+            )
             stdout = self.sosreport()
             self.parse_sosreport_stdout(stdout)
-            self.configuration["hypervisor_dir"] = os.path.join(self.configuration.get("local_scratch_dir"),self.configuration.get("hostname"))
+            self.configuration["hypervisor_dir"] = os.path.join(
+                self.configuration.get("local_scratch_dir"),
+                self.configuration.get("hostname")
+            )
             os.mkdir(self.configuration["hypervisor_dir"])
-            self.configuration['archive_name'] = self.configuration.get("hostname") + "-" + os.path.basename(self.configuration.get("path"))
-            self.caller.call('%(scp_cmd)s:%(path)s %(hypervisor_dir)s/%(archive_name)s')
+            self.configuration['archive_name'] = "%s-%s" % (
+                self.configuration.get("hostname"),
+                os.path.basename(self.configuration.get("path"))
+            )
+            self.caller.call(
+                '%(scp_cmd)s:%(path)s %(hypervisor_dir)s/%(archive_name)s'
+            )
             self.caller.call('%(ssh_cmd)s "/bin/rm %(path)s*"')
 
             stdout = self.caller.call('%(ssh_cmd)s "date --iso-8601=seconds"')
@@ -556,29 +614,46 @@ class HyperVisorData(CollectorBase):
             except ValueError, e:
                 logging.debug("get_time_diff: " + str(e))
         except Exception, e:
-            ExitCodes.exit_code=ExitCodes.WARN
-            logging.error("Failed to collect logs from: %s; %s" % (self.configuration.get("hostname"), e))
-            multilog(logging.debug,traceback.format_exc())
-            logging.debug("Configuration for %(hostname)s:" % self.configuration)
-            multilog(logging.debug,pprint.pformat(self.configuration))
+            ExitCodes.exit_code = ExitCodes.WARN
+            logging.error(
+                "Failed to collect logs from: %s; %s" % (
+                    self.configuration.get("hostname"),
+                    e
+                )
+            )
+            multilog(logging.debug, traceback.format_exc())
+            logging.debug(
+                "Configuration for %(hostname)s:" % self.configuration
+            )
+            multilog(logging.debug, pprint.pformat(self.configuration))
         finally:
             if self.semaphore:
                 self.semaphore.release()
 
-        logging.info("finished collecting information from %(hostname)s" % self.configuration)
+        logging.info(
+            "finished collecting information from %(hostname)s" % (
+                self.configuration
+            )
+        )
 
 
 class ENGINEData(CollectorBase):
 
     def build_options(self):
-        opts = ["-k rpm.rpmva=off",
-                "-k engine.vdsmlogs=%s" % self.configuration.get("local_scratch_dir"),
-                "-k engine.prefix=on",
-                "-k general.all_logs=True",
-                "-k apache.log=True"]
+        opts = [
+            "-k rpm.rpmva=off",
+            "-k engine.vdsmlogs=%s" % self.configuration.get(
+                "local_scratch_dir"
+            ),
+            "-k engine.prefix=on",
+            "-k general.all_logs=True",
+            "-k apache.log=True"
+        ]
 
         if self.configuration.get("ticket_number"):
-            opts.append("--ticket-number=%s" % self.configuration.get("ticket_number"))
+            opts.append(
+                "--ticket-number=%s" % self.configuration.get("ticket_number")
+            )
 
         if self.configuration.get("upload"):
             opts.append("--upload=%s" % self.configuration.get("upload"))
@@ -603,20 +678,24 @@ class ENGINEData(CollectorBase):
             "memory",
         ))
         self.configuration["sos_options"] = self.build_options()
-        stdout = self.caller.call('/usr/sbin/sosreport --batch --report --tmp-dir=%(local_tmp_dir)s  -o %(reports)s %(sos_options)s')
+        stdout = self.caller.call(
+            '/usr/sbin/sosreport --batch --report --tmp-dir=%(local_tmp_dir)s\
+            -o %(reports)s %(sos_options)s'
+        )
         self.parse_sosreport_stdout(stdout)
         if os.path.exists(self.configuration["path"]):
-            archiveSize = '%.1fM' % (float(os.path.getsize(self.configuration["path"])) / (1 << 20))
+            archiveSize = '%.1fM' % (
+                float(os.path.getsize(self.configuration["path"])) / (1 << 20)
+            )
         else:
             archiveSize = None
 
         return """Log files have been collected and placed in %s.
       The MD5 for this file is %s and its size is %s""" % (
-      self.configuration["path"] ,
-      self.configuration["checksum"],
-      archiveSize)
-
-
+            self.configuration["path"],
+            self.configuration["checksum"],
+            archiveSize
+        )
 
 
 class PostgresData(CollectorBase):
@@ -638,37 +717,55 @@ class PostgresData(CollectorBase):
         else:
             return "%s@" % DEFAULT_SSH_USER
 
-
     def sosreport(self):
         opt = ""
 
         if self.configuration.get("pg_dbhost") == "localhost":
             if self.configuration.get("pg_pass"):
-                opt = '-k postgresql.dbname=%(pg_dbname)s -k postgresql.username=%(pg_user)s -k postgresql.password=%(pg_pass)s'
+                opt = '-k postgresql.dbname=%(pg_dbname)s \
+-k postgresql.username=%(pg_user)s \
+-k postgresql.password=%(pg_pass)s'
 
-            stdout = self.caller.call('/usr/sbin/sosreport --batch --report -o postgresql '
-                        '--tmp-dir=%(local_scratch_dir)s ' + opt)
+            stdout = self.caller.call(
+                '/usr/sbin/sosreport --batch --report -o postgresql '
+                '--tmp-dir=%(local_scratch_dir)s ' + opt
+            )
             self.parse_sosreport_stdout(stdout)
             # Prepend postgresql- to the .md5 file that is produced by SOS
             # so that it is easy to distinguish from the other N reports
             # that are all related to hypervisors.  Note, that we
             # only do this in the case of a local PostgreSQL DB because
             # when the DB is remote the .md5 file is not copied.
-            os.rename("%s.md5" % (self.configuration["path"]),
-                      os.path.join(self.configuration["local_scratch_dir"],
-                                   "postgresql-%s.md5" % self.configuration["filename"]))
+            os.rename(
+                "%s.md5" % (self.configuration["path"]),
+                os.path.join(
+                    self.configuration["local_scratch_dir"],
+                    "postgresql-%s.md5" % self.configuration["filename"]
+                )
+            )
         else:
             # The PG database is on a remote host
-            opt = '-k postgresql.dbname=%(pg_dbname)s -k postgresql.dbhost=%(pg_dbhost)s -k postgresql.dbport=%(pg_dbport)s -k postgresql.username=%(pg_user)s -k postgresql.password=%(pg_pass)s '
+            opt = '-k postgresql.dbname=%(pg_dbname)s \
+-k postgresql.dbhost=%(pg_dbhost)s \
+-k postgresql.dbport=%(pg_dbport)s \
+-k postgresql.username=%(pg_user)s \
+-k postgresql.password=%(pg_pass)s '
             # REMOVE the following 3 lines when SoS starts shipping psql.py
-            stdout = self.caller.call('/usr/sbin/sosreport --batch --report -o postgresql '
-                        '--tmp-dir=%(local_scratch_dir)s ' + opt)
+            stdout = self.caller.call(
+                '/usr/sbin/sosreport --batch --report -o postgresql '
+                '--tmp-dir=%(local_scratch_dir)s ' + opt
+            )
             self.parse_sosreport_stdout(stdout)
-            os.rename("%s.md5" % (self.configuration["path"]),
-                      os.path.join(self.configuration["local_scratch_dir"],
-                                   "postgresql-%s.md5" % self.configuration["filename"]))
+            os.rename(
+                "%s.md5" % (self.configuration["path"]),
+                os.path.join(
+                    self.configuration["local_scratch_dir"],
+                    "postgresql-%s.md5" % self.configuration["filename"]
+                )
+            )
 # Uncomment the code below when base SoS gets the psql.py plug-in
-#            cmd = '%(ssh_cmd)s "/usr/sbin/sosreport --batch --report -o postgresql ' + opt
+#            cmd = '%(ssh_cmd)s \
+#"/usr/sbin/sosreport --batch --report -o postgresql ' + opt
 #            stdout = self.caller.call(cmd)
 #            self.parse_sosreport_stdout(stdout)
 #            self.caller.call('%(scp_cmd)s:%(path)s %(local_scratch_dir)s')
@@ -677,8 +774,16 @@ class PostgresData(CollectorBase):
         # Prepend postgresql- to the PostgreSQL SOS report
         # so that it is easy to distinguished from the other N reports
         # that are all related to hypervisors.
-        os.rename(os.path.join(self.configuration["local_scratch_dir"], self.configuration["filename"]),
-                  os.path.join(self.configuration["local_scratch_dir"], "postgresql-%s" % self.configuration["filename"]))
+        os.rename(
+            os.path.join(
+                self.configuration["local_scratch_dir"],
+                self.configuration["filename"]
+            ),
+            os.path.join(
+                self.configuration["local_scratch_dir"],
+                "postgresql-%s" % self.configuration["filename"]
+            )
+        )
 
 
 class LogCollector(object):
@@ -690,8 +795,8 @@ class LogCollector(object):
 
     def write_time_diff(self, queue):
         local_scratch_dir = self.conf.get("local_scratch_dir")
-
-        with open(os.path.join(local_scratch_dir, DEFAULT_TIME_SHIFT_FILE), "w") as fd:
+        filepath = os.path.join(local_scratch_dir, DEFAULT_TIME_SHIFT_FILE)
+        with open(filepath, "w") as fd:
             fd.write(HyperVisorData.TIME_DRIFT_HEADER + "\n")
             for record in queue:
                 fd.write(record + "\n")
@@ -703,9 +808,16 @@ class LogCollector(object):
         try:
             self.conf.prompt("engine", msg="hostname of oVirt Engine")
             self.conf.prompt("user", msg="REST API username for oVirt Engine")
-            self.conf.getpass("passwd", msg="REST API password for the %s oVirt Engine user"  % self.conf.get("user"))
+            self.conf.getpass(
+                "passwd",
+                msg="REST API password for the %s oVirt Engine user" % (
+                    self.conf.get("user")
+                )
+            )
         except Configuration.SkipException:
-            logging.info("Will not collect hypervisor list from oVirt Engine API.")
+            logging.info(
+                "Will not collect hypervisor list from oVirt Engine API."
+            )
             raise
 
         try:
@@ -715,7 +827,7 @@ class LogCollector(object):
                                        self.conf.get("cert_file"),
                                        self.conf.get("insecure"))
         except Exception, e:
-            ExitCodes.exit_code=ExitCodes.WARN
+            ExitCodes.exit_code = ExitCodes.WARN
             logging.error("_get_hypervisors_from_api: %s" % e)
             return set()
 
@@ -738,17 +850,25 @@ class LogCollector(object):
         return patterns, others
 
     def _filter_hosts(self, which, pattern):
-        logging.debug("filtering host list with %s against %s name" % (pattern, which))
+        logging.debug(
+            "filtering host list with %s against %s name" % (pattern, which)
+        )
 
         if which == "host":
-            return set([(dc, cl, h) for dc, cl, h in self.conf.get("hosts")
-                    if fnmatch.fnmatch(h, pattern)])
+            return set([
+                (dc, cl, h) for dc, cl, h in self.conf.get("hosts")
+                if fnmatch.fnmatch(h, pattern)
+            ])
         elif which == "cluster":
-            return set([(dc, cl, h) for dc, cl, h in self.conf.get("hosts")
-                    if fnmatch.fnmatch(cl.name, pattern)])
+            return set([
+                (dc, cl, h) for dc, cl, h in self.conf.get("hosts")
+                if fnmatch.fnmatch(cl.name, pattern)
+            ])
         elif which == "datacenter":
-            return set([(dc, cl, h) for dc, cl, h in self.conf.get("hosts")
-                    if fnmatch.fnmatch(dc, pattern)])
+            return set([
+                (dc, cl, h) for dc, cl, h in self.conf.get("hosts")
+                if fnmatch.fnmatch(dc, pattern)
+            ])
 
     def set_hosts(self):
         """Fetches the hostnames for the supplied cluster or datacenter.
@@ -760,16 +880,20 @@ class LogCollector(object):
 
         self.conf["hosts"] = set()
 
-        host_patterns, host_others = self._sift_patterns(self.conf.get("hosts_list"))
+        host_patterns, host_others = self._sift_patterns(
+            self.conf.get("hosts_list")
+        )
         datacenter_patterns = self.conf.get("datacenter", [])
         cluster_patterns = self.conf.get("cluster", [])
 
         if host_patterns:
             self.conf['host_pattern'] = host_patterns
 
-        if any((host_patterns,
+        if any((
+            host_patterns,
             datacenter_patterns,
-            cluster_patterns)) or not host_others:
+            cluster_patterns
+        )) or not host_others:
             self.conf["hosts"] = self._get_hypervisors_from_api()
 
         host_filtered = set()
@@ -783,7 +907,9 @@ class LogCollector(object):
 
         if datacenter_patterns:
             for pattern in datacenter_patterns:
-                datacenter_filtered |= self._filter_hosts("datacenter", pattern)
+                datacenter_filtered |= self._filter_hosts(
+                    "datacenter", pattern
+                )
             self.conf['hosts'] &= datacenter_filtered
 
         if cluster_patterns:
@@ -810,9 +936,12 @@ class LogCollector(object):
         host_list.sort(key=get_host)
 
         fmt = "%-20s | %-20s | %s"
-        print "Host list (datacenter=%(datacenter)s, cluster=%(cluster)s, host=%(host_pattern)s):" % self.conf
+        print "Host list (datacenter=%(datacenter)s, cluster=%(cluster)s, \
+host=%(host_pattern)s):" % self.conf
         print fmt % ("Data Center", "Cluster", "Hostname/IP Address")
-        print "\n".join(fmt % (dc, cluster, host) for dc, cluster, host in host_list)
+        print "\n".join(
+            fmt % (dc, cluster, host) for dc, cluster, host in host_list
+        )
 
     def get_hypervisor_data(self):
         hosts = self.conf.get("hosts")
@@ -820,8 +949,10 @@ class LogCollector(object):
         if hosts:
             if not self.conf.get("quiet"):
                 continue_ = get_from_prompt(
-                        msg="About to collect information from %d hypervisors. Continue? (Y/n): " % len(hosts),
-                        default='y')
+                    msg="About to collect information from %d hypervisors. \
+Continue? (Y/n): " % len(hosts),
+                    default='y'
+                )
 
                 if continue_ not in ('y', 'Y'):
                     logging.info("Aborting hypervisor collection...")
@@ -842,11 +973,13 @@ class LogCollector(object):
 
             for datacenter, cluster, host in hosts:
                 sem.acquire(True)
-                collector = HyperVisorData(host.strip(),
-                                           configuration=self.conf,
-                                           semaphore=sem,
-                                           queue=time_diff_queue,
-                                           gluster_enabled=cluster.gluster_enabled)
+                collector = HyperVisorData(
+                    host.strip(),
+                    configuration=self.conf,
+                    semaphore=sem,
+                    queue=time_diff_queue,
+                    gluster_enabled=cluster.gluster_enabled
+                )
                 thread = threading.Thread(target=collector.run)
                 thread.start()
                 threads.append(thread)
@@ -857,34 +990,55 @@ class LogCollector(object):
             self.write_time_diff(time_diff_queue)
 
     def get_postgres_data(self):
-        if self.conf.get("no_postgresql") == False:
+        if self.conf.get("no_postgresql") is False:
             try:
                 try:
                     if not self.conf.get("pg_pass"):
-                        self.conf.getpass("pg_pass", msg="password for the PostgreSQL user, %s, to dump the %s PostgreSQL database instance" %
-                                              (self.conf.get('pg_user'),
-                                               self.conf.get('pg_dbname')))
-                    logging.info("Gathering PostgreSQL the oVirt Engine database and log files from %s..." % (self.conf.get("pg_dbhost")))
+                        self.conf.getpass(
+                            "pg_pass",
+                            msg="password for the PostgreSQL user, %s, \
+to dump the %s PostgreSQL database instance" %
+                                (
+                                    self.conf.get('pg_user'),
+                                    self.conf.get('pg_dbname')
+                                )
+                        )
+                    logging.info(
+                        "Gathering PostgreSQL the oVirt Engine database and \
+log files from %s..." % (self.conf.get("pg_dbhost"))
+                    )
                 except Configuration.SkipException:
-                    logging.info("PostgreSQL oVirt Engine database will not be collected.")
-                    logging.info("Gathering PostgreSQL log files from %s..." % (self.conf.get("pg_dbhost")))
+                    logging.info(
+                        "PostgreSQL oVirt Engine database \
+will not be collected."
+                    )
+                    logging.info(
+                        "Gathering PostgreSQL log files from %s..." % (
+                            self.conf.get("pg_dbhost")
+                        )
+                    )
 
                 collector = PostgresData(self.conf.get("pg_dbhost"),
                                          configuration=self.conf)
                 collector.sosreport()
             except Exception, e:
-                ExitCodes.exit_code=ExitCodes.WARN
-                logging.error("Could not collect PostgreSQL information: %s" % e)
+                ExitCodes.exit_code = ExitCodes.WARN
+                logging.error(
+                    "Could not collect PostgreSQL information: %s" % e
+                )
         else:
-            ExitCodes.exit_code=ExitCodes.NOERR
+            ExitCodes.exit_code = ExitCodes.NOERR
             logging.info("Skipping postgresql collection...")
 
     def get_engine_data(self):
         logging.info("Gathering oVirt Engine information...")
-        collector = ENGINEData("localhost",
-                              configuration=self.conf)
+        collector = ENGINEData(
+            "localhost",
+            configuration=self.conf
+        )
         stdout = collector.sosreport()
         logging.info(stdout)
+
 
 def parse_password(option, opt_str, value, parser):
     value = getpass.getpass("Please enter %s: " % (option.help))
@@ -898,174 +1052,263 @@ if __name__ == '__main__':
     setup_pg_defaults()
 
     def comma_separated_list(option, opt_str, value, parser):
-        setattr(parser.values, option.dest, [v.strip() for v in value.split(",")])
+        setattr(
+            parser.values, option.dest, [v.strip() for v in value.split(",")]
+        )
 
-    usage_string = "\n".join(("Usage: %prog [options] list",
-                              "       %prog [options] collect"))
+    usage_string = "\n".join((
+        "Usage: %prog [options] list",
+        "       %prog [options] collect"
+    ))
 
     epilog_string = """\nReturn values:
     0: The program ran to completion with no errors.
     1: The program encountered a critical failure and stopped.
-    2: The program encountered a problem gathering data but was able to continue.
+    2: The program encountered a problem gathering data but was able \
+to continue.
 """
     OptionParser.format_epilog = lambda self, formatter: self.epilog
-    parser = OptionParser(usage_string,
-                          version="Version " + versionNum,
-                          epilog=epilog_string)
+    parser = OptionParser(
+        usage_string,
+        version="Version " + versionNum,
+        epilog=epilog_string
+    )
 
+    parser.add_option(
+        "", "--conf-file", dest="conf_file",
+        help="path to configuration file (default=%s)" % (
+            DEFAULT_CONFIGURATION_FILE
+        ),
+        metavar="PATH"
+    )
 
-    parser.add_option("", "--conf-file", dest="conf_file",
-            help="path to configuration file (default=%s)" % DEFAULT_CONFIGURATION_FILE,
-            metavar="PATH")
+    parser.add_option(
+        "", "--local-tmp", dest="local_tmp_dir",
+        help="directory to copy reports to locally \
+(default=%s)" % DEFAULT_SCRATCH_DIR,
+        metavar="PATH",
+        default=DEFAULT_SCRATCH_DIR
+    )
 
-    parser.add_option("", "--local-tmp", dest="local_tmp_dir",
-            help="directory to copy reports to locally (default=%s)" % DEFAULT_SCRATCH_DIR, metavar="PATH",
-            default=DEFAULT_SCRATCH_DIR)
+    parser.add_option(
+        "", "--ticket-number", dest="ticket_number",
+        help="ticket number to pass with the sosreport",
+        metavar="TICKET"
+    )
 
-    parser.add_option("", "--ticket-number", dest="ticket_number",
-            help="ticket number to pass with the sosreport",
-            metavar="TICKET")
+    parser.add_option(
+        "", "--upload", dest="upload",
+        help="Upload the report to Red Hat \
+(use exclusively if advised from a Red Hat support representative).",
+        metavar="FTP_SERVER"
+    )
 
-    parser.add_option("", "--upload", dest="upload",
-            help="Upload the report to Red Hat (use exclusively if advised from a Red Hat support representative).",
-            metavar="FTP_SERVER")
+    parser.add_option(
+        "", "--quiet", dest="quiet",
+        action="store_true", default=False,
+        help="reduce console output (default=False)"
+    )
 
-    parser.add_option("", "--quiet", dest="quiet",
-            action="store_true", default=False,
-            help="reduce console output (default=False)")
+    parser.add_option(
+        "", "--log-file",
+        dest="log_file",
+        help="path to log file (default=%s)" % DEFAULT_LOG_FILE,
+        metavar="PATH",
+        default=DEFAULT_LOG_FILE
+    )
 
-    parser.add_option("", "--log-file",
-                      dest="log_file",
-                      help="path to log file (default=%s)" % DEFAULT_LOG_FILE,
-                      metavar="PATH",
-                      default=DEFAULT_LOG_FILE)
+    parser.add_option(
+        "", "--cert-file", dest="cert_file",
+        help="The CA certificate used to validate the engine. \
+(default=/etc/pki/ovirt-engine/ca.pem)",
+        metavar="/etc/pki/ovirt-engine/ca.pem",
+        default="/etc/pki/ovirt-engine/ca.pem"
+    )
 
-    parser.add_option("", "--cert-file", dest="cert_file",
-            help="The CA certificate used to validate the engine. (default=/etc/pki/ovirt-engine/ca.pem)",
-            metavar="/etc/pki/ovirt-engine/ca.pem",
-            default="/etc/pki/ovirt-engine/ca.pem")
+    parser.add_option(
+        "", "--insecure", dest="insecure",
+        help="Do not make an attempt to verify the engine.",
+        action="store_true",
+        default=False
+    )
 
-    parser.add_option("", "--insecure", dest="insecure",
-            help="Do not make an attempt to verify the engine.",
-            action="store_true",
-            default=False)
+    parser.add_option(
+        "-v", "--verbose", dest="verbose",
+        action="store_true", default=False
+    )
 
-    parser.add_option("-v", "--verbose", dest="verbose",
-            action="store_true", default=False)
+    engine_group = OptionGroup(
+        parser,
+        "oVirt Engine Configuration",
+        """The options in the oVirt Engine configuration group can be used to
+filter log collection from one or more hypervisors. If the --no-hypervisors
+option is specified, data is not collected from any hypervisor."""
+    )
 
-    engine_group = OptionGroup(parser,
-                              "oVirt Engine Configuration",
-"""The options in the oVirt Engine configuration group can be used to filter log collection from one or more hypervisors.
-If the --no-hypervisors option is specified, data is not collected from any hypervisor.""")
+    engine_group.add_option(
+        "", "--no-hypervisors",
+        help="skip collection from hypervisors (default=False)",
+        dest="no_hypervisor",
+        action="store_true",
+        default=False
+    )
 
-    engine_group.add_option("", "--no-hypervisors",
-            help="skip collection from hypervisors (default=False)",
-            dest="no_hypervisor",
-            action="store_true",
-            default=False)
+    engine_group.add_option(
+        "-u", "--user", dest="user",
+        help="username to use with the REST API. \
+This should be in UPN format.",
+        metavar="user@engine.example.com"
+    )
 
-    engine_group.add_option("-u", "--user", dest="user",
-            help="username to use with the REST API.  This should be in UPN format.",
-            metavar="user@engine.example.com")
+    engine_group.add_option(
+        "-p",
+        "--passwd",
+        dest="passwd",
+        help=SUPPRESS_HELP
+    )
 
-    engine_group.add_option("-p",
-                           "--passwd",
-                           dest="passwd",
-                           help=SUPPRESS_HELP)
+    engine_group.add_option(
+        "-r", "--engine", dest="engine", metavar="engine.example.com",
+        help="hostname or IP address of the oVirt Engine \
+(default=localhost:443)",
+        default="localhost:443"
+    )
 
-    engine_group.add_option("-r", "--engine", dest="engine", metavar="engine.example.com",
-            help="hostname or IP address of the oVirt Engine (default=localhost:443)",
-            default="localhost:443")
+    engine_group.add_option(
+        "-c", "--cluster", dest="cluster",
+        help="pattern, or comma separated list of patterns to filter the host \
+list by cluster name (default=None)",
+        action="callback",
+        callback=comma_separated_list,
+        type="string",
+        default=None, metavar="CLUSTER"
+    )
 
-    engine_group.add_option("-c", "--cluster", dest="cluster",
-            help="pattern, or comma separated list of patterns to filter the host list by cluster name (default=None)",
-            action="callback",
-            callback=comma_separated_list,
-            type="string",
-            default=None, metavar="CLUSTER")
+    engine_group.add_option(
+        "-d", "--data-center", dest="datacenter",
+        help="pattern, or comma separated list of patterns to filter the host \
+list by data center name (default=None)",
+        action="callback",
+        callback=comma_separated_list,
+        type="string",
+        default=None, metavar="DATACENTER"
+    )
 
-    engine_group.add_option("-d", "--data-center", dest="datacenter",
-            help="pattern, or comma separated list of patterns to filter the host list by data center name (default=None)",
-            action="callback",
-            callback=comma_separated_list,
-            type="string",
-            default=None, metavar="DATACENTER")
+    engine_group.add_option(
+        "-H", "--hosts", dest="hosts_list", action="callback",
+        callback=comma_separated_list,
+        type="string",
+        help="""comma separated list of hostnames, hostname patterns, FQDNs,
+FQDN patterns, IP addresses, or IP address patterns from which the log
+collector should collect hypervisor logs (default=None)"""
+    )
 
-    engine_group.add_option("-H", "--hosts", dest="hosts_list", action="callback",
-            callback=comma_separated_list,
-            type="string",
-            help="""comma separated list of hostnames, hostname patterns, FQDNs, FQDN patterns,
-IP addresses, or IP address patterns from which the log collector should collect hypervisor logs (default=None)""")
+    ssh_group = OptionGroup(
+        parser, "SSH Configuration",
+        """The options in the SSH configuration group can be used to specify
+the maximum number of concurrent SSH connections to hypervisor(s) for log
+collection, the SSH port, and a identity file to be used."""
+    )
 
-    ssh_group = OptionGroup(parser, "SSH Configuration",
-"""The options in the SSH configuration group can be used to specify the maximum
-number of concurrent SSH connections to hypervisor(s) for log collection, the
-SSH port, and a identity file to be used.""")
+    ssh_group.add_option(
+        "", "--ssh-port", dest="ssh_port",
+        help="the port to ssh and scp on", metavar="PORT",
+        default=22
+    )
 
-    ssh_group.add_option("", "--ssh-port", dest="ssh_port",
-            help="the port to ssh and scp on", metavar="PORT",
-            default=22)
+    ssh_group.add_option(
+        "-k", "--key-file", dest="key_file",
+        help="""the identity file (private key) to be used for accessing the
+hypervisors (default=%s).
+If a identity file is not supplied the program will prompt for a password.
+It is strongly recommended to use key based authentication with SSH because
+the program may make multiple SSH connections resulting in multiple requests
+for the SSH password.""" % DEFAULT_SSH_KEY,
+        metavar="KEYFILE",
+        default=DEFAULT_SSH_KEY
+    )
 
-    ssh_group.add_option("-k", "--key-file", dest="key_file",
-            help="""the identity file (private key) to be used for accessing the hypervisors (default=%s).
-If a identity file is not supplied the program will prompt for a password.  It is strongly recommended to
-use key based authentication with SSH because the program may make multiple SSH connections
-resulting in multiple requests for the SSH password.""" % DEFAULT_SSH_KEY,
-            metavar="KEYFILE",
-            default=DEFAULT_SSH_KEY)
+    ssh_group.add_option(
+        "", "--max-connections", dest="max_connections",
+        help="max concurrent connections for fetching hypervisor logs \
+(default = 10)",
+        default=10
+    )
 
-    ssh_group.add_option("", "--max-connections", dest="max_connections",
-            help="max concurrent connections for fetching hypervisor logs (default = 10)",
-            default=10)
+    db_group = OptionGroup(
+        parser,
+        "PostgreSQL Database Configuration",
+        """The log collector will connect to the oVirt Engine PostgreSQL
+database and dump the data for inclusion in the log report unless
+--no-postgresql is specified.
+The PostgreSQL user ID and database name can be specified if they
+are different from the defaults. If the PostgreSQL database is not on the
+localhost set pg-dbhost, provide a pg-ssh-user, and optionally supply
+pg-host-key and the log collector will gather remote PostgreSQL logs.
+The PostgreSQL SOS plug-in must be installed on pg-dbhost for
+successful remote log collection."""
+    )
 
-    db_group = OptionGroup(parser, "PostgreSQL Database Configuration",
-"""The log collector will connect to the oVirt Engine PostgreSQL database and dump the data
-for inclusion in the log report unless --no-postgresql is specified.  The PostgreSQL user ID and database
-name can be specified if they are different from the defaults.  If the PostgreSQL database
-is not on the localhost set pg-dbhost, provide a pg-ssh-user, and optionally supply pg-host-key and the log collector
-will gather remote PostgreSQL logs.  The PostgreSQL SOS plug-in must be installed on pg-dbhost for
-successful remote log collection.""")
+    db_group.add_option(
+        "", "--no-postgresql", dest="no_postgresql",
+        help="This option causes the tool to skip the postgresql collection \
+(default=false)",
+        action="store_true",
+        default=False
+    )
 
-    db_group.add_option("", "--no-postgresql", dest="no_postgresql",
-            help="This option causes the tool to skip the postgresql collection (default=false)",
-            action="store_true",
-            default=False)
+    db_group.add_option(
+        "", "--pg-user", dest="pg_user",
+        help="PostgreSQL database user name (default=%s)" % pg_user,
+        metavar=pg_user,
+        default=pg_user
+    )
 
-    db_group.add_option("", "--pg-user", dest="pg_user",
-            help="PostgreSQL database user name (default=%s)" % pg_user,
-            metavar=pg_user,
-            default=pg_user)
+    db_group.add_option(
+        "",
+        "--pg-pass",
+        dest="pg_pass",
+        help=SUPPRESS_HELP
+    )
 
-    db_group.add_option("",
-                        "--pg-pass",
-                        dest="pg_pass",
-                        help=SUPPRESS_HELP)
+    db_group.add_option(
+        "", "--pg-dbname", dest="pg_dbname",
+        help="PostgreSQL database name (default=%s)" % pg_dbname,
+        metavar=pg_dbname,
+        default=pg_dbname
+    )
 
-    db_group.add_option("", "--pg-dbname", dest="pg_dbname",
-            help="PostgreSQL database name (default=%s)" % pg_dbname,
-            metavar=pg_dbname,
-            default=pg_dbname)
+    db_group.add_option(
+        "", "--pg-dbhost", dest="pg_dbhost",
+        help="PostgreSQL database hostname or IP address (default=%s)" % (
+            pg_dbhost
+        ),
+        metavar=pg_dbhost,
+        default=pg_dbhost
+    )
 
-    db_group.add_option("", "--pg-dbhost", dest="pg_dbhost",
-            help="PostgreSQL database hostname or IP address (default=%s)" % pg_dbhost,
-            metavar=pg_dbhost,
-            default=pg_dbhost)
+    db_group.add_option(
+        "", "--pg-dbport", dest="pg_dbport",
+        help="PostgreSQL server port number (default=%s)" % pg_dbport,
+        metavar=pg_dbport,
+        default=pg_dbport
+    )
 
-    db_group.add_option("", "--pg-dbport", dest="pg_dbport",
-            help="PostgreSQL server port number (default=%s)" % pg_dbport,
-            metavar=pg_dbport,
-            default=pg_dbport)
-
-    db_group.add_option("", "--pg-ssh-user", dest="pg_ssh_user",
-            help="""the SSH user that will be used to connect to the
+    db_group.add_option(
+        "", "--pg-ssh-user", dest="pg_ssh_user",
+        help="""the SSH user that will be used to connect to the
 server upon which the remote PostgreSQL database lives. (default=root)""",
-            metavar="root",
-            default='root')
+        metavar="root",
+        default='root'
+    )
 
-    db_group.add_option("", "--pg-host-key", dest="pg_host_key",
-            help="""the identity file (private key) to be used for accessing the host
-upon which the PostgreSQL database lives (default=not needed if using localhost)""",
-            metavar="none")
+    db_group.add_option(
+        "", "--pg-host-key", dest="pg_host_key",
+        help="""the identity file (private key) to be used for accessing the
+host upon which the PostgreSQL database lives
+(default=not needed if using localhost)""",
+        metavar="none"
+    )
 
     parser.add_option_group(engine_group)
     parser.add_option_group(ssh_group)
@@ -1079,9 +1322,15 @@ upon which the PostgreSQL database lives (default=not needed if using localhost)
         # we start doing anything.
         if os.path.exists(conf["local_tmp_dir"]):
             if not os.path.isdir(conf["local_tmp_dir"]):
-                raise Exception('%s is not a directory.' % (conf["local_tmp_dir"]))
+                raise Exception(
+                    '%s is not a directory.' % (conf["local_tmp_dir"])
+                )
         else:
-            logging.info("%s does not exist.  It will be created." % (conf["local_tmp_dir"]))
+            logging.info(
+                "%s does not exist.  It will be created." % (
+                    conf["local_tmp_dir"]
+                )
+            )
             os.makedirs(conf["local_tmp_dir"])
 
         # We need to make a temporary scratch directory wherein
@@ -1089,22 +1338,28 @@ upon which the PostgreSQL database lives (default=not needed if using localhost)
         # will be dumped.  The contents of this directory will be scooped
         # up by the oVirt Engine SOS plug-in via the engine.vdsmlogs option
         # and included in a single .xz file.
-        conf["local_scratch_dir"] = os.path.join(conf["local_tmp_dir"], 'RHEVH-and-PostgreSQL-reports')
+        conf["local_scratch_dir"] = os.path.join(
+            conf["local_tmp_dir"],
+            'RHEVH-and-PostgreSQL-reports'
+        )
         if not os.path.exists(conf["local_scratch_dir"]):
             os.makedirs(conf["local_scratch_dir"])
         else:
             if len(os.listdir(conf["local_scratch_dir"])) != 0:
-                raise Exception("""the scratch directory for temporary storage of hypervisor reports is not empty.
-It should be empty so that reports from a prior invocation of the log collector are not collected again.
+                raise Exception("""the scratch directory for temporary storage
+of hypervisor reports is not empty.
+It should be empty so that reports from a prior invocation of the log collector
+are not collected again.
 The directory is: %s'""" % (conf["local_scratch_dir"]))
-
 
         if conf.command == "collect":
             if not conf.get("no_hypervisor"):
                 if collector.set_hosts():
                     collector.get_hypervisor_data()
                 else:
-                    logging.info("No hypervisors were selected, therefore no hypervisor data will be collected.")
+                    logging.info(
+                        "No hypervisors were selected, therefore no \
+hypervisor data will be collected.")
             else:
                 logging.info("Skipping hypervisor collection...")
 
@@ -1115,11 +1370,13 @@ The directory is: %s'""" % (conf["local_scratch_dir"]))
             if collector.set_hosts():
                 collector.list_hosts()
             else:
-                logging.info("No hypervisors were found, therefore no hypervisor data will be listed.")
+                logging.info(
+                    "No hypervisors were found, therefore no hypervisor \
+data will be listed.")
 
         # Clean up the temp directory
         shutil.rmtree(conf["local_scratch_dir"])
-    except  KeyboardInterrupt, k:
+    except KeyboardInterrupt, k:
         print "Exiting on user cancel."
     except Exception, e:
         multilog(logging.error, e)
