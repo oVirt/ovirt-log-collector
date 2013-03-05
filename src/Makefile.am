@@ -16,12 +16,27 @@
 #
 
 include $(top_srcdir)/build/python.inc
+include $(top_srcdir)/build/subst.inc
 
 MAINTAINERCLEANFILES = \
 	$(srcdir)/Makefile.in \
 	$(NULL)
 
+SUFFIXES = .in
+
+CLEANFILES = \
+	config.py \
+	$(NULL)
+
+config.py: \
+	$(top_srcdir)/configure.ac \
+	$(NULL)
+
 SUBDIRS = sos helper
+
+ovirtlogcollectorlib_PYTHON = \
+	config.py\
+	$(NULL)
 
 dist_ovirtlogcollectorlib_PYTHON = \
 	__init__.py \
