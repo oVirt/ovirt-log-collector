@@ -37,24 +37,42 @@ class HyperVisorDataTest(unittest.TestCase):
     def test_format_ssh_command_ssh_port(self):
         params = {"hostname": "localhost", "ssh_user": "foo", "ssh_port": "22"}
         self._prep(params)
-        self.assertEquals(self.hvd.format_ssh_command(), "ssh -p 22 foo@localhost")
+        self.assertEquals(
+            self.hvd.format_ssh_command(), "ssh -p 22 foo@localhost"
+        )
 
     def test_format_ssh_command_keyfile(self):
-        params = {"hostname": "localhost", "ssh_user": "foo",
-                "ssh_port": "22", "key_file": "/tmp/foobar"}
+        params = {
+            "hostname": "localhost",
+            "ssh_user": "foo",
+            "ssh_port": "22",
+            "key_file": "/tmp/foobar"
+        }
         self._prep(params)
-        self.assertEquals(self.hvd.format_ssh_command(), "ssh -p 22 -i /tmp/foobar foo@localhost")
+        self.assertEquals(
+            self.hvd.format_ssh_command(),
+            "ssh -p 22 -i /tmp/foobar foo@localhost"
+        )
 
     def test_format_ssh_command_no_port(self):
-        params = {"hostname": "localhost", "ssh_user": "foo",
-                "key_file": "/tmp/foobar"}
+        params = {
+            "hostname": "localhost",
+            "ssh_user": "foo",
+            "key_file": "/tmp/foobar"
+        }
         self._prep(params)
-        self.assertEquals(self.hvd.format_ssh_command(), "ssh -i /tmp/foobar foo@localhost")
+        self.assertEquals(
+            self.hvd.format_ssh_command(),
+            "ssh -i /tmp/foobar foo@localhost"
+        )
 
     def test_format_ssh_command_no_user(self):
         params = {"hostname": "localhost", "key_file": "/tmp/foobar"}
         self._prep(params)
-        self.assertEquals(self.hvd.format_ssh_command(), "ssh -i /tmp/foobar localhost")
+        self.assertEquals(
+            self.hvd.format_ssh_command(),
+            "ssh -i /tmp/foobar localhost"
+        )
 
 if __name__ == "__main__":
     unittest.main()

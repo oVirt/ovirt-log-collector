@@ -1,15 +1,17 @@
-"""This module uses the REST API to get a collection of information about hypervisors"""
+"""
+This module uses the REST API to get a collection of information about
+hypervisors
+"""
+
 import logging
-import urllib2
-import base64
-import threading
 import gettext
 from ovirtsdk.api import API
-from ovirtsdk.xml import params
-from ovirtsdk.infrastructure.errors import RequestError, ConnectionError, NoCertificatesError
+from ovirtsdk.infrastructure.errors import RequestError, ConnectionError
+from ovirtsdk.infrastructure.errors import NoCertificatesError
 
 t = gettext.translation('hypervisors', fallback=True)
 _ = t.ugettext
+
 
 class ENGINETree(object):
 
@@ -59,7 +61,11 @@ class ENGINETree(object):
         self.datacenters.add(dc_obj)
 
     def add_cluster(self, cluster):
-        c_obj = self.Cluster(cluster.id, cluster.name, cluster.get_gluster_service())
+        c_obj = self.Cluster(
+            cluster.id,
+            cluster.name,
+            cluster.get_gluster_service()
+        )
         self.clusters.add(c_obj)
         if cluster.get_data_center() is not None:
             for dc in self.datacenters:
@@ -98,16 +104,20 @@ class ENGINETree(object):
                 self.datacenters.add(dc)
 
     def __str__(self):
-        return "\n".join(["%-20s | %-20s | %s" % (dc, cluster, host)
-                            for dc in self.datacenters
-                            for cluster in dc.clusters
-                            for host in cluster.hosts])
+        return "\n".join([
+            "%-20s | %-20s | %s" % (dc, cluster, host)
+            for dc in self.datacenters
+            for cluster in dc.clusters
+            for host in cluster.hosts
+        ])
 
     def get_sortable(self):
-        return [(dc.name, cluster, host.address)
-                    for dc in self.datacenters
-                    for cluster in dc.clusters
-                    for host in cluster.hosts]
+        return [
+            (dc.name, cluster, host.address)
+            for dc in self.datacenters
+            for cluster in dc.clusters
+            for host in cluster.hosts
+        ]
 
 
 def _initialize_api(hostname, username, password, ca, insecure):
@@ -122,10 +132,12 @@ def _initialize_api(hostname, username, password, ca, insecure):
               insecure=insecure)
     pi = api.get_product_info()
     if pi is not None:
-        vrm = '%s.%s.%s' % (pi.get_version().get_major(),
-                            pi.get_version().get_minor(),
-                            pi.get_version().get_revision())
-        logging.debug("API Vendor(%s)\tAPI Version(%s)" %  (
+        vrm = '%s.%s.%s' % (
+            pi.get_version().get_major(),
+            pi.get_version().get_minor(),
+            pi.get_version().get_revision()
+        )
+        logging.debug("API Vendor(%s)\tAPI Version(%s)" % (
             pi.get_vendor(), vrm)
         )
     else:
@@ -148,15 +160,28 @@ def get_all(hostname, username, password, ca, insecure=False):
                 tree.add_host(host)
             result = set(tree.get_sortable())
     except RequestError as re:
-        logging.error(_("Unable to connect to REST API.  Reason: %s") %  re.reason)
+        logging.error(
+            _("Unable to connect to REST API.  Reason: %s") % re.reason
+        )
         raise re
     except ConnectionError as ce:
-        logging.error(_("Problem connecting to the REST API. Is the service available and does the CA certificate exist?"))
+        logging.error(_(
+            "Problem connecting to the REST API."
+            "Is the service available and does the CA certificate exist?"
+        ))
         raise ce
     except NoCertificatesError as nce:
-        logging.error(_("Problem connecting to the REST API.  The CA is invalid.  To override use the \'insecure\' option."))
+        logging.error(_(
+            "Problem connecting to the REST API."
+            "The CA is invalid.  To override use the \'insecure\' option."
+        ))
         raise nce
     except Exception as e:
-        logging.error(_("Failure fetching information about hypervisors from API . Error: %s") % e)
+        logging.error(
+            _(
+                "Failure fetching information about hypervisors from API."
+                "Error: %s"
+            ) % e
+        )
         raise e
     return result

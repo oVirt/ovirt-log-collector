@@ -3,6 +3,7 @@ import os
 import sos.plugintools
 import tempfile
 
+
 def find(file_pattern, top_dir, max_depth=None, path_pattern=None):
     """generate function to find files recursively. Usage:
 
@@ -21,7 +22,8 @@ def find(file_pattern, top_dir, max_depth=None, path_pattern=None):
             continue
 
         for name in fnmatch.filter(filelist, file_pattern):
-            yield os.path.join(path,name)
+            yield os.path.join(path, name)
+
 
 # Class name must be the same as file name and method names must not change
 class postgresql(sos.plugintools.PluginBase):
@@ -31,12 +33,28 @@ class postgresql(sos.plugintools.PluginBase):
     __dbport = 5432
 
     optionList = [
-        ("pghome",  'PostgreSQL server home directory (default=/var/lib/pgsql)', '', False),
-        ("username",  'username for pg_dump (default=postgres)', '', False),
-        ("password",  'password for pg_dump (default=None)', '', False),
-        ("dbname",  'database name to dump for pg_dump (default=None)', '', False),
-        ("dbhost",  'hostname/IP of the server upon which the DB is running (default=localhost)', '', False),
-        ("dbport",  'database server port number (default=5432)', '', False)
+        (
+            'pghome',
+            'PostgreSQL server home directory (default=/var/lib/pgsql)',
+            '',
+            False
+        ),
+        ('username', 'username for pg_dump (default=postgres)', '', False),
+        ('password', 'password for pg_dump (default=None)', '', False),
+        (
+            'dbname',
+            'database name to dump for pg_dump (default=None)',
+            '',
+            False
+        ),
+        (
+            'dbhost',
+            'hostname/IP of the server upon which the DB is running \
+(default=localhost)',
+            '',
+            False
+        ),
+        ('dbport', 'database server port number (default=5432)', '', False)
     ]
 
     def pg_dump(self):
@@ -67,7 +85,9 @@ class postgresql(sos.plugintools.PluginBase):
             self.soslog.error(
                 "Unable to execute pg_dump. Error(%s)" % (output)
             )
-            self.addAlert("ERROR: Unable to execute pg_dump.  Error(%s)" % (output))
+            self.addAlert(
+                "ERROR: Unable to execute pg_dump.  Error(%s)" % (output)
+            )
 
     def setup(self):
         if self.getOption("pghome"):
@@ -97,7 +117,6 @@ class postgresql(sos.plugintools.PluginBase):
                     "WARN: dbname must be supplied to dump a database."
                 )
 
-
         # Copy PostgreSQL log files.
         for file in find("*.log", self.__pghome):
             self.addCopySpec(file)
@@ -105,8 +124,10 @@ class postgresql(sos.plugintools.PluginBase):
         for file in find("*.conf", self.__pghome):
             self.addCopySpec(file)
 
-        self.addCopySpec(os.path.join(self.__pghome, "data" , "PG_VERSION"))
-        self.addCopySpec(os.path.join(self.__pghome, "data" , "postmaster.opts"))
+        self.addCopySpec(os.path.join(self.__pghome, "data", "PG_VERSION"))
+        self.addCopySpec(
+            os.path.join(self.__pghome, "data", "postmaster.opts")
+        )
 
     def postproc(self):
         import shutil
