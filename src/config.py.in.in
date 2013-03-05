@@ -1,0 +1,14 @@
+"""
+Paths and version constants for @PACKAGE_NAME@
+"""
+
+PACKAGE_NAME = "@PACKAGE_NAME@"
+PACKAGE_VERSION = "@PACKAGE_VERSION@"
+
+FILE_PG_PASS = "@engineconfigdir_POST@/.pgpass"
+
+DEFAULT_CA_PEM = "@sysconfdir_POST@/pki/ovirt-engine/ca.pem"
+DEFAULT_SSH_KEY = "@sysconfdir_POST@/pki/ovirt-engine/keys/engine_id_rsa"
+DEFAULT_CONFIGURATION_FILE = "@engineconfigdir_POST@/logcollector.conf"
+DEFAULT_LOG_FILE = \
+    "@localstatedir_POST@/log/ovirt-engine/engine-log-collector.log"

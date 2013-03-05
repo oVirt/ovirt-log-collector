@@ -31,23 +31,21 @@ import getpass
 import datetime
 import dateutil.parser
 import dateutil.tz as tz
+import tempfile
+import atexit
 from helper import hypervisors
 
+from ovirt_log_collector import config
 
-versionNum = "1.0.0"
 STREAM_LOG_FORMAT = '%(levelname)s: %(message)s'
 FILE_LOG_FORMAT = \
     '%(asctime)s::%(levelname)s::%(module)s::%(lineno)d::%(name)s:: \
 %(message)s'
 FILE_LOG_DSTMP = '%Y-%m-%d %H:%M:%S'
-DEFAULT_SSH_KEY = "/etc/pki/ovirt-engine/keys/engine_id_rsa"
 DEFAULT_SSH_USER = 'root'
-DEFAULT_CONFIGURATION_FILE = "/etc/ovirt-engine/logcollector.conf"
-DEFAULT_SCRATCH_DIR = '/tmp/logcollector'
-DEFAULT_LOG_FILE = '/var/log/ovirt-engine/engine-log-collector.log'
 DEFAULT_TIME_SHIFT_FILE = 'time_diff.txt'
-FILE_PG_PASS = "/etc/ovirt-engine/.pgpass"
 PGPASS_FILE_ADMIN_LINE = "DB ADMIN credentials"
+DEFAULT_SCRATCH_DIR = None  # Will be initialized by __main__
 
 # Default DB connection params
 pg_user = 'postgres'
@@ -71,11 +69,11 @@ def get_pg_var(dbconf_param, user=None):
             "Error: unknown value type '%s' was requested" % dbconf_param
         )
     inDbAdminSection = False
-    if (os.path.exists(FILE_PG_PASS)):
+    if (os.path.exists(config.FILE_PG_PASS)):
         logging.debug(
             "Found existing pgpass file, fetching DB %s value" % dbconf_param
         )
-        with open(FILE_PG_PASS) as pgPassFile:
+        with open(config.FILE_PG_PASS) as pgPassFile:
             for line in pgPassFile:
 
                 # find the line with "DB ADMIN"
@@ -254,8 +252,8 @@ class Configuration(dict):
 File=(%s)" % self.options.conf_file
                 )
 
-        elif os.path.isfile(DEFAULT_CONFIGURATION_FILE):
-            self.from_file(DEFAULT_CONFIGURATION_FILE)
+        elif os.path.isfile(config.DEFAULT_CONFIGURATION_FILE):
+            self.from_file(config.DEFAULT_CONFIGURATION_FILE)
 
     def from_option_groups(self, options, parser):
         for optGrp in parser.option_groups:
@@ -1051,6 +1049,17 @@ if __name__ == '__main__':
 
     setup_pg_defaults()
 
+    DEFAULT_SCRATCH_DIR = tempfile.mkdtemp(prefix='logcollector-')
+
+    commandline = set(sys.argv)
+    cleanup_set = set(["--help", "-h", "--version"])
+
+    def cleanup():
+        os.rmdir(DEFAULT_SCRATCH_DIR)
+
+    if len(commandline.intersection(cleanup_set)) != 0:
+        atexit.register(cleanup)
+
     def comma_separated_list(option, opt_str, value, parser):
         setattr(
             parser.values, option.dest, [v.strip() for v in value.split(",")]
@@ -1070,14 +1079,17 @@ to continue.
     OptionParser.format_epilog = lambda self, formatter: self.epilog
     parser = OptionParser(
         usage_string,
-        version="Version " + versionNum,
+        version="{pkg_name}-{pkg_version}".format(
+            pkg_name=config.PACKAGE_NAME,
+            pkg_version=config.PACKAGE_VERSION
+        ),
         epilog=epilog_string
     )
 
     parser.add_option(
         "", "--conf-file", dest="conf_file",
         help="path to configuration file (default=%s)" % (
-            DEFAULT_CONFIGURATION_FILE
+            config.DEFAULT_CONFIGURATION_FILE
         ),
         metavar="PATH"
     )
@@ -1085,7 +1097,7 @@ to continue.
     parser.add_option(
         "", "--local-tmp", dest="local_tmp_dir",
         help="directory to copy reports to locally \
-(default=%s)" % DEFAULT_SCRATCH_DIR,
+(default is randomly generated like: %s)" % DEFAULT_SCRATCH_DIR,
         metavar="PATH",
         default=DEFAULT_SCRATCH_DIR
     )
@@ -1112,17 +1124,19 @@ to continue.
     parser.add_option(
         "", "--log-file",
         dest="log_file",
-        help="path to log file (default=%s)" % DEFAULT_LOG_FILE,
+        help="path to log file (default=%s)" % (
+            config.DEFAULT_LOG_FILE
+        ),
         metavar="PATH",
-        default=DEFAULT_LOG_FILE
+        default=config.DEFAULT_LOG_FILE
     )
 
     parser.add_option(
         "", "--cert-file", dest="cert_file",
         help="The CA certificate used to validate the engine. \
-(default=/etc/pki/ovirt-engine/ca.pem)",
-        metavar="/etc/pki/ovirt-engine/ca.pem",
-        default="/etc/pki/ovirt-engine/ca.pem"
+(default=%s)" % config.DEFAULT_CA_PEM,
+        metavar=config.DEFAULT_CA_PEM,
+        default=config.DEFAULT_CA_PEM
     )
 
     parser.add_option(
@@ -1223,9 +1237,9 @@ hypervisors (default=%s).
 If a identity file is not supplied the program will prompt for a password.
 It is strongly recommended to use key based authentication with SSH because
 the program may make multiple SSH connections resulting in multiple requests
-for the SSH password.""" % DEFAULT_SSH_KEY,
+for the SSH password.""" % config.DEFAULT_SSH_KEY,
         metavar="KEYFILE",
-        default=DEFAULT_SSH_KEY
+        default=config.DEFAULT_SSH_KEY
     )
 
     ssh_group.add_option(

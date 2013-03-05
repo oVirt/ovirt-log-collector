@@ -76,6 +76,7 @@ AM_CONDITIONAL([PYTHON_SYNTAX_CHECK], [test "${enable_python_syntax_check}" = "y
 AC_CONFIG_FILES([
 	Makefile
 	ovirt-log-collector.spec
+	src/config.py.in
 	src/Makefile
 	src/sos/Makefile
 	src/sos/plugins/Makefile
