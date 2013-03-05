@@ -44,28 +44,35 @@ class postgresql(sos.plugintools.PluginBase):
         old_env_pgpassword = os.environ.get("PGPASSWORD")
         os.environ["PGPASSWORD"] = "%s" % (self.getOption("password"))
         if self.getOption("dbhost"):
-            (status, output, rtime) = self.callExtProg("pg_dump -U %s -h %s -p %s -w -f %s -F t %s" %
-                                           (self.__username,
-                                            self.getOption("dbhost"),
-                                            self.__dbport,
-                                            dest_file,
-                                            self.getOption("dbname")))
+            cmd = "pg_dump -U %s -h %s -p %s -w -f %s -F t %s" % (
+                self.__username,
+                self.getOption("dbhost"),
+                self.__dbport,
+                dest_file,
+                self.getOption("dbname")
+            )
         else:
-            (status, output, rtime) = self.callExtProg("pg_dump -C -U %s -w -f %s -F t %s " %
-                                                       (self.__username,
-                                                        dest_file,
-                                                        self.getOption("dbname")))
-
+            cmd = "pg_dump -C -U %s -w -f %s -F t %s " % (
+                self.__username,
+                dest_file,
+                self.getOption("dbname")
+            )
+        self.soslog.debug("calling %s" % cmd)
+        (status, output, rtime) = self.callExtProg(cmd)
         if old_env_pgpassword is not None:
             os.environ["PGPASSWORD"] = str(old_env_pgpassword)
         if (status == 0):
             self.addCopySpec(dest_file)
         else:
+            self.soslog.error(
+                "Unable to execute pg_dump. Error(%s)" % (output)
+            )
             self.addAlert("ERROR: Unable to execute pg_dump.  Error(%s)" % (output))
 
     def setup(self):
         if self.getOption("pghome"):
             self.__pghome = self.getOption("pghome")
+            self.soslog.debug("using pghome=%s" % self.__pghome)
 
         if self.getOption("dbname"):
             if self.getOption("password"):
@@ -76,7 +83,20 @@ class postgresql(sos.plugintools.PluginBase):
                 self.tmp_dir = tempfile.mkdtemp()
                 self.pg_dump()
             else:
-                self.addAlert("WARN: password must be supplied to dump a database.")
+                self.soslog.warning(
+                    "password must be supplied to dump a database."
+                )
+                self.addAlert(
+                    "WARN: password must be supplied to dump a database."
+                )
+        else:
+                self.soslog.warning(
+                    "dbname must be supplied to dump a database."
+                )
+                self.addAlert(
+                    "WARN: dbname must be supplied to dump a database."
+                )
+
 
         # Copy PostgreSQL log files.
         for file in find("*.log", self.__pghome):
@@ -88,10 +108,12 @@ class postgresql(sos.plugintools.PluginBase):
         self.addCopySpec(os.path.join(self.__pghome, "data" , "PG_VERSION"))
         self.addCopySpec(os.path.join(self.__pghome, "data" , "postmaster.opts"))
 
-
     def postproc(self):
         import shutil
         try:
             shutil.rmtree(self.tmp_dir)
         except:
+            self.soslog.exception(
+                "Unable to remove %s." % (self.tmp_dir)
+            )
             self.addAlert("ERROR: Unable to remove %s." % (self.tmp_dir))

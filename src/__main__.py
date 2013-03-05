@@ -57,6 +57,62 @@ pg_dbport = '5432'
 t = gettext.translation('logcollector', fallback=True)
 _ = t.ugettext
 
+
+def get_pg_var(dbconf_param, user=None):
+    '''
+    Provides a mechanism to extract information from .pgpass.
+    '''
+    field = {'pass': 4, 'admin': 3, 'host': 0, 'port': 1}
+    if dbconf_param not in field.keys():
+        raise ValueError("Error: unknown value type '%s' was requested" % \
+                        dbconf_param)
+    inDbAdminSection = False
+    if (os.path.exists(FILE_PG_PASS)):
+        logging.debug("Found existing pgpass file, fetching DB %s value" % \
+                dbconf_param)
+        with open(FILE_PG_PASS) as pgPassFile:
+            for line in pgPassFile:
+
+                # find the line with "DB ADMIN"
+                if PGPASS_FILE_ADMIN_LINE in line:
+                    inDbAdminSection = True
+                    continue
+
+                if inDbAdminSection and not line.startswith("#"):
+                    # Means we're on DB ADMIN line, as it's for all DBs
+                    dbcreds = line.split(":", 4)
+                    return str(dbcreds[field[dbconf_param]]).strip()
+
+                # Fetch the password if needed
+                if dbconf_param == "pass" and user \
+                    and not line.startswith("#"):
+                        dbcreds = line.split(":", 4)
+                        if dbcreds[3] == user:
+                            return dbcreds[field[dbconf_param]]
+    return None
+
+
+def setup_pg_defaults():
+    """
+    Set defaults value to those read from .pgpass
+    """
+    global pg_user
+    global pg_pass
+    global pg_dbhost
+    global pg_dbport
+    try:
+        pg_user = get_pg_var('admin') or pg_user
+        pg_pass = get_pg_var('pass', pg_user) or pg_pass
+        pg_dbhost = get_pg_var('host') or pg_dbhost
+        pg_dbport = get_pg_var('port') or pg_dbport
+    except ValueError as ve:
+        print "Programming error in get_pg_var invocation: %s" % str(ve)
+        sys.exit(ExitCodes.CRITICAL)
+    except EnvironmentError as e:
+        print "Warning: error while reading .pgpass configuration: %s" % str(e)
+        ExitCodes.exit_code = ExitCodes.WARN
+
+
 def multilog(logger, msg):
     for line in str(msg).splitlines():
         logger(line)
@@ -96,6 +152,7 @@ class Caller(object):
     def call(self, cmds):
         """Uses the configuration to fork a subprocess and run cmds."""
         _cmds = self.prep(cmds)
+        logging.debug("calling(%s)" % _cmds)
         proc = subprocess.Popen(_cmds,
                    stdout=subprocess.PIPE,
                    stderr=subprocess.PIPE)
@@ -137,9 +194,6 @@ class Configuration(dict):
             raise Exception("Configuration requires a parser")
 
         self.options, self.args = self.parser.parse_args()
-        if os.geteuid() != 0:
-            raise Exception("This tool requires root permissions to run.")
-
         # At this point we know enough about the command line options
         # to test for verbose and if it is set we should re-initialize
         # the logger to DEBUG.  This will have the effect of printing
@@ -147,7 +201,6 @@ class Configuration(dict):
         if getattr(self.options, "verbose"):
             self.__initLogger(logging.DEBUG)
 
-        self.set_pg_db_attrs()
         self.load_config_file()
 
         if self.options:
@@ -172,58 +225,6 @@ class Configuration(dict):
             self.__initLogger(level, self.options.quiet, self.options.log_file)
 
     def __missing__(self, key):
-        return None
-
-    def set_pg_db_attrs(self):
-        '''
-        This method will check for /etc/ovirt-engin/.pgpass and set the
-        values for the admin user, admin user pw, pg host, and pg port
-        in the configuration dictionary.
-
-        If values not found, use defaults.
-        '''
-
-        try:
-            self['pg_user'] = self._get_pg_var('admin') or pg_user
-            self['pg_pass'] = self._get_pg_var('pass', self['pg_user']) or pg_pass
-            self['pg_dbhost'] = self._get_pg_var('host') or pg_dbhost
-            self['pg_dbport'] = self._get_pg_var('port') or pg_dbport
-        except Exception, e:
-            logging.debug(str(e))
-
-    def _get_pg_var(self, dbconf_param, user=None):
-        '''
-        Provides a mechanism to extract information from .pgpass.
-        '''
-        field = {'pass': 4, 'admin': 3, 'host': 0, 'port': 1}
-        if dbconf_param not in field.keys():
-            raise Exception("Error: unknown value type '%s' was requested" % \
-                            dbconf_param)
-
-        inDbAdminSection = False
-        if (os.path.exists(FILE_PG_PASS)):
-            logging.debug("found existing pgpass file, fetching DB %s value" % \
-                  dbconf_param)
-            with open(FILE_PG_PASS) as pgPassFile:
-                for line in pgPassFile:
-
-                    # find the line with "DB ADMIN"
-                    if PGPASS_FILE_ADMIN_LINE in line:
-                        inDbAdminSection = True
-                        continue
-
-                    if inDbAdminSection and not line.startswith("#"):
-                        # Means we're on DB ADMIN line, as it's for all DBs
-                        dbcreds = line.split(":", 4)
-                        return str(dbcreds[field[dbconf_param]]).strip()
-
-                    # Fetch the password if needed
-                    if dbconf_param == "pass" and user \
-                        and not line.startswith("#"):
-                            dbcreds = line.split(":", 4)
-                            if dbcreds[3] == user:
-                                return dbcreds[field[dbconf_param]]
-
         return None
 
     def load_config_file(self):
@@ -641,7 +642,7 @@ class PostgresData(CollectorBase):
     def sosreport(self):
         opt = ""
 
-        if self.hostname == "localhost":
+        if self.configuration.get("pg_dbhost") == "localhost":
             if self.configuration.get("pg_pass"):
                 opt = '-k postgresql.dbname=%(pg_dbname)s -k postgresql.username=%(pg_user)s -k postgresql.password=%(pg_pass)s'
 
@@ -890,6 +891,11 @@ def parse_password(option, opt_str, value, parser):
     setattr(parser.values, option.dest, value)
 
 if __name__ == '__main__':
+    if os.geteuid() != 0:
+        print "This tool requires root permissions to run."
+        sys.exit(ExitCodes.CRITICAL)
+
+    setup_pg_defaults()
 
     def comma_separated_list(option, opt_str, value, parser):
         setattr(parser.values, option.dest, [v.strip() for v in value.split(",")])
