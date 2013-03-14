@@ -29,13 +29,11 @@ Group:		Virtualization/Management
 
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}
 BuildArch:	noarch
-Requires:	gettext
 Requires:	python
 Requires:	python-dateutil
 Requires:	python-lxml
 Requires:	ovirt-engine-sdk
 Requires:	sos
-BuildRequires:	gettext-devel
 BuildRequires:	python2-devel
 
 %description
