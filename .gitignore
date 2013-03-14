@@ -20,3 +20,6 @@ tmp.*
 *.pyc
 *.pyo
 *~
+
+src/config.py
+src/config.py.in
