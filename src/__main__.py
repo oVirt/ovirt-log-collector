@@ -243,7 +243,7 @@ class Configuration(dict):
         """Loads the user-supplied config file or the system default.
            If the user supplies a bad filename we will stop."""
 
-        conf_file = DEFAULT_CONFIGURATION_FILE
+        conf_file = config.DEFAULT_CONFIGURATION_FILE
 
         if self.options and getattr(self.options, "conf_file"):
             conf_file = self.options.conf_file
