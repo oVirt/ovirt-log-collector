@@ -49,7 +49,12 @@ dist_man_MANS = \
 
 dist_engineconfig_DATA = \
 	logcollector.conf \
-	$(NuLL)
+	$(NULL)
+
+confddir=$(engineconfigdir)/logcollector.conf.d
+dist_confd_DATA = \
+	.keep \
+	$(NULL)
 
 all-local: \
 	python-syntax-check \
