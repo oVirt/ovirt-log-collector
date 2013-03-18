@@ -887,61 +887,57 @@ class LogCollector(object):
             ])
 
     def set_hosts(self):
-        """Fetches the hostnames for the supplied cluster or datacenter.
-           Filtering is applied if patterns are found in the --hosts, --cluster
-           or --datacenters options. There can be multiple patterns in each
-           option. Patterns found within the same option are inclusive and
-           each each option set together is treated as an intersection.
+        """
+        Fetches the hostnames for the supplied cluster or datacenter.
+        Filtering is applied if patterns are found in the --hosts, --cluster
+        or --datacenters options. There can be multiple patterns in each
+        option. Patterns found within the same option are inclusive and
+        each option set together is treated as an intersection.
         """
 
-        self.conf["hosts"] = set()
+        self.conf['hosts'] = set()
 
         host_patterns, host_others = self._sift_patterns(
-            self.conf.get("hosts_list")
+            self.conf.get('hosts_list')
         )
-        datacenter_patterns = self.conf.get("datacenter", [])
-        cluster_patterns = self.conf.get("cluster", [])
+        datacenter_patterns = self.conf.get('datacenter', [])
+        cluster_patterns = self.conf.get('cluster', [])
 
         if host_patterns:
             self.conf['host_pattern'] = host_patterns
 
-        if any((
-            host_patterns,
-            datacenter_patterns,
-            cluster_patterns
-        )) or not host_others:
-            self.conf["hosts"] = self._get_hypervisors_from_api()
-
+        self.conf['hosts'] = self._get_hypervisors_from_api()
+        #Filter all host specified with -H
         host_filtered = set()
-        cluster_filtered = set()
-        datacenter_filtered = set()
-
+        if host_others:
+            host_filtered = set([
+                (dc, cl, h) for dc, cl, h in self.conf['hosts']
+                if h in host_others
+            ])
         if host_patterns:
             for pattern in host_patterns:
-                host_filtered |= self._filter_hosts("host", pattern)
+                host_filtered |= self._filter_hosts('host', pattern)
+        if host_patterns or host_others:
             self.conf['hosts'] &= host_filtered
 
+        #Intersect with hosts belonging to the data centers specified with -d
         if datacenter_patterns:
+            datacenter_filtered = set()
             for pattern in datacenter_patterns:
                 datacenter_filtered |= self._filter_hosts(
-                    "datacenter", pattern
+                    'datacenter', pattern
                 )
             self.conf['hosts'] &= datacenter_filtered
 
+        #Intersect with hosts belonging to the clusters specified with -c
         if cluster_patterns:
+            #remove all hosts that don't match the patterns
+            cluster_filtered = set()
             for pattern in cluster_patterns:
-                cluster_filtered |= self._filter_hosts("cluster", pattern)
+                cluster_filtered |= self._filter_hosts('cluster', pattern)
             self.conf['hosts'] &= cluster_filtered
 
-        # build a set of hostnames that are already in the target host list.
-        # So that we can prevent duplication in the next step
-        hostnames = set((t[2] for t in self.conf['hosts']))
-
-        for hostname in host_others:
-            if hostname not in hostnames:
-                self.conf['hosts'].add(("", "", hostname))
-
-        return bool(self.conf.get("hosts"))
+        return bool(self.conf.get('hosts'))
 
     def list_hosts(self):
 
