@@ -540,6 +540,7 @@ class HyperVisorData(CollectorBase):
             "selinux",
             "kernel",
             "memory",
+            "rpm",
         ))
 
         # these are the reports that will work with rhev2.2 hosts
