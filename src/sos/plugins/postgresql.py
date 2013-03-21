@@ -57,11 +57,18 @@ class postgresql(sos.plugintools.PluginBase):
         ('dbport', 'database server port number (default=5432)', '', False)
     ]
 
+    def __init__(self, pluginname, commons):
+        sos.plugintools.PluginBase.__init__(self, pluginname, commons)
+        self.tmp_dir = None
+
     def pg_dump(self):
         dest_file = os.path.join(self.tmp_dir, "sos_pgdump.tar")
         old_env_pgpassword = os.environ.get("PGPASSWORD")
         os.environ["PGPASSWORD"] = "%s" % (self.getOption("password"))
-        if self.getOption("dbhost"):
+        if (
+            self.getOption("dbhost") and
+            self.getOption("dbhost") is not True
+        ):
             cmd = "pg_dump -U %s -h %s -p %s -w -f %s -F t %s" % (
                 self.__username,
                 self.getOption("dbhost"),
@@ -90,15 +97,30 @@ class postgresql(sos.plugintools.PluginBase):
             )
 
     def setup(self):
-        if self.getOption("pghome"):
+        if (
+            self.getOption("pghome") and
+            self.getOption("pghome") is not True
+        ):
             self.__pghome = self.getOption("pghome")
-            self.soslog.debug("using pghome=%s" % self.__pghome)
+        self.soslog.debug("using pghome=%s" % self.__pghome)
 
-        if self.getOption("dbname"):
-            if self.getOption("password"):
-                if self.getOption("username"):
+        if (
+            self.getOption("dbname") and
+            self.getOption("dbname") is not True
+        ):
+            if (
+                self.getOption("password") and
+                self.getOption("password") is not True
+            ):
+                if (
+                    self.getOption("username") and
+                    self.getOption("username") is not True
+                ):
                     self.__username = self.getOption("username")
-                if self.getOption("dbport"):
+                if (
+                    self.getOption("dbport") and
+                    self.getOption("dbport") is not True
+                ):
                     self.__dbport = self.getOption("dbport")
                 self.tmp_dir = tempfile.mkdtemp()
                 self.pg_dump()
@@ -110,19 +132,19 @@ class postgresql(sos.plugintools.PluginBase):
                     "WARN: password must be supplied to dump a database."
                 )
         else:
-                self.soslog.warning(
-                    "dbname must be supplied to dump a database."
-                )
-                self.addAlert(
-                    "WARN: dbname must be supplied to dump a database."
-                )
+            self.soslog.warning(
+                "dbname must be supplied to dump a database."
+            )
+            self.addAlert(
+                "WARN: dbname must be supplied to dump a database."
+            )
 
         # Copy PostgreSQL log files.
-        for file in find("*.log", self.__pghome):
-            self.addCopySpec(file)
+        for filename in find("*.log", self.__pghome):
+            self.addCopySpec(filename)
         # Copy PostgreSQL config files.
-        for file in find("*.conf", self.__pghome):
-            self.addCopySpec(file)
+        for filename in find("*.conf", self.__pghome):
+            self.addCopySpec(filename)
 
         self.addCopySpec(os.path.join(self.__pghome, "data", "PG_VERSION"))
         self.addCopySpec(
@@ -133,7 +155,7 @@ class postgresql(sos.plugintools.PluginBase):
         import shutil
         try:
             shutil.rmtree(self.tmp_dir)
-        except:
+        except shutil.Error:
             self.soslog.exception(
                 "Unable to remove %s." % (self.tmp_dir)
             )
