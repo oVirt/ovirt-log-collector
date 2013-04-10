@@ -914,6 +914,19 @@ class LogCollector(object):
                 (dc, cl, h) for dc, cl, h in self.conf['hosts']
                 if h in host_others
             ])
+            not_found = host_others - set(host[2] for host in host_filtered)
+            if not_found != set():
+                logging.error(
+                    _(
+                        'The following host are not listed as hypervisors: '
+                        '{not_listed}. Known hypervisors can be listed using '
+                        'the list command'
+                    ).format(
+                        not_listed=','.join(not_found)
+                    )
+                )
+                sys.exit(ExitCodes.CRITICAL)
+
         if host_patterns:
             for pattern in host_patterns:
                 host_filtered |= self._filter_hosts('host', pattern)
