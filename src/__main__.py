@@ -21,10 +21,10 @@ import os
 from optparse import OptionParser, OptionGroup, SUPPRESS_HELP
 import subprocess
 import shlex
+import shutil
 import pprint
 import fnmatch
 import traceback
-import shutil
 import logging
 import gettext
 import getpass
@@ -33,6 +33,7 @@ import dateutil.parser
 import dateutil.tz as tz
 import tempfile
 import atexit
+import time
 from helper import hypervisors
 
 from ovirt_log_collector import config
@@ -639,12 +640,12 @@ fi
 class ENGINEData(CollectorBase):
 
     def build_options(self):
+        """
+        returns the parameters for sosreport execution on the local host
+        running ovirt-engine service.
+        """
         opts = [
             "-k rpm.rpmva=off",
-            "-k engine.vdsmlogs=%s" % self.configuration.get(
-                "local_scratch_dir"
-            ),
-            "-k engine.prefix=on",
             "-k general.all_logs=True",
             "-k apache.log=True"
         ]
@@ -677,23 +678,9 @@ class ENGINEData(CollectorBase):
             "memory",
         ))
         self.configuration["sos_options"] = self.build_options()
-        stdout = self.caller.call(
-            '/usr/sbin/sosreport --batch --report --tmp-dir=%(local_tmp_dir)s\
-            -o %(reports)s %(sos_options)s'
-        )
-        self.parse_sosreport_stdout(stdout)
-        if os.path.exists(self.configuration["path"]):
-            archiveSize = '%.1fM' % (
-                float(os.path.getsize(self.configuration["path"])) / (1 << 20)
-            )
-        else:
-            archiveSize = None
-
-        return """Log files have been collected and placed in %s.
-      The MD5 for this file is %s and its size is %s""" % (
-            self.configuration["path"],
-            self.configuration["checksum"],
-            archiveSize
+        self.caller.call(
+            "sosreport --batch --report --build \
+            --tmp-dir='%(local_tmp_dir)s' -o %(reports)s %(sos_options)s"
         )
 
 
@@ -791,6 +778,60 @@ class LogCollector(object):
         self.conf = configuration
         if self.conf.command is None:
             raise Exception("No command specified.")
+
+    def archive(self):
+        """
+        Create a single tarball with collected data from engine, postgresql
+        and all hypervisors.
+        """
+        print _('Creating compressed archive...')
+        report_file_ext = 'bz2'
+        compressor = 'bzip2'
+        caller = Caller({})
+        try:
+            caller.call('xz --version')
+            report_file_ext = 'xz'
+            compressor = 'xz'
+        except Exception:
+            logging.debug('xz compression not available')
+        self.conf["path"] = os.path.join(
+            tempfile.gettempdir(),
+            "sosreport-%s-%s.tar.%s" % (
+                'LogCollector',
+                time.strftime("%Y%m%d%H%M%S"),
+                report_file_ext
+            )
+        )
+        config = {
+            'report': os.path.splitext(self.conf['path'])[0],
+            'compressed_report': self.conf['path'],
+            'compressor': compressor,
+            'directory': self.conf["local_tmp_dir"],
+        }
+        caller.configuration = config
+        caller.call("tar -cf '%(report)s' -C '%(directory)s' .")
+        shutil.rmtree(self.conf["local_tmp_dir"])
+        caller.call("%(compressor)s -1 '%(report)s'")
+        md5_out = caller.call("md5sum '%(compressed_report)s'")
+        checksum = md5_out.split()[0]
+        with open("%s.md5" % self.conf["path"], 'w') as checksum_file:
+            checksum_file.write(md5_out)
+
+        msg = ''
+        if os.path.exists(self.conf["path"]):
+            archiveSize = '%.1fM' % (
+                float(os.path.getsize(self.conf["path"])) / (1 << 20)
+            )
+
+            msg = _(
+                'Log files have been collected and placed in {path}.\n'
+                'The MD5 for this file is {checksum} and its size is {size}'
+            ).format(
+                path=self.conf["path"],
+                size=archiveSize,
+                checksum=checksum,
+            )
+        return msg
 
     def write_time_diff(self, queue):
         local_scratch_dir = self.conf.get("local_scratch_dir")
@@ -1044,8 +1085,7 @@ will not be collected."
             "localhost",
             configuration=self.conf
         )
-        stdout = collector.sosreport()
-        logging.info(stdout)
+        collector.sosreport()
 
 
 def parse_password(option, opt_str, value, parser):
@@ -1359,12 +1399,11 @@ host upon which the PostgreSQL database lives
 
         # We need to make a temporary scratch directory wherein
         # all of the output from VDSM and PostgreSQL SOS plug-ins
-        # will be dumped.  The contents of this directory will be scooped
-        # up by the oVirt Engine SOS plug-in via the engine.vdsmlogs option
-        # and included in a single .xz file.
+        # will be dumped.  The contents of this directory will be included in
+        # a single .xz or .bz2 file report.
         conf["local_scratch_dir"] = os.path.join(
             conf["local_tmp_dir"],
-            'RHEVH-and-PostgreSQL-reports'
+            'log-collector-data'
         )
         if not os.path.exists(conf["local_scratch_dir"]):
             os.makedirs(conf["local_scratch_dir"])
@@ -1377,6 +1416,8 @@ are not collected again.
 The directory is: %s'""" % (conf["local_scratch_dir"]))
 
         if conf.command == "collect":
+            collector.get_engine_data()
+            collector.get_postgres_data()
             if not conf.get("no_hypervisor"):
                 if collector.set_hosts():
                     collector.get_hypervisor_data()
@@ -1386,10 +1427,8 @@ The directory is: %s'""" % (conf["local_scratch_dir"]))
 hypervisor data will be collected.")
             else:
                 logging.info("Skipping hypervisor collection...")
-
-            collector.get_postgres_data()
-            collector.get_engine_data()
-
+            stdout = collector.archive()
+            logging.info(stdout)
         elif conf.command == "list":
             if collector.set_hosts():
                 collector.list_hosts()
@@ -1398,8 +1437,6 @@ hypervisor data will be collected.")
                     "No hypervisors were found, therefore no hypervisor \
 data will be listed.")
 
-        # Clean up the temp directory
-        shutil.rmtree(conf["local_scratch_dir"])
     except KeyboardInterrupt, k:
         print "Exiting on user cancel."
     except Exception, e:
