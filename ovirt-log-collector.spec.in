@@ -34,6 +34,7 @@ Requires:	python-lxml
 Requires:	ovirt-engine-sdk
 Requires:	sos
 BuildRequires:	python2-devel
+BuildRequires:	gettext
 
 %description
 Log Collector tool for oVirt Engine

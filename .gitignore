@@ -14,8 +14,6 @@ config.rpath
 config.sub
 ABOUT-NLS
 
-intl
-
 tmp.*
 *.pyc
 *.pyo
