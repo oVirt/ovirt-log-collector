@@ -34,9 +34,12 @@ import dateutil.tz as tz
 import tempfile
 import atexit
 import time
-from helper import hypervisors
 
+
+from helper import hypervisors
 from ovirt_log_collector import config
+from ovirt_log_collector import util
+
 
 STREAM_LOG_FORMAT = '%(levelname)s: %(message)s'
 FILE_LOG_FORMAT = \
@@ -50,11 +53,10 @@ DEFAULT_SCRATCH_DIR = None  # Will be initialized by __main__
 
 # Default DB connection params
 pg_user = 'postgres'
-pg_pass = '12345'
+pg_pass = None
 pg_dbname = 'engine'
 pg_dbhost = 'localhost'
 pg_dbport = '5432'
-
 
 t = gettext.translation('logcollector', fallback=True)
 _ = t.ugettext
@@ -101,23 +103,45 @@ def get_pg_var(dbconf_param, user=None):
 
 def setup_pg_defaults():
     """
-    Set defaults value to those read from .pgpass
+    Set defaults value to those read from config.ENGINE_CONF
+    falling back to legacy .pgpass if needed.
     """
     global pg_user
     global pg_pass
     global pg_dbhost
     global pg_dbport
-    try:
-        pg_user = get_pg_var('admin') or pg_user
-        pg_pass = get_pg_var('pass', pg_user) or pg_pass
-        pg_dbhost = get_pg_var('host') or pg_dbhost
-        pg_dbport = get_pg_var('port') or pg_dbport
-    except ValueError as ve:
-        print "Programming error in get_pg_var invocation: %s" % str(ve)
-        sys.exit(ExitCodes.CRITICAL)
-    except EnvironmentError as e:
-        print "Warning: error while reading .pgpass configuration: %s" % str(e)
-        ExitCodes.exit_code = ExitCodes.WARN
+    global pg_dbname
+    engine_config = util.ConfigFile([
+        config.ENGINE_DEFAULTS,
+        config.ENGINE_CONF,
+    ])
+    if engine_config.get('ENGINE_DB_PASSWORD'):
+        pg_pass = engine_config.get('ENGINE_DB_PASSWORD')
+        pg_user = engine_config.get('ENGINE_DB_USER')
+        pg_dbname = engine_config.get('ENGINE_DB_DATABASE')
+        pg_dbhost = engine_config.get('ENGINE_DB_HOST')
+        pg_dbport = engine_config.get('ENGINE_DB_PORT')
+    else:
+        try:
+            pg_user = get_pg_var('admin') or pg_user
+            pg_pass = get_pg_var('pass', pg_user) or pg_pass
+            pg_dbhost = get_pg_var('host') or pg_dbhost
+            pg_dbport = get_pg_var('port') or pg_dbport
+        except ValueError as ve:
+            sys.stderr.write(
+                _(
+                    'Programming error in get_pg_var invocation: {error}\n'
+                ).format(error=ve)
+            )
+            sys.exit(ExitCodes.CRITICAL)
+        except EnvironmentError as e:
+            sys.stderr.write(
+                _(
+                    'Warning: error while reading .pgpass configuration: '
+                    '{error}\n'
+                ).format(error=e)
+            )
+            ExitCodes.exit_code = ExitCodes.WARN
 
 
 def multilog(logger, msg):
@@ -1397,6 +1421,8 @@ host upon which the PostgreSQL database lives
 
     try:
         conf = Configuration(parser)
+        if not conf.get('pg_pass') and pg_pass:
+            conf['pg_pass'] = pg_pass
         collector = LogCollector(conf)
 
         # We must ensure that the working directory exits before

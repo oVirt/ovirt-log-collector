@@ -22,6 +22,7 @@
 		-e 's#[@]engineconfigdir_POST@#$(engineconfigdir)#g' \
 		-e 's#[@]sysconfdir_POST@#$(sysconfdir)#g' \
 		-e 's#[@]localstatedir_POST@#$(localstatedir)#g' \
+                -e 's#[@]datadir_POST@#$(datadir)#g' \
 		$< > $@.tmp; then \
 		mv "$@.tmp" "$@"; \
 	else \

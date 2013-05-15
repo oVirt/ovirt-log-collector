@@ -6,6 +6,8 @@ PACKAGE_NAME = "@PACKAGE_NAME@"
 PACKAGE_VERSION = "@PACKAGE_VERSION@"
 
 FILE_PG_PASS = "@engineconfigdir_POST@/.pgpass"
+ENGINE_DEFAULTS = "@datadir_POST@/conf/engine.conf.defaults"
+ENGINE_CONF = "@engineconfigdir_POST@/engine.conf"
 
 DEFAULT_CA_PEM = "@sysconfdir_POST@/pki/ovirt-engine/ca.pem"
 DEFAULT_SSH_KEY = "@sysconfdir_POST@/pki/ovirt-engine/keys/engine_id_rsa"
