@@ -299,6 +299,45 @@ class Configuration(dict):
                 if opt_value is not None:
                     self[option.dest] = opt_value
 
+    def _upgrade_configs(self, configs):
+        import ConfigParser
+        for configfile in configs:
+            cp = ConfigParser.ConfigParser()
+            cp.read(configfile)
+            try:
+                if cp.has_option('LogCollector', 'rhevm'):
+                    backupfile = "%s-%s" % (
+                        configfile,
+                        datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+                    )
+                    logging.info(
+                        (
+                            'Upgrading {configfile} ; a backup of the old '
+                            'configuration will be saved in {backupfile}'
+                        ).format(
+                            configfile=configfile,
+                            backupfile=backupfile
+                        )
+                    )
+                    shutil.move(configfile, backupfile)
+                    cp.set(
+                        'LogCollector',
+                        'engine',
+                        cp.get('LogCollector', 'rhevm')
+                    )
+                    cp.remove_option('LogCollector', 'rhevm')
+                    with open(configfile, 'w') as f:
+                        cp.write(f)
+            except ConfigParser.NoSectionError:
+                pass
+            except IOError as e:
+                logging.error(
+                    'Failed to upgrade {filename}: {error}'.format(
+                        filename=configfile,
+                        error=e,
+                    )
+                )
+
     def from_file(self, configFile):
         import ConfigParser
         import glob
@@ -313,6 +352,7 @@ class Configuration(dict):
             )
         )
 
+        self._upgrade_configs(configs)
         cp = ConfigParser.ConfigParser()
         cp.read(configs)
 
