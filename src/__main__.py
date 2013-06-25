@@ -50,7 +50,7 @@ DEFAULT_SCRATCH_DIR = None  # Will be initialized by __main__
 
 # Default DB connection params
 pg_user = 'postgres'
-pg_pass = '12345'
+pg_pass = None
 pg_dbname = 'engine'
 pg_dbhost = 'localhost'
 pg_dbport = '5432'
@@ -1399,6 +1399,8 @@ host upon which the PostgreSQL database lives
 
     try:
         conf = Configuration(parser)
+        if not conf.get('pg_pass') and pg_pass:
+            conf['pg_pass'] = pg_pass
         collector = LogCollector(conf)
 
         # We must ensure that the working directory exits before
