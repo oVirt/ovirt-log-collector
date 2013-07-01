@@ -51,6 +51,8 @@ DEFAULT_TIME_SHIFT_FILE = 'time_diff.txt'
 PGPASS_FILE_ADMIN_LINE = "DB ADMIN credentials"
 DEFAULT_SCRATCH_DIR = None  # Will be initialized by __main__
 
+SSH_SERVER_ALIVE_INTERVAL = 600
+
 # Default DB connection params
 pg_user = 'postgres'
 pg_pass = None
@@ -544,6 +546,8 @@ class CollectorBase(object):
 
             # ignore host key checking
             cmd += "-oStrictHostKeyChecking=no "
+            # keep alive the connection
+            cmd += '-oServerAliveInterval=%d ' % SSH_SERVER_ALIVE_INTERVAL
 
             cmd += self.get_ssh_user()
 
