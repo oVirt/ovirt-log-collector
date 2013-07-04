@@ -33,6 +33,7 @@ Requires:	python-dateutil
 Requires:	python-lxml
 Requires:	ovirt-engine-sdk
 Requires:	sos
+Requires:	openssh-clients
 BuildRequires:	python2-devel
 BuildRequires:	gettext
 
