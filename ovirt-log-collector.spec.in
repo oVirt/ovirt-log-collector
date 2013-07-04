@@ -34,6 +34,7 @@ Requires:	python-lxml
 Requires:	ovirt-engine-sdk
 Requires:	logrotate
 Requires:	sos
+Requires:	openssh-clients
 BuildRequires:	python2-devel
 
 %description
