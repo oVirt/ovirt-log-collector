@@ -255,6 +255,10 @@ class Configuration(dict):
         # This will ensure that any further log messages throughout the
         # lifecycle of this program go to the log handlers that the user
         # has specified.
+        if self.options.quiet and self.options.verbose:
+            parser.error(
+                _('Options --quiet and --verbose are mutually exclusive')
+            )
         if self.options.log_file or self.options.quiet:
             level = logging.INFO
             if self.options.verbose:
