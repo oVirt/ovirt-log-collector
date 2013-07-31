@@ -697,6 +697,22 @@ fi
                 '%(scp_cmd)s:%(path)s %(hypervisor_dir)s/%(archive_name)s'
             )
             self.caller.call('%(ssh_cmd)s "/bin/rm %(path)s*"')
+            stdout = self.caller.call(
+                '%(ssh_cmd)s "/bin/ls -lRZ /etc /var /rhev"'
+            )
+            self.configuration['selinux_dir'] = os.path.join(
+                self.configuration.get('hypervisor_dir'),
+                'selinux',
+            )
+            os.mkdir(self.configuration['selinux_dir'])
+            with open(
+                os.path.join(
+                    self.configuration['selinux_dir'],
+                    'ls_-lRZ_etc_var_rhev',
+                ),
+                'w',
+            ) as f:
+                f.write(stdout)
 
             stdout = self.caller.call('%(ssh_cmd)s "date --iso-8601=seconds"')
             try:
