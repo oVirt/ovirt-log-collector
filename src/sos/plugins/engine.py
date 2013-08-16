@@ -15,6 +15,8 @@ class engine(sos.plugintools.PluginBase):
         self.addCopySpec("/usr/share/ovirt-engine/conf")
         self.addCopySpec("/var/log/ovirt-guest-agent")
         self.addCopySpec("/var/lib/ovirt-engine/setup-history.txt")
+        self.addCopySpec("/var/lib/ovirt-engine/setup/answers")
+        self.addCopySpec("/var/lib/ovirt-engine/external_truststore")
 
     def postproc(self):
         """
