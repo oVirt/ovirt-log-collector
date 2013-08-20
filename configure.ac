@@ -81,6 +81,7 @@ AC_CONFIG_FILES([
 	src/sos/Makefile
 	src/sos/plugins/Makefile
 	src/helper/Makefile
+	src/logrotate.d/Makefile
 	po/Makefile.in
 ])
 AC_OUTPUT

@@ -1,0 +1,7 @@
+@localstatedir@/log/ovirt-engine/@PACKAGE_NAME@/*.log {
+    monthly
+    missingok
+    compress
+    nocreate
+    rotate 1
+}
