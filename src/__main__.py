@@ -42,15 +42,27 @@ from ovirt_log_collector import util
 
 
 STREAM_LOG_FORMAT = '%(levelname)s: %(message)s'
-FILE_LOG_FORMAT = \
-    '%(asctime)s::%(levelname)s::%(module)s::%(lineno)d::%(name)s:: \
-%(message)s'
+FILE_LOG_FORMAT = (
+    '%(asctime)s::'
+    '%(levelname)s::'
+    '%(module)s::'
+    '%(lineno)d::'
+    '%(name)s::'
+    ' %(message)s'
+)
 FILE_LOG_DSTMP = '%Y-%m-%d %H:%M:%S'
+DEFAULT_LOG_FILE = os.path.join(
+    config.DEFAULT_LOG_DIR,
+    '{prefix}-{timestamp}.log'.format(
+        prefix=config.LOG_PREFIX,
+        timestamp=time.strftime('%Y%m%d%H%M%S'),
+    )
+)
+
 DEFAULT_SSH_USER = 'root'
 DEFAULT_TIME_SHIFT_FILE = 'time_diff.txt'
 PGPASS_FILE_ADMIN_LINE = "DB ADMIN credentials"
 DEFAULT_SCRATCH_DIR = None  # Will be initialized by __main__
-
 SSH_SERVER_ALIVE_INTERVAL = 600
 
 # Default DB connection params
@@ -1242,11 +1254,9 @@ to continue.
     parser.add_option(
         "", "--log-file",
         dest="log_file",
-        help="path to log file (default=%s)" % (
-            config.DEFAULT_LOG_FILE
-        ),
+        help="path to log file (default=%s)" % DEFAULT_LOG_FILE,
         metavar="PATH",
-        default=config.DEFAULT_LOG_FILE
+        default=DEFAULT_LOG_FILE
     )
 
     parser.add_option(
