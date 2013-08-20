@@ -20,3 +20,5 @@ tmp.*
 *.pyc
 *.pyo
 *~
+src/config.py.in
+src/logrotate.d/ovirt-log-collector

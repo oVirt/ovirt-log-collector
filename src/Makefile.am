@@ -32,7 +32,11 @@ config.py: \
 	$(top_srcdir)/configure.ac \
 	$(NULL)
 
-SUBDIRS = sos helper
+SUBDIRS = \
+	sos \
+	helper \
+	logrotate.d \
+	$(NULL)
 
 ovirtlogcollectorlib_PYTHON = \
 	config.py\
@@ -61,6 +65,7 @@ clean-local: \
 
 install-data-hook:
 	$(MKDIR_P) "$(DESTDIR)$(bindir)"
+	$(MKDIR_P) "$(DESTDIR)$(localstatedir)/log/ovirt-engine/$(PACKAGE_NAME)"
 	chmod a+x "$(DESTDIR)$(ovirtlogcollectorlibdir)/__main__.py"
 	rm -f "$(DESTDIR)$(bindir)/engine-log-collector"
 	$(LN_S) "$(ovirtlogcollectorlibdir)/__main__.py" "$(DESTDIR)$(bindir)/engine-log-collector"
