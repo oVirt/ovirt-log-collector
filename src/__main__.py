@@ -652,11 +652,11 @@ class HyperVisorData(CollectorBase):
             self.configuration['reports'] += ",gluster"
 
         cmd = """%(ssh_cmd)s "
-VERSION=`/bin/rpm -q --qf '[%%{VERSION}]' sos | /bin/sed 's/\.//'`;
+VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' sos | /bin/sed 's/\.//'`;
 if [ "$VERSION" -ge "22" ]; then
-    /usr/sbin/sosreport --batch -k general.all_logs=True -o %(reports)s
+    /usr/sbin/sosreport {option} --batch -k general.all_logs=True -o %(reports)s
 elif [ "$VERSION" -ge "17" ]; then
-    /usr/sbin/sosreport --no-progressbar -k general.all_logs=True \
+    /usr/sbin/sosreport {option} --no-progressbar -k general.all_logs=True \
         -o %(bc_reports)s
 else
     /bin/echo "No valid version of sosreport found." 1>&2
@@ -664,6 +664,14 @@ else
 fi
 "
         """
+
+        if self.configuration.get("ticket_number"):
+            cmd = cmd.format(option='--ticket-number={number}'.format(
+                number=self.configuration.get("ticket_number")
+            ))
+        else:
+            cmd = cmd.format(option='')
+
         return self.caller.call(cmd)
 
     def run(self):
@@ -786,9 +794,12 @@ class PostgresData(CollectorBase):
     def sosreport(self):
         opt = ""
 
+        if self.configuration.get("ticket_number"):
+            opt += '--ticket-number=' + self.configuration.get("ticket_number")
+
         if self.configuration.get("pg_dbhost") == "localhost":
             if self.configuration.get("pg_pass"):
-                opt = '-k postgresql.dbname=%(pg_dbname)s \
+                opt += ' -k postgresql.dbname=%(pg_dbname)s \
 -k postgresql.username=%(pg_user)s \
 -k postgresql.password=%(pg_pass)s'
 
@@ -882,6 +893,19 @@ class LogCollector(object):
                 report_file_ext
             )
         )
+
+        if self.conf["ticket_number"]:
+            self.conf["path"] = os.path.join(
+                tempfile.gettempdir(),
+                "sosreport-%s-%s-%s.tar.%s" % (
+                'LogCollector',
+                self.conf["ticket_number"],
+                time.strftime("%Y%m%d%H%M%S"),
+                report_file_ext
+                )
+            )
+
+
         config = {
             'report': os.path.splitext(self.conf['path'])[0],
             'compressed_report': self.conf['path'],
