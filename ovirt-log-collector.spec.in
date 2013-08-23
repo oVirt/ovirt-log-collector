@@ -26,7 +26,7 @@ License:	ASL 2.0
 URL:		http://www.ovirt.org
 Source:		http://resources.ovirt.org/releases/nightly/src/%{package_name}-%{package_version}.tar.gz
 
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}
+BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:	noarch
 Requires:	python
 Requires:	python-dateutil
@@ -58,9 +58,9 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %doc AUTHORS
 %doc COPYING
 %dir %{_localstatedir}/log/ovirt-engine/%{package_name}
+%dir %{_sysconfdir}/ovirt-engine/logcollector.conf.d
 %config(noreplace) %{_sysconfdir}/ovirt-engine/logcollector.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{package_name}
-%{_sysconfdir}/ovirt-engine/logcollector.conf.d/.keep
 %{python_sitelib}/ovirt_log_collector/*.py*
 %{python_sitelib}/ovirt_log_collector/helper/*.py*
 %{python_sitelib}/sos/plugins/*.py*

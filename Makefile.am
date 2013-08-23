@@ -35,6 +35,7 @@ EXTRA_DIST = \
 	.gitignore \
 	m4/.gitignore \
 	po/.gitignore \
+	README.localization \
 	$(NULL)
 
 SUBDIRS = \

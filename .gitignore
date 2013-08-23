@@ -13,12 +13,11 @@ config.guess
 config.rpath
 config.sub
 ABOUT-NLS
-
 tmp.*
 *.pyc
 *.pyo
 *~
-
+src/logrotate.d/ovirt-log-collector
 src/config.py
 src/config.py.in
 ovirt-log-collector-*.tar.gz

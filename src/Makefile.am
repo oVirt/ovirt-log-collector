@@ -28,6 +28,10 @@ CLEANFILES = \
 	config.py \
 	$(NULL)
 
+EXTRA_DIST = \
+	tests.py \
+	$(NULL)
+
 config.py: \
 	$(top_srcdir)/configure.ac \
 	$(NULL)
@@ -57,9 +61,6 @@ dist_engineconfig_DATA = \
 	$(NULL)
 
 confddir=$(engineconfigdir)/logcollector.conf.d
-dist_confd_DATA = \
-	.keep \
-	$(NULL)
 
 all-local: \
 	python-syntax-check \
@@ -70,6 +71,7 @@ clean-local: \
 	$(NULL)
 
 install-data-hook:
+	$(MKDIR_P) "$(DESTDIR)$(confddir)"
 	$(MKDIR_P) "$(DESTDIR)$(bindir)"
 	$(MKDIR_P) "$(DESTDIR)$(localstatedir)/log/ovirt-engine/$(PACKAGE_NAME)"
 	chmod a+x "$(DESTDIR)$(ovirtlogcollectorlibdir)/__main__.py"
