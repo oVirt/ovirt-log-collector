@@ -885,8 +885,12 @@ class LogCollector(object):
             compressor = 'xz'
         except Exception:
             logging.debug('xz compression not available')
+
+        if not os.path.exists(self.conf["output"]):
+            os.makedirs(self.conf["output"])
+
         self.conf["path"] = os.path.join(
-            tempfile.gettempdir(),
+            self.conf["output"],
             "sosreport-%s-%s.tar.%s" % (
                 'LogCollector',
                 time.strftime("%Y%m%d%H%M%S"),
@@ -896,7 +900,7 @@ class LogCollector(object):
 
         if self.conf["ticket_number"]:
             self.conf["path"] = os.path.join(
-                tempfile.gettempdir(),
+                self.conf["output"],
                 "sosreport-%s-%s-%s.tar.%s" % (
                 'LogCollector',
                 self.conf["ticket_number"],
@@ -1250,8 +1254,10 @@ to continue.
 
     parser.add_option(
         "", "--local-tmp", dest="local_tmp_dir",
-        help="directory to copy reports to locally \
-(default is randomly generated like: %s)" % DEFAULT_SCRATCH_DIR,
+        help="directory to copy reports to locally. "
+             "Please note that the local-tmp directory is used "
+             "only for storing temporary reports gathered from hypervisors."
+             "(default is randomly generated like: %s)" % DEFAULT_SCRATCH_DIR,
         metavar="PATH",
         default=DEFAULT_SCRATCH_DIR
     )
@@ -1301,6 +1307,12 @@ to continue.
     parser.add_option(
         "-v", "--verbose", dest="verbose",
         action="store_true", default=False
+    )
+
+    parser.add_option(
+        "", "--output", dest="output",
+        help="Destination directory where the report will be stored",
+        default=tempfile.gettempdir()
     )
 
     engine_group = OptionGroup(
