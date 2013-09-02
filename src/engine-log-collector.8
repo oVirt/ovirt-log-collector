@@ -56,7 +56,7 @@ Show the help message and exit.\&
 
 .IP "\fB\-\-local\-tmp=PATH\fP"
 
-Local directory where reports are copied (default=/tmp/logcollector).\&
+Local directory where reports are copied (default=/tmp/logcollector). Please note that the directory is used only for storing temporary reports gathered from hypervisors.\&
 
 .IP "\fB\-\-config\-file=PATH\fP"
 
@@ -81,6 +81,10 @@ Path to \fBengine\-log\-collector\fP log file (default=/var/log/engine\-log\-col
 .IP "\fB\-v, \-\-verbose\fP"
 
 Display verbose output.\&
+
+.IP "\fB\-\-output\fP"
+
+Destination directory where the report will be stored.\&
 
 .SH "oVirt Engine CONFIGURATION OPTIONS"
 The options in the oVirt Engine configuration group can be used to filter log collection from one or more hypervisors. If the \-\-no\-hypervisors option is specified, data is not collected from any hypervisor. Wild card globbing (*, ?, []) can be used to match names.\&
