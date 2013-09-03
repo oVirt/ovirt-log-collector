@@ -129,7 +129,7 @@ def _initialize_api(hostname, username, password, ca, insecure):
               username=username,
               password=password,
               ca_file=ca,
-              insecure=insecure)
+              validate_cert_chain=not insecure)
     pi = api.get_product_info()
     if pi is not None:
         vrm = '%s.%s.%s' % (
