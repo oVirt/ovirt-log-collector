@@ -34,6 +34,7 @@ import dateutil.tz as tz
 import tempfile
 import atexit
 import time
+import socket
 
 
 from helper import hypervisors
@@ -1063,6 +1064,37 @@ class LogCollector(object):
                 if h in host_others
             ])
             not_found = host_others - set(host[2] for host in host_filtered)
+            if not_found != set():
+                #try to resolve to ip specified hosts
+                for fqdn in set(not_found):
+                    try:
+                        ipaddr = socket.gethostbyname(fqdn)
+                        logging.debug('%s --> %s' % (fqdn, ipaddr))
+                        for (dc, cl, h) in self.conf['hosts']:
+                            if h == ipaddr:
+                                host_filtered.add((dc, cl, h))
+                                not_found.remove(fqdn)
+                    except socket.error:
+                        logging.warning(
+                            _('Cannot resolve {host}').format(
+                                host=fqdn,
+                            )
+                        )
+            if not_found != set():
+                #try to resolve to ip known hypervisors
+                for (dc, cl, h) in self.conf['hosts']:
+                    try:
+                        ipaddr = socket.gethostbyname(h)
+                        logging.debug('%s --> %s' % (h, ipaddr))
+                        if ipaddr in host_others:
+                            host_filtered.add((dc, cl, h))
+                            not_found.remove(ipaddr)
+                    except socket.error:
+                        logging.warning(
+                            _('Cannot resolve {host}').format(
+                                host=h,
+                            )
+                        )
             if not_found != set():
                 logging.error(
                     _(
