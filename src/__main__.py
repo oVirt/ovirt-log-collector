@@ -41,7 +41,13 @@ from helper import hypervisors
 from ovirt_log_collector import config
 from ovirt_log_collector import util
 
+DEFAULT_SSH_USER = 'root'
+DEFAULT_TIME_SHIFT_FILE = 'time_diff.txt'
+PGPASS_FILE_ADMIN_LINE = "DB ADMIN credentials"
+DEFAULT_SCRATCH_DIR = None  # Will be initialized by __main__
+SSH_SERVER_ALIVE_INTERVAL = 600
 
+#{Logging system
 STREAM_LOG_FORMAT = '%(levelname)s: %(message)s'
 FILE_LOG_FORMAT = (
     '%(asctime)s::'
@@ -60,11 +66,13 @@ DEFAULT_LOG_FILE = os.path.join(
     )
 )
 
-DEFAULT_SSH_USER = 'root'
-DEFAULT_TIME_SHIFT_FILE = 'time_diff.txt'
-PGPASS_FILE_ADMIN_LINE = "DB ADMIN credentials"
-DEFAULT_SCRATCH_DIR = None  # Will be initialized by __main__
-SSH_SERVER_ALIVE_INTERVAL = 600
+
+class NotAnError(logging.Filter):
+
+    def filter(self, entry):
+        return entry.levelno < logging.ERROR
+#}
+
 
 # Default DB connection params
 pg_user = 'postgres'
@@ -274,6 +282,7 @@ class Configuration(dict):
             parser.error(
                 _('Options --quiet and --verbose are mutually exclusive')
             )
+
         if self.options.log_file or self.options.quiet:
             level = logging.INFO
             if self.options.verbose:
@@ -422,10 +431,17 @@ class Configuration(dict):
             logging.error("Could not configure file logging: %s" % e)
 
     def __log_to_stream(self, level):
-        sh = logging.StreamHandler()
         fmt = logging.Formatter(STREAM_LOG_FORMAT)
+        #Errors should always be there, on stderr
+        h_err = logging.StreamHandler(sys.stderr)
+        h_err.setLevel(logging.ERROR)
+        h_err.setFormatter(fmt)
+        logging.root.addHandler(h_err)
+        #Other logs should go to stdout
+        sh = logging.StreamHandler(sys.stdout)
         sh.setLevel(level)
         sh.setFormatter(fmt)
+        sh.addFilter(NotAnError())
         logging.root.addHandler(sh)
 
     def __initLogger(self, logLevel=logging.INFO, quiet=None, logFile=None):
@@ -440,7 +456,7 @@ class Configuration(dict):
         # command line; hence, we will need to load and unload the handlers
         # to ensure consistently fomatted output.
         log = logging.getLogger()
-        for h in log.handlers:
+        for h in list(log.handlers):
             log.removeHandler(h)
 
         if quiet:
@@ -465,7 +481,7 @@ class Configuration(dict):
             else:
                 # Case: Not quiet and no log file supplied.
                 # Log to only stdout/stderr
-                logging.basicConfig(level=logLevel, format=STREAM_LOG_FORMAT)
+                self.__log_to_stream(logLevel)
 
 
 class CollectorBase(object):
@@ -920,10 +936,10 @@ class LogCollector(object):
             self.conf["path"] = os.path.join(
                 self.conf["output"],
                 "sosreport-%s-%s-%s.tar.%s" % (
-                'LogCollector',
-                self.conf["ticket_number"],
-                time.strftime("%Y%m%d%H%M%S"),
-                report_file_ext
+                    'LogCollector',
+                    self.conf["ticket_number"],
+                    time.strftime("%Y%m%d%H%M%S"),
+                    report_file_ext
                 )
             )
 
