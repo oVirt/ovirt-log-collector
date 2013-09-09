@@ -655,7 +655,8 @@ class HyperVisorData(CollectorBase):
         cmd = """%(ssh_cmd)s "
 VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' sos | /bin/sed 's/\.//'`;
 if [ "$VERSION" -ge "22" ]; then
-    /usr/sbin/sosreport {option} --batch -k general.all_logs=True -o %(reports)s
+    /usr/sbin/sosreport {option} --batch -k general.all_logs=True \
+        -o %(reports)s
 elif [ "$VERSION" -ge "17" ]; then
     /usr/sbin/sosreport {option} --no-progressbar -k general.all_logs=True \
         -o %(bc_reports)s
@@ -925,7 +926,6 @@ class LogCollector(object):
                 report_file_ext
                 )
             )
-
 
         config = {
             'report': os.path.splitext(self.conf['path'])[0],
