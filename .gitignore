@@ -23,3 +23,4 @@ tmp.*
 src/config.py.in
 src/logrotate.d/ovirt-log-collector
 ovirt-log-collector-*.tar.gz
+.idea

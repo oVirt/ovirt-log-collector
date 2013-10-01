@@ -152,11 +152,11 @@ def get_all(hostname, username, password, ca, insecure=False):
     try:
         api = _initialize_api(hostname, username, password, ca, insecure)
         if api is not None:
-            for dc in api.datacenters.list():
+            for dc in api.datacenters.list(max=1000):
                 tree.add_datacenter(dc)
-            for cluster in api.clusters.list():
+            for cluster in api.clusters.list(max=1000):
                 tree.add_cluster(cluster)
-            for host in api.hosts.list():
+            for host in api.hosts.list(max=1000):
                 tree.add_host(host)
             result = set(tree.get_sortable())
     except RequestError as re:
