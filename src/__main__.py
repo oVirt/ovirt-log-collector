@@ -46,6 +46,7 @@ DEFAULT_TIME_SHIFT_FILE = 'time_diff.txt'
 PGPASS_FILE_ADMIN_LINE = "DB ADMIN credentials"
 DEFAULT_SCRATCH_DIR = None  # Will be initialized by __main__
 SSH_SERVER_ALIVE_INTERVAL = 600
+MAX_WARN_HOSTS_COUNT = 10
 
 #{Logging system
 STREAM_LOG_FORMAT = '%(levelname)s: %(message)s'
@@ -1173,15 +1174,37 @@ host=%(host_pattern)s):" % self.conf
 
         if hosts:
             if not self.conf.get("quiet"):
-                continue_ = get_from_prompt(
-                    msg="About to collect information from %d hypervisors. \
-Continue? (Y/n): " % len(hosts),
-                    default='y'
-                )
+                # Check if there are more than MAX_WARN_HOSTS_COUNT hosts
+                # to collect from
+                if len(hosts) >= MAX_WARN_HOSTS_COUNT:
+                    logging.warning(
+                        _("{number} hypervisors detected. It might take some "
+                          "time to collect logs from {number} hypervisors. "
+                          "You can use the following filters -c, -d, -H. "
+                          "For more information use -h".format(
+                              number=len(hosts),
+                          ))
+                    )
+                    _continue = \
+                        get_from_prompt(msg="Do you want to proceed(Y/n)",
+                                        default='y')
+                    if _continue not in ('Y', 'y'):
+                        logging.info(
+                            _("Aborting hypervisor collection...")
+                        )
+                        return
+                else:
+                    continue_ = get_from_prompt(
+                        msg="About to collect information from "
+                            "{len} hypervisors. Continue? (Y/n): ".format(
+                                len=len(hosts),
+                            ),
+                        default='y'
+                    )
 
-                if continue_ not in ('y', 'Y'):
-                    logging.info("Aborting hypervisor collection...")
-                    return
+                    if continue_ not in ('y', 'Y'):
+                        logging.info("Aborting hypervisor collection...")
+                        return
 
             logging.info("Gathering information from selected hypervisors...")
 
