@@ -32,6 +32,7 @@ Requires:	python
 Requires:	python-dateutil
 Requires:	python-lxml
 Requires:	ovirt-engine-sdk
+Requires:	ovirt-engine-lib
 Requires:	logrotate
 Requires:	sos
 Requires:	openssh-clients
