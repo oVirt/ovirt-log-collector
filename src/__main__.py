@@ -965,18 +965,24 @@ class LogCollector(object):
 
         msg = ''
         if os.path.exists(self.conf["path"]):
-            archiveSize = '%.1fM' % (
-                float(os.path.getsize(self.conf["path"])) / (1 << 20)
-            )
+            archiveSize = float(os.path.getsize(self.conf["path"])) / (1 << 20)
+
+            size = '%.1fM' % archiveSize
 
             msg = _(
                 'Log files have been collected and placed in {path}.\n'
                 'The MD5 for this file is {checksum} and its size is {size}'
             ).format(
                 path=self.conf["path"],
-                size=archiveSize,
+                size=size,
                 checksum=checksum,
             )
+
+            if archiveSize >= 1000:
+                msg += _(
+                    '\nYou can use the following filters in the next '
+                    'execution -c, -d, -H to reduce the archive size.'
+                )
         return msg
 
     def write_time_diff(self, queue):
