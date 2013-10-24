@@ -45,7 +45,6 @@ ovirtlogcollectorlib_PYTHON = \
 dist_ovirtlogcollectorlib_PYTHON = \
 	__init__.py \
 	__main__.py \
-	util.py \
 	$(NULL)
 
 dist_man_MANS = \

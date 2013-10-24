@@ -37,9 +37,12 @@ import time
 import socket
 
 
+from ovirt_engine import configfile
+
+
 from helper import hypervisors
 from ovirt_log_collector import config
-from ovirt_log_collector import util
+
 
 DEFAULT_SSH_USER = 'root'
 DEFAULT_TIME_SHIFT_FILE = 'time_diff.txt'
@@ -135,7 +138,7 @@ def setup_pg_defaults():
     global pg_dbhost
     global pg_dbport
     global pg_dbname
-    engine_config = util.ConfigFile([
+    engine_config = configfile.ConfigFile([
         config.ENGINE_DEFAULTS,
         config.ENGINE_CONF,
     ])
