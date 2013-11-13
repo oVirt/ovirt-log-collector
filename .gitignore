@@ -22,3 +22,4 @@ src/config.py
 src/config.py.in
 ovirt-log-collector-*.tar.gz
 .idea
+.gitreview
