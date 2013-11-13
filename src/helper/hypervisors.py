@@ -145,6 +145,22 @@ def _initialize_api(hostname, username, password, ca, insecure):
     return api
 
 
+def paginate(entity, oquery=""):
+    """Generator for listing all elements of object avoiding api query limit
+    @param entity: object to paginate using list and query
+    @param oquery: optional query to limit results
+    """
+    page = 0
+    length = 100
+    while length > 0:
+        page += 1
+        query = "%s page %s" % (oquery, page)
+        tanda = entity.list(query=query)
+        length = len(tanda)
+        for elem in tanda:
+            yield elem
+
+
 def get_all(hostname, username, password, ca, insecure=False):
 
     tree = ENGINETree()
@@ -152,11 +168,11 @@ def get_all(hostname, username, password, ca, insecure=False):
     try:
         api = _initialize_api(hostname, username, password, ca, insecure)
         if api is not None:
-            for dc in api.datacenters.list(max=1000):
+            for dc in paginate(api.datacenters):
                 tree.add_datacenter(dc)
-            for cluster in api.clusters.list(max=1000):
+            for cluster in paginate(api.clusters):
                 tree.add_cluster(cluster)
-            for host in api.hosts.list(max=1000):
+            for host in paginate(api.hosts):
                 tree.add_host(host)
             result = set(tree.get_sortable())
     except RequestError as re:
