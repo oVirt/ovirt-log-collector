@@ -356,15 +356,6 @@ class Configuration(dict):
                     'engine',
                     cp.get('LogCollector', 'rhevm')
                 )
-                logging.warning(
-                    _(
-                        'A deprecated configuration key has been found. '
-                        'Please replace the deprecated key, \'rhevm\', '
-                        'with the new one \'engine\' in {configFiles}'
-                    ).format(
-                        configFiles=', '.join(configs)
-                    )
-                )
             cp.remove_option('LogCollector', 'rhevm')
 
         # we want the items from the LogCollector section only
