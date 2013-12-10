@@ -830,12 +830,14 @@ class PostgresData(CollectorBase):
         if self.configuration.get("ticket_number"):
             opt += '--ticket-number=' + self.configuration.get("ticket_number")
 
-        if self.configuration.get("pg_dbhost") == "localhost":
-            if self.configuration.get("pg_pass"):
-                opt += ' -k postgresql.dbname=%(pg_dbname)s \
--k postgresql.username=%(pg_user)s \
--k postgresql.password=%(pg_pass)s'
-
+        if self.configuration.get('pg_pass'):
+            opt = (
+                '-k postgresql.dbname=%(pg_dbname)s '
+                '-k postgresql.dbhost=%(pg_dbhost)s '
+                '-k postgresql.dbport=%(pg_dbport)s '
+                '-k postgresql.username=%(pg_user)s '
+                '-k postgresql.password=%(pg_pass)s '
+            )
             stdout = self.caller.call(
                 '/usr/sbin/sosreport --batch --report -o postgresql '
                 '--tmp-dir=%(local_scratch_dir)s ' + opt
@@ -843,9 +845,7 @@ class PostgresData(CollectorBase):
             self.parse_sosreport_stdout(stdout)
             # Prepend postgresql- to the .md5 file that is produced by SOS
             # so that it is easy to distinguish from the other N reports
-            # that are all related to hypervisors.  Note, that we
-            # only do this in the case of a local PostgreSQL DB because
-            # when the DB is remote the .md5 file is not copied.
+            # that are all related to hypervisors.
             os.rename(
                 "%s.md5" % (self.configuration["path"]),
                 os.path.join(
@@ -853,36 +853,8 @@ class PostgresData(CollectorBase):
                     "postgresql-%s.md5" % self.configuration["filename"]
                 )
             )
-        else:
-            # The PG database is on a remote host
-            opt = '-k postgresql.dbname=%(pg_dbname)s \
--k postgresql.dbhost=%(pg_dbhost)s \
--k postgresql.dbport=%(pg_dbport)s \
--k postgresql.username=%(pg_user)s \
--k postgresql.password=%(pg_pass)s '
-            # REMOVE the following 3 lines when SoS starts shipping psql.py
-            stdout = self.caller.call(
-                '/usr/sbin/sosreport --batch --report -o postgresql '
-                '--tmp-dir=%(local_scratch_dir)s ' + opt
-            )
-            self.parse_sosreport_stdout(stdout)
-            os.rename(
-                "%s.md5" % (self.configuration["path"]),
-                os.path.join(
-                    self.configuration["local_scratch_dir"],
-                    "postgresql-%s.md5" % self.configuration["filename"]
-                )
-            )
-# Uncomment the code below when base SoS gets the psql.py plug-in
-#            cmd = '%(ssh_cmd)s \
-#"/usr/sbin/sosreport --batch --report -o postgresql ' + opt
-#            stdout = self.caller.call(cmd)
-#            self.parse_sosreport_stdout(stdout)
-#            self.caller.call('%(scp_cmd)s:%(path)s %(local_scratch_dir)s')
-#            self.caller.call('%(ssh_cmd)s "rm %(path)s*"')
-
         # Prepend postgresql- to the PostgreSQL SOS report
-        # so that it is easy to distinguished from the other N reports
+        # so that it is easy to distinguish from the other N reports
         # that are all related to hypervisors.
         os.rename(
             os.path.join(
