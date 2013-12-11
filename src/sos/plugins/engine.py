@@ -1,4 +1,5 @@
 import os
+import re
 import signal
 import subprocess
 
@@ -10,12 +11,35 @@ import sos.plugintools
 class engine(sos.plugintools.PluginBase):
     """oVirt related information"""
 
+    DB_PASS_FILES = re.compile(
+        flags=re.VERBOSE,
+        pattern=r"""
+        ^
+        /etc/
+        (rhevm|ovirt-engine)/
+        engine.conf
+        (\.d/.+.conf)?
+        $
+        """
+    )
+
+    DEFAULT_SENSITIVE_KEYS = (
+        'ENGINE_DB_PASSWORD:ENGINE_PKI_TRUST_STORE_PASSWORD:'
+        'ENGINE_PKI_ENGINE_STORE_PASSWORD'
+    )
+
     optionList = [
         (
             'jbosstrace',
             'Enable oVirt Engine JBoss stack trace generation',
             '',
             True
+        ),
+        (
+            'sensitive_keys',
+            'Sensitive keys to be masked',
+            '',
+            DEFAULT_SENSITIVE_KEYS
         ),
     ]
 
@@ -63,6 +87,8 @@ class engine(sos.plugintools.PluginBase):
                 except OSError as e:
                     self.soslog.error('Unable to send signal to %d' % pid, e)
 
+        self.addForbiddenPath('/etc/ovirt-engine/.pgpass')
+        self.addForbiddenPath('/etc/rhevm/.pgpass')
         # Copy engine config files.
         self.addCopySpec("/etc/ovirt-engine")
         self.addCopySpec("/etc/rhevm")
@@ -77,17 +103,34 @@ class engine(sos.plugintools.PluginBase):
 
     def postproc(self):
         """
-        Obfuscate passwords.
+        Obfuscate sensitive keys.
         """
-
         self.doRegexSub(
             "/etc/ovirt-engine/engine-config/engine-config.properties",
             r"Password.type=(.*)",
             r'Password.type=********'
         )
-
         self.doRegexSub(
             "/etc/rhevm/rhevm-config/rhevm-config.properties",
             r"Password.type=(.*)",
             r'Password.type=********'
         )
+
+        if self.getOption('sensitive_keys'):
+            sensitive_keys = self.getOption('sensitive_keys')
+            if self.getOption('sensitive_keys') is True:
+                #Handle --alloptions case which set this to True.
+                sensitive_keys = self.DEFAULT_SENSITIVE_KEYS
+            key_list = [x for x in sensitive_keys.split(':') if x]
+            for filename in self.copiedFiles:
+                if self.DB_PASS_FILES.match(filename['srcpath']):
+                    for key in key_list:
+                        self.doRegexSub(
+                            filename['srcpath'],
+                            r'{key}=(.*)'.format(
+                                key=key,
+                            ),
+                            r'{key}=********'.format(
+                                key=key,
+                            )
+                        )
