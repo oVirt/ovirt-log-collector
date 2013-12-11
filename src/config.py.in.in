@@ -11,6 +11,14 @@ FILE_PG_PASS = "@engineconfigdir_POST@/.pgpass"
 ENGINE_DEFAULTS = "@datadir_POST@/conf/engine.conf.defaults"
 ENGINE_CONF = "@engineconfigdir_POST@/engine.conf"
 
+ENGINE_SERVICE_DEFAULTS = os.path.join(
+    '@datadir_POST@',
+    'ovirt-engine',
+    'services',
+    'ovirt-engine',
+    'ovirt-engine.conf'
+)
+
 DEFAULT_CA_PEM = "@sysconfdir_POST@/pki/ovirt-engine/ca.pem"
 DEFAULT_SSH_KEY = "@sysconfdir_POST@/pki/ovirt-engine/keys/engine_id_rsa"
 DEFAULT_CONFIGURATION_FILE = "@engineconfigdir_POST@/logcollector.conf"

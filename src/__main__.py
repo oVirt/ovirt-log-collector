@@ -768,6 +768,16 @@ fi
 
 class ENGINEData(CollectorBase):
 
+    def prep(self):
+        CollectorBase.prep(self)
+        engine_service_config = configfile.ConfigFile([
+            config.ENGINE_SERVICE_DEFAULTS,
+        ])
+        if engine_service_config.get('SENSITIVE_KEYS'):
+            self.configuration['sensitive_keys'] = engine_service_config.get(
+                'SENSITIVE_KEYS'
+            ).replace(',', ':')
+
     def build_options(self):
         """
         returns the parameters for sosreport execution on the local host
@@ -776,8 +786,15 @@ class ENGINEData(CollectorBase):
         opts = [
             "-k rpm.rpmva=off",
             "-k general.all_logs=True",
-            "-k apache.log=True"
+            "-k apache.log=True",
         ]
+
+        if self.configuration.get('sensitive_keys'):
+            opts.append(
+                '-k engine.sensitive_keys=%s' % self.configuration.get(
+                    'sensitive_keys'
+                )
+            )
 
         if self.configuration.get("ticket_number"):
             opts.append(
