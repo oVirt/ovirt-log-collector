@@ -357,6 +357,14 @@ class Configuration(dict):
                     cp.get('LogCollector', 'rhevm')
                 )
             cp.remove_option('LogCollector', 'rhevm')
+        if cp.has_option('LogCollector', 'engine-ca'):
+            if not cp.has_option('LogCollector', 'cert-file'):
+                cp.set(
+                    'LogCollector',
+                    'cert-file',
+                    cp.get('LogCollector', 'engine-ca')
+                )
+            cp.remove_option('LogCollector', 'engine-ca')
 
         # we want the items from the LogCollector section only
         try:
