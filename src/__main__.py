@@ -569,9 +569,9 @@ class CollectorBase(object):
         def format_ssh_command(self, cmd="ssh"):
             cmd = "/usr/bin/%s " % cmd
 
-            # add a controlling tty
+            # disable reading from stdin
             if cmd.startswith("/usr/bin/ssh"):
-                cmd += "-t "
+                cmd += "-n "
 
             if "ssh_port" in self.configuration:
                 port_flag = "-p" if cmd.startswith("/usr/bin/ssh") else "-P"
