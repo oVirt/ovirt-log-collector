@@ -64,6 +64,13 @@ case "${PYTHON_VERSION}" in
 esac
 
 AX_PYTHON_MODULE([ovirtsdk])
+AX_PYTHON_MODULE([sos], [fatal])
+AC_MSG_CHECKING(sos version)
+    AC_ARG_VAR([SOS_VERSION], [SOS utility version])
+    SOS_VERSION=`$PYTHON -c "import sos; print(sos.__version__)" |cut -c1 2>/dev/null`
+    AC_MSG_RESULT($SOS_VERSION)
+
+AM_CONDITIONAL([SOS2], [test x"${SOS_VERSION}" == x2])
 
 engineconfigdir="\$(sysconfdir)/ovirt-engine"
 ovirtlogcollectorlibdir="\$(pythondir)/ovirt_log_collector"

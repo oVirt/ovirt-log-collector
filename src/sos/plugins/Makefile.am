@@ -21,10 +21,17 @@ MAINTAINERCLEANFILES = \
 	$(srcdir)/Makefile.in \
 	$(NULL)
 
+if SOS2
 dist_sosplugins_PYTHON = \
 	engine.py \
 	postgresql.py \
 	$(NULL)
+else
+dist_noinst_PYTHON = \
+	engine.py \
+	postgresql.py \
+	$(NULL)
+endif
 
 all-local: \
 	python-syntax-check \

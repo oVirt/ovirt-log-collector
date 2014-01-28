@@ -34,10 +34,17 @@ Requires:	python-lxml
 Requires:	ovirt-engine-sdk-python >= 3.4.0.2
 Requires:	ovirt-engine-lib
 Requires:	logrotate
-Requires:	sos
 Requires:	openssh-clients
+
+%if 0%{fedora} >= 20 || 0%{?rhel} >= 7
+Requires:   sos >= 3.1
+%else
+Requires:   sos < 3
+%endif
+
 BuildRequires:	python2-devel
 BuildRequires:	gettext
+BuildRequires:	sos
 
 %description
 Log Collector tool for oVirt Engine
@@ -55,6 +62,7 @@ make %{?_smp_mflags}
 rm -rf "%{buildroot}"
 make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 
+
 %files
 %doc AUTHORS
 %doc COPYING
@@ -62,9 +70,20 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %dir %{_sysconfdir}/ovirt-engine/logcollector.conf.d
 %config(noreplace) %{_sysconfdir}/ovirt-engine/logcollector.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{package_name}
-%{python_sitelib}/ovirt_log_collector/*.py*
-%{python_sitelib}/ovirt_log_collector/helper/*.py*
+%{python_sitelib}/ovirt_log_collector/
+%if 0%{fedora}
+%if 0%{fedora} < 20
 %{python_sitelib}/sos/plugins/*.py*
+%endif
+%endif
+
+%if 0%{?rhel}
+%if 0%{rhel} < 7
+%{python_sitelib}/sos/plugins/*.py*
+%endif
+%endif
+
+
 %{_bindir}/engine-log-collector
 %{_mandir}/man8/*
 
