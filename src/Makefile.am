@@ -37,9 +37,9 @@ config.py: \
 	$(NULL)
 
 SUBDIRS = \
-	sos \
 	helper \
 	logrotate.d \
+	sos \
 	$(NULL)
 
 ovirtlogcollectorlib_PYTHON = \

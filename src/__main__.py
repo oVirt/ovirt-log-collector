@@ -35,7 +35,7 @@ import tempfile
 import atexit
 import time
 import socket
-
+import sos
 
 from ovirt_engine import configfile
 
@@ -677,7 +677,10 @@ class HyperVisorData(CollectorBase):
 
         cmd = """%(ssh_cmd)s "
 VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' sos | /bin/sed 's/\.//'`;
-if [ "$VERSION" -ge "22" ]; then
+if [ "$VERSION" -ge "30" ]; then
+    /usr/sbin/sosreport {option} --batch \
+        -o %(reports)s
+elif [ "$VERSION" -ge "22" ]; then
     /usr/sbin/sosreport {option} --batch -k general.all_logs=True \
         -o %(reports)s
 elif [ "$VERSION" -ge "17" ]; then
@@ -767,9 +770,14 @@ fi
 
 
 class ENGINEData(CollectorBase):
+    def __init__(self, hostname, configuration=None, **kwargs):
+        super(ENGINEData, self).__init__(hostname, configuration)
+        self._engine_plugin = 'engine'
+        if sos.__version__.replace('.', '') >= '30':
+            self._engine_plugin = 'ovirt-engine'
 
     def prep(self):
-        CollectorBase.prep(self)
+        super(ENGINEData, self).prep()
         engine_service_config = configfile.ConfigFile([
             config.ENGINE_SERVICE_DEFAULTS,
         ])
@@ -793,12 +801,10 @@ class ENGINEData(CollectorBase):
         """
         opts = [
             "-k rpm.rpmva=off",
-            "-k general.all_logs=True",
             "-k apache.log=True",
         ]
-
         sensitive_keys = {
-            'engine': 'sensitive_keys',
+            self._engine_plugin: 'sensitive_keys',
             'ovirt_engine_dwh': 'dwh_sensitive_keys',
         }
         for plugin in sensitive_keys:
@@ -818,11 +824,15 @@ class ENGINEData(CollectorBase):
         if self.configuration.get("upload"):
             opts.append("--upload=%s" % self.configuration.get("upload"))
 
+        if sos.__version__.replace('.', '') < '30':
+            opts.append('--report')
+            opts.append("-k general.all_logs=True")
+
         return " ".join(opts)
 
     def sosreport(self):
         self.configuration["reports"] = ",".join((
-            "engine",
+            self._engine_plugin,
             "rpm",
             "libvirt",
             "general",
@@ -841,12 +851,16 @@ class ENGINEData(CollectorBase):
         ))
         self.configuration["sos_options"] = self.build_options()
         self.caller.call(
-            "sosreport --batch --report --build \
+            "sosreport --batch --build \
             --tmp-dir='%(local_tmp_dir)s' -o %(reports)s %(sos_options)s"
         )
 
 
 class PostgresData(CollectorBase):
+
+    def __init__(self, hostname, configuration=None, **kwargs):
+        super(PostgresData, self).__init__(hostname, configuration)
+        self._postgres_plugin = 'postgresql'
 
     def get_key_file(self):
         """
@@ -867,22 +881,29 @@ class PostgresData(CollectorBase):
 
     def sosreport(self):
         opt = ""
-
         if self.configuration.get("ticket_number"):
-            opt += '--ticket-number=' + self.configuration.get("ticket_number")
+            opt += '--ticket-number=%(ticket_number)s '
+
+        if sos.__version__.replace('.', '') < '30':
+            opt += '--report '
 
         if self.configuration.get('pg_pass'):
             opt = (
-                '-k postgresql.dbname=%(pg_dbname)s '
-                '-k postgresql.dbhost=%(pg_dbhost)s '
-                '-k postgresql.dbport=%(pg_dbport)s '
-                '-k postgresql.username=%(pg_user)s '
-                '-k postgresql.password=%(pg_pass)s '
+                '-k {plugin}.dbname=%(pg_dbname)s '
+                '-k {plugin}.dbhost=%(pg_dbhost)s '
+                '-k {plugin}.dbport=%(pg_dbport)s '
+                '-k {plugin}.username=%(pg_user)s '
+                '-k {plugin}.password=%(pg_pass)s '
+            ).format(
+                plugin=self._postgres_plugin,
             )
-            stdout = self.caller.call(
-                '/usr/sbin/sosreport --batch --report -o postgresql '
+            cmdline = (
+                '/usr/sbin/sosreport --batch -o {plugin} '
                 '--tmp-dir=%(local_scratch_dir)s ' + opt
+            ).format(
+                plugin=self._postgres_plugin,
             )
+            stdout = self.caller.call(cmdline)
             self.parse_sosreport_stdout(stdout)
             # Prepend postgresql- to the .md5 file that is produced by SOS
             # so that it is easy to distinguish from the other N reports
