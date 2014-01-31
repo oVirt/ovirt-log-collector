@@ -100,6 +100,7 @@ class engine(sos.plugintools.PluginBase):
         self.addCopySpec("/var/lib/ovirt-engine/setup-history.txt")
         self.addCopySpec("/var/lib/ovirt-engine/setup/answers")
         self.addCopySpec("/var/lib/ovirt-engine/external_truststore")
+        self.addCopySpec("/var/tmp/ovirt-engine/config")
 
     def postproc(self):
         """
@@ -115,6 +116,18 @@ class engine(sos.plugintools.PluginBase):
             r"Password.type=(.*)",
             r'Password.type=********'
         )
+        for filename in (
+            'ovirt-engine.xml',
+            'ovirt-engine_history/current/ovirt-engine.v1.xml',
+            'ovirt-engine_history/ovirt-engine.boot.xml',
+            'ovirt-engine_history/ovirt-engine.initial.xml',
+            'ovirt-engine_history/ovirt-engine.last.xml',
+        ):
+            self.doRegexSub(
+                "/var/tmp/ovirt-engine/config/%s" % filename,
+                r"<password>(.*)</password>",
+                r'<password>********</password>'
+            )
 
         if self.getOption('sensitive_keys'):
             sensitive_keys = self.getOption('sensitive_keys')
