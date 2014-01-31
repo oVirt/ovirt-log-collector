@@ -124,7 +124,9 @@ def _initialize_api(hostname, username, password, ca, insecure):
     """
     Initialize the oVirt RESTful API
     """
-    url = "https://" + hostname + "/api"
+    url = 'https://{hostname}/ovirt-engine/api'.format(
+        hostname=hostname,
+    )
     api = API(url=url,
               username=username,
               password=password,
