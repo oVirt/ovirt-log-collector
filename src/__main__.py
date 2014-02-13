@@ -1289,11 +1289,6 @@ def parse_password(option, opt_str, value, parser):
     setattr(parser.values, option.dest, value)
 
 if __name__ == '__main__':
-    if os.geteuid() != 0:
-        print "This tool requires root permissions to run."
-        sys.exit(ExitCodes.CRITICAL)
-
-    setup_pg_defaults()
 
     DEFAULT_SCRATCH_DIR = tempfile.mkdtemp(prefix='logcollector-')
 
@@ -1305,6 +1300,11 @@ if __name__ == '__main__':
 
     if len(commandline.intersection(cleanup_set)) != 0:
         atexit.register(cleanup)
+    elif os.geteuid() != 0:
+        print ('This tool requires root permissions to run.')
+        sys.exit(ExitCodes.CRITICAL)
+    else:
+        setup_pg_defaults()
 
     def comma_separated_list(option, opt_str, value, parser):
         setattr(
@@ -1579,6 +1579,7 @@ host upon which the PostgreSQL database lives
     parser.add_option_group(engine_group)
     parser.add_option_group(ssh_group)
     parser.add_option_group(db_group)
+    parser.parse_args()
 
     try:
         conf = Configuration(parser)
