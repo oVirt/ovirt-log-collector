@@ -778,6 +778,14 @@ class ENGINEData(CollectorBase):
                 'SENSITIVE_KEYS'
             ).replace(',', ':')
 
+        dwh_service_config = configfile.ConfigFile([
+            config.ENGINE_DWH_SERVICE_DEFAULTS,
+        ])
+        if dwh_service_config.get('SENSITIVE_KEYS'):
+            self.configuration['dwh_sensitive_keys'] = dwh_service_config.get(
+                'SENSITIVE_KEYS'
+            ).replace(',', ':')
+
     def build_options(self):
         """
         returns the parameters for sosreport execution on the local host
@@ -789,12 +797,18 @@ class ENGINEData(CollectorBase):
             "-k apache.log=True",
         ]
 
-        if self.configuration.get('sensitive_keys'):
-            opts.append(
-                '-k engine.sensitive_keys=%s' % self.configuration.get(
-                    'sensitive_keys'
+        sensitive_keys = {
+            'engine': 'sensitive_keys',
+            'ovirt_engine_dwh': 'dwh_sensitive_keys',
+        }
+        for plugin in sensitive_keys:
+            if self.configuration.get(sensitive_keys[plugin]):
+                opts.append(
+                    '-k {plugin}.sensitive_keys={keys}'.format(
+                        plugin=plugin,
+                        keys=self.configuration.get(sensitive_keys[plugin]),
+                    )
                 )
-            )
 
         if self.configuration.get("ticket_number"):
             opts.append(
@@ -822,6 +836,7 @@ class ENGINEData(CollectorBase):
             "kernel",
             "apache",
             "memory",
+            "ovirt_engine_dwh",
             "ovirt_engine_reports",
         ))
         self.configuration["sos_options"] = self.build_options()

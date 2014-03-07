@@ -23,6 +23,7 @@ MAINTAINERCLEANFILES = \
 
 dist_sosplugins_PYTHON = \
 	engine.py \
+	ovirt_engine_dwh.py \
 	ovirt_engine_reports.py \
 	postgresql.py \
 	$(NULL)
