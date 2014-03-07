@@ -19,6 +19,14 @@ ENGINE_SERVICE_DEFAULTS = os.path.join(
     'ovirt-engine.conf'
 )
 
+ENGINE_DWH_SERVICE_DEFAULTS = os.path.join(
+    '@datadir_POST@',
+    'ovirt-engine-dwh',
+    'services',
+    'ovirt-engine-dwhd',
+    'ovirt-engine-dwhd.conf'
+)
+
 DEFAULT_CA_PEM = "@sysconfdir_POST@/pki/ovirt-engine/ca.pem"
 DEFAULT_SSH_KEY = "@sysconfdir_POST@/pki/ovirt-engine/keys/engine_id_rsa"
 DEFAULT_CONFIGURATION_FILE = "@engineconfigdir_POST@/logcollector.conf"
