@@ -834,6 +834,7 @@ class ENGINEData(CollectorBase):
             "kernel",
             "apache",
             "memory",
+            "ovirt_engine_reports",
         ))
         self.configuration["sos_options"] = self.build_options()
         self.caller.call(
