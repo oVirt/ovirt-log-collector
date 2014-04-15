@@ -51,7 +51,7 @@ DEFAULT_SCRATCH_DIR = None  # Will be initialized by __main__
 SSH_SERVER_ALIVE_INTERVAL = 600
 MAX_WARN_HOSTS_COUNT = 10
 
-#{Logging system
+# {Logging system
 STREAM_LOG_FORMAT = '%(levelname)s: %(message)s'
 FILE_LOG_FORMAT = (
     '%(asctime)s::'
@@ -75,7 +75,7 @@ class NotAnError(logging.Filter):
 
     def filter(self, entry):
         return entry.levelno < logging.ERROR
-#}
+# }
 
 
 # Default DB connection params
@@ -348,7 +348,7 @@ class Configuration(dict):
         cp = ConfigParser.ConfigParser()
         cp.read(configs)
 
-        #backward compatibility with existing setup
+        # backward compatibility with existing setup
         if cp.has_option('LogCollector', 'rhevm'):
             if not cp.has_option('LogCollector', 'engine'):
                 cp.set(
@@ -395,7 +395,7 @@ class Configuration(dict):
     # This doesn't ask for CTRL+C to abort because KeyboardInterrupts don't
     # seem to behave the same way every time. Take a look at the link:
     # "http://stackoverflow.com/questions/4606942/\
-    #why-cant-i-handle-a-keyboardinterrupt-in-python"
+    # why-cant-i-handle-a-keyboardinterrupt-in-python"
     def _prompt(self, prompt_function, key, msg=None):
         value = get_from_prompt(
             msg="Please provide the %s (CTRL+D to skip): " % msg,
@@ -435,12 +435,12 @@ class Configuration(dict):
 
     def __log_to_stream(self, level):
         fmt = logging.Formatter(STREAM_LOG_FORMAT)
-        #Errors should always be there, on stderr
+        # Errors should always be there, on stderr
         h_err = logging.StreamHandler(sys.stderr)
         h_err.setLevel(logging.ERROR)
         h_err.setFormatter(fmt)
         logging.root.addHandler(h_err)
-        #Other logs should go to stdout
+        # Other logs should go to stdout
         sh = logging.StreamHandler(sys.stdout)
         sh.setLevel(level)
         sh.setFormatter(fmt)
@@ -1111,7 +1111,7 @@ class LogCollector(object):
             self.conf['host_pattern'] = host_patterns
 
         self.conf['hosts'] = self._get_hypervisors_from_api()
-        #Filter all host specified with -H
+        # Filter all host specified with -H
         host_filtered = set()
         if host_others:
             host_filtered = set([
@@ -1120,7 +1120,7 @@ class LogCollector(object):
             ])
             not_found = host_others - set(host[2] for host in host_filtered)
             if not_found != set():
-                #try to resolve to ip specified hosts
+                # try to resolve to ip specified hosts
                 for fqdn in set(not_found):
                     try:
                         ipaddr = socket.gethostbyname(fqdn)
@@ -1136,7 +1136,7 @@ class LogCollector(object):
                             )
                         )
             if not_found != set():
-                #try to resolve to ip known hypervisors
+                # try to resolve to ip known hypervisors
                 for (dc, cl, h) in self.conf['hosts']:
                     try:
                         ipaddr = socket.gethostbyname(h)
@@ -1168,7 +1168,7 @@ class LogCollector(object):
         if host_patterns or host_others:
             self.conf['hosts'] &= host_filtered
 
-        #Intersect with hosts belonging to the data centers specified with -d
+        # Intersect with hosts belonging to the data centers specified with -d
         if datacenter_patterns:
             datacenter_filtered = set()
             for pattern in datacenter_patterns:
@@ -1177,9 +1177,9 @@ class LogCollector(object):
                 )
             self.conf['hosts'] &= datacenter_filtered
 
-        #Intersect with hosts belonging to the clusters specified with -c
+        # Intersect with hosts belonging to the clusters specified with -c
         if cluster_patterns:
-            #remove all hosts that don't match the patterns
+            # remove all hosts that don't match the patterns
             cluster_filtered = set()
             for pattern in cluster_patterns:
                 cluster_filtered |= self._filter_hosts('cluster', pattern)
@@ -1687,7 +1687,7 @@ data will be listed.")
         logging.debug("Configuration:")
         try:
             logging.debug("command: %s" % conf.command)
-            #multilog(logging.debug, pprint.pformat(conf))
+            # multilog(logging.debug, pprint.pformat(conf))
         except:
             pass
         multilog(logging.debug, traceback.format_exc())
