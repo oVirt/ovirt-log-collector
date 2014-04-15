@@ -132,7 +132,7 @@ class engine(sos.plugintools.PluginBase):
         if self.getOption('sensitive_keys'):
             sensitive_keys = self.getOption('sensitive_keys')
             if self.getOption('sensitive_keys') is True:
-                #Handle --alloptions case which set this to True.
+                # Handle --alloptions case which set this to True.
                 sensitive_keys = self.DEFAULT_SENSITIVE_KEYS
             key_list = [x for x in sensitive_keys.split(':') if x]
             for filename in self.copiedFiles:
