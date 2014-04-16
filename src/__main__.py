@@ -678,8 +678,8 @@ class HyperVisorData(CollectorBase):
         cmd = """%(ssh_cmd)s "
 VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' sos | /bin/sed 's/\.//'`;
 if [ "$VERSION" -ge "30" ]; then
-    /usr/sbin/sosreport {option} --batch \
-        -o %(reports)s
+    /usr/sbin/sosreport {option} --batch -k logs.all_logs=True \
+        -o logs,%(reports)s
 elif [ "$VERSION" -ge "22" ]; then
     /usr/sbin/sosreport {option} --batch -k general.all_logs=True \
         -o %(reports)s
@@ -827,6 +827,8 @@ class ENGINEData(CollectorBase):
         if sos.__version__.replace('.', '') < '30':
             opts.append('--report')
             opts.append("-k general.all_logs=True")
+        else:
+            opts.append("-k logs.all_logs=True")
 
         return " ".join(opts)
 
@@ -849,6 +851,8 @@ class ENGINEData(CollectorBase):
             "ovirt_engine_dwh",
             "ovirt_engine_reports",
         ))
+        if sos.__version__.replace('.', '') > '30':
+            self.configuration['reports'] += ',logs'
         self.configuration["sos_options"] = self.build_options()
         self.caller.call(
             "sosreport --batch --build \
