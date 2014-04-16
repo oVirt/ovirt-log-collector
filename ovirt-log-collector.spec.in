@@ -31,7 +31,7 @@ BuildArch:	noarch
 Requires:	python
 Requires:	python-dateutil
 Requires:	python-lxml
-Requires:	ovirt-engine-sdk-python >= 3.4.0.4
+Requires:	ovirt-engine-sdk-python >= 3.4.0.7
 Requires:	ovirt-engine-lib
 Requires:	logrotate
 Requires:	sos
