@@ -36,7 +36,7 @@ Requires:	ovirt-engine-lib
 Requires:	logrotate
 Requires:	openssh-clients
 
-%if 0%{?fedora} >= 20 || 0%{?rhel} >= 7
+%if 0%{?fedora} >= 19 || 0%{?rhel} >= 7
 Requires:   sos >= 3.1
 %else
 Requires:   sos < 3
@@ -44,7 +44,14 @@ Requires:   sos < 3
 
 BuildRequires:	python2-devel
 BuildRequires:	gettext
-BuildRequires:	sos
+
+%if 0%{?fedora} >= 19 || 0%{?rhel} >= 7
+BuildRequires:   sos >= 3
+%else
+BuildRequires:   sos < 3
+%endif
+
+
 
 %description
 Log Collector tool for oVirt Engine
@@ -72,7 +79,7 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{package_name}
 %{python_sitelib}/ovirt_log_collector/
 %if 0%{?fedora}
-%if 0%{?fedora} < 20
+%if 0%{?fedora} < 19
 %{python_sitelib}/sos/plugins/*.py*
 %endif
 %endif
