@@ -1338,7 +1338,7 @@ if __name__ == '__main__':
     if len(commandline.intersection(cleanup_set)) != 0:
         atexit.register(cleanup)
     elif os.geteuid() != 0:
-        print ('This tool requires root permissions to run.')
+        print('This tool requires root permissions to run.')
         sys.exit(ExitCodes.CRITICAL)
     else:
         setup_pg_defaults()
