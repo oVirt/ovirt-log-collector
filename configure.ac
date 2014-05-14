@@ -64,11 +64,20 @@ case "${PYTHON_VERSION}" in
 esac
 
 AX_PYTHON_MODULE([ovirtsdk])
-AX_PYTHON_MODULE([sos], [fatal])
-AC_MSG_CHECKING(sos version)
-    AC_ARG_VAR([SOS_VERSION], [SOS utility version])
-    SOS_VERSION=`$PYTHON -c "import sos; print(sos.__version__)" |cut -c1 2>/dev/null`
-    AC_MSG_RESULT($SOS_VERSION)
+
+
+AC_ARG_WITH(
+    [sos-version],
+    [AS_HELP_STRING([--with-sos-version], [sos version to use])],
+    [SOS_VERSION="${withval}"],
+    [
+        AX_PYTHON_MODULE([sos], [fatal])
+        SOS_VERSION="$(${PYTHON} -c "import sos; print(sos.__version__.split('.', 2)[[0]])"  2>/dev/null)"
+    ]
+)
+
+AC_MSG_CHECKING([sos version])
+AC_MSG_RESULT([${SOS_VERSION}])
 
 AM_CONDITIONAL([SOS2], [test x"${SOS_VERSION}" == x2])
 
