@@ -153,11 +153,14 @@ def paginate(entity, oquery=""):
     @param oquery: optional query to limit results
     """
     page = 0
-    length = 100
+    page_size = 100
+    length = page_size
     while length > 0:
         page += 1
         query = "%s page %s" % (oquery, page)
-        tanda = entity.list(query=query)
+        # after BZ1025320 default is provide all results
+        # this limits results on each iteration to page_size
+        tanda = entity.list(query=query, max=page_size)
         length = len(tanda)
         for elem in tanda:
             yield elem
