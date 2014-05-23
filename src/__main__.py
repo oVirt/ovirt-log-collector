@@ -1662,17 +1662,28 @@ are not collected again.
 The directory is: %s'""" % (conf["local_scratch_dir"]))
 
         if conf.command == "collect":
+            hosts_present = None
+            e = None
+            try:
+                if not conf.get("no_hypervisor"):
+                    hosts_present = collector.set_hosts()
+            except Exception as e:
+                pass
             collector.get_engine_data()
             collector.get_postgres_data()
-            if not conf.get("no_hypervisor"):
-                if collector.set_hosts():
-                    collector.get_hypervisor_data()
+            if hosts_present:
+                collector.get_hypervisor_data()
+            else:
+                if conf.get("no_hypervisor"):
+                    logging.info("Skipping hypervisor collection...")
+                elif e:
+                    logging.info("Hypervisor data will not be collected, Error"
+                                 " while selecting hypervisors\nReason:"
+                                 " %s" % str(e))
                 else:
                     logging.info(
-                        "No hypervisors were selected, therefore no \
-hypervisor data will be collected.")
-            else:
-                logging.info("Skipping hypervisor collection...")
+                        "No hypervisors were selected, therefore no "
+                        "hypervisor data will be collected.")
             stdout = collector.archive()
             logging.info(stdout)
         elif conf.command == "list":
