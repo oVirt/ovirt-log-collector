@@ -892,7 +892,7 @@ class PostgresData(CollectorBase):
             opt += '--report '
 
         if self.configuration.get('pg_pass'):
-            opt = (
+            opt += (
                 '-k {plugin}.dbname=%(pg_dbname)s '
                 '-k {plugin}.dbhost=%(pg_dbhost)s '
                 '-k {plugin}.dbport=%(pg_dbport)s '
