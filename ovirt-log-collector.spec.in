@@ -37,7 +37,7 @@ Requires:	logrotate
 Requires:	openssh-clients
 
 %if 0%{?fedora} >= 19 || 0%{?rhel} >= 7
-Requires:	sos >= 3.1
+Requires:	sos >= 3.1-1.1
 %else
 Requires:	sos < 3
 %endif

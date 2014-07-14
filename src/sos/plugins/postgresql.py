@@ -1,3 +1,22 @@
+# Copyright (C) 2014 Red Hat, Inc., Sandro Bonazzola <sbonazzo@redhat.com>
+# Copyright (C) 2013 Chris J Arges <chris.j.arges@canonical.com>
+# Copyright (C) 2012-2013 Red Hat, Inc., Bryn M. Reeves <bmr@redhat.com>
+# Copyright (C) 2011 Red Hat, Inc., Jesse Jaggars <jjaggars@redhat.com>
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
 import fnmatch
 import os
 import sos.plugintools
@@ -25,36 +44,16 @@ def find(file_pattern, top_dir, max_depth=None, path_pattern=None):
             yield os.path.join(path, name)
 
 
-# Class name must be the same as file name and method names must not change
 class postgresql(sos.plugintools.PluginBase):
     """PostgreSQL related information"""
-    __pghome = '/var/lib/pgsql'
-    __username = 'postgres'
-    __dbport = 5432
 
     optionList = [
-        (
-            'pghome',
-            'PostgreSQL server home directory (default=/var/lib/pgsql)',
-            '',
-            False
-        ),
-        ('username', 'username for pg_dump (default=postgres)', '', False),
-        ('password', 'password for pg_dump (default=None)', '', False),
-        (
-            'dbname',
-            'database name to dump for pg_dump (default=None)',
-            '',
-            False
-        ),
-        (
-            'dbhost',
-            'hostname/IP of the server upon which the DB is running \
-(default=localhost)',
-            '',
-            False
-        ),
-        ('dbport', 'database server port number (default=5432)', '', False)
+        ('pghome', 'PostgreSQL server home directory.', '', '/var/lib/pgsql'),
+        ('username', 'username for pg_dump', '', 'postgres'),
+        ('password', 'password for pg_dump', '', ''),
+        ('dbname', 'database name to dump for pg_dump', '', ''),
+        ('dbhost', 'database hostname/IP (do not use unix socket)', '', ''),
+        ('dbport', 'database server port number', '', '5432')
     ]
 
     def __init__(self, pluginname, commons):
@@ -64,25 +63,21 @@ class postgresql(sos.plugintools.PluginBase):
     def pg_dump(self):
         dest_file = os.path.join(self.tmp_dir, "sos_pgdump.tar")
         old_env_pgpassword = os.environ.get("PGPASSWORD")
-        os.environ["PGPASSWORD"] = "%s" % (self.getOption("password"))
-        if (
-            self.getOption("dbhost") and
-            self.getOption("dbhost") is not True
-        ):
+        os.environ["PGPASSWORD"] = self.getOption("password")
+        if self.getOption("dbhost"):
             cmd = "pg_dump -U %s -h %s -p %s -w -f %s -F t %s" % (
-                self.__username,
+                self.getOption("username"),
                 self.getOption("dbhost"),
-                self.__dbport,
+                self.getOption("dbport"),
                 dest_file,
                 self.getOption("dbname")
             )
         else:
             cmd = "pg_dump -C -U %s -w -f %s -F t %s " % (
-                self.__username,
+                self.getOption("username"),
                 dest_file,
                 self.getOption("dbname")
             )
-        self.soslog.debug("calling %s" % cmd)
         (status, output, rtime) = self.callExtProg(cmd)
         if old_env_pgpassword is not None:
             os.environ["PGPASSWORD"] = str(old_env_pgpassword)
@@ -97,31 +92,8 @@ class postgresql(sos.plugintools.PluginBase):
             )
 
     def setup(self):
-        if (
-            self.getOption("pghome") and
-            self.getOption("pghome") is not True
-        ):
-            self.__pghome = self.getOption("pghome")
-        self.soslog.debug("using pghome=%s" % self.__pghome)
-
-        if (
-            self.getOption("dbname") and
-            self.getOption("dbname") is not True
-        ):
-            if (
-                self.getOption("password") and
-                self.getOption("password") is not True
-            ):
-                if (
-                    self.getOption("username") and
-                    self.getOption("username") is not True
-                ):
-                    self.__username = self.getOption("username")
-                if (
-                    self.getOption("dbport") and
-                    self.getOption("dbport") is not True
-                ):
-                    self.__dbport = self.getOption("dbport")
+        if self.getOption("dbname"):
+            if self.getOption("password"):
                 self.tmp_dir = tempfile.mkdtemp()
                 self.pg_dump()
             else:
@@ -140,23 +112,37 @@ class postgresql(sos.plugintools.PluginBase):
             )
 
         # Copy PostgreSQL log files.
-        for filename in find("*.log", self.__pghome):
+        for filename in find("*.log", self.get_option("pghome")):
             self.addCopySpec(filename)
         # Copy PostgreSQL config files.
-        for filename in find("*.conf", self.__pghome):
+        for filename in find("*.conf", self.get_option("pghome")):
             self.addCopySpec(filename)
 
-        self.addCopySpec(os.path.join(self.__pghome, "data", "PG_VERSION"))
         self.addCopySpec(
-            os.path.join(self.__pghome, "data", "postmaster.opts")
+            os.path.join(
+                self.getOption("pghome"),
+                "data",
+                "PG_VERSION"
+            )
+        )
+        self.addCopySpec(
+            os.path.join(
+                self.getOption("pghome"),
+                "data",
+                "postmaster.opts"
+            )
         )
 
     def postproc(self):
         import shutil
-        try:
-            shutil.rmtree(self.tmp_dir)
-        except shutil.Error:
-            self.soslog.exception(
-                "Unable to remove %s." % (self.tmp_dir)
-            )
-            self.addAlert("ERROR: Unable to remove %s." % (self.tmp_dir))
+        if self.tmp_dir:
+            try:
+                shutil.rmtree(self.tmp_dir)
+            except shutil.Error:
+                self.soslog.exception(
+                    "Unable to remove %s." % (self.tmp_dir)
+                )
+                self.addAlert("ERROR: Unable to remove %s." % (self.tmp_dir))
+
+
+# vim: et ts=4 sw=4
