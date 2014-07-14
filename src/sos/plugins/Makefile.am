@@ -23,16 +23,12 @@ MAINTAINERCLEANFILES = \
 
 if SOS2
 dist_sosplugins_PYTHON = \
-	engine.py \
-	ovirt_engine_dwh.py \
-	ovirt_engine_reports.py \
+	ovirt.py \
 	postgresql.py \
 	$(NULL)
 else
 dist_noinst_PYTHON = \
-	engine.py \
-	ovirt_engine_dwh.py \
-	ovirt_engine_reports.py \
+	ovirt.py \
 	postgresql.py \
 	$(NULL)
 endif
