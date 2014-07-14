@@ -772,9 +772,17 @@ fi
 class ENGINEData(CollectorBase):
     def __init__(self, hostname, configuration=None, **kwargs):
         super(ENGINEData, self).__init__(hostname, configuration)
-        self._engine_plugin = 'engine'
-        if sos.__version__.replace('.', '') >= '30':
+        self._plugins = self.caller.call('sosreport --list-plugins')
+        if 'ovirt.sensitive_keys' in self._plugins:
+            self._engine_plugin = 'ovirt'
+        elif 'ovirt-engine.sensitive_keys' in self._plugins:
             self._engine_plugin = 'ovirt-engine'
+        elif 'engine.sensitive_keys' in self._plugins:
+            self._engine_plugin = 'engine'
+        else:
+            logging.error('ovirt plugin not found, falling back on default')
+            self._engine_plugin = 'ovirt'
+        self.dwh_prep()
 
     def prep(self):
         super(ENGINEData, self).prep()
@@ -786,13 +794,21 @@ class ENGINEData(CollectorBase):
                 'SENSITIVE_KEYS'
             ).replace(',', ':')
 
+    def dwh_prep(self):
         dwh_service_config = configfile.ConfigFile([
             config.ENGINE_DWH_SERVICE_DEFAULTS,
         ])
         if dwh_service_config.get('SENSITIVE_KEYS'):
-            self.configuration['dwh_sensitive_keys'] = dwh_service_config.get(
+            dwh_sensitive_keys = dwh_service_config.get(
                 'SENSITIVE_KEYS'
             ).replace(',', ':')
+            if 'ovirt_engine_dwh.sensitive_keys' in self._plugins:
+                self.configuration['dwh_sensitive_keys'] = dwh_sensitive_keys
+            else:
+                if self.configuration['sensitive_keys']:
+                    self.configuration['sensitive_keys'] += dwh_sensitive_keys
+                else:
+                    self.configuration['sensitive_keys'] = dwh_sensitive_keys
 
     def build_options(self):
         """
@@ -807,6 +823,7 @@ class ENGINEData(CollectorBase):
             self._engine_plugin: 'sensitive_keys',
             'ovirt_engine_dwh': 'dwh_sensitive_keys',
         }
+
         for plugin in sensitive_keys:
             if self.configuration.get(sensitive_keys[plugin]):
                 opts.append(
@@ -848,11 +865,14 @@ class ENGINEData(CollectorBase):
             "kernel",
             "apache",
             "memory",
-            "ovirt_engine_dwh",
-            "ovirt_engine_reports",
         ))
-        if sos.__version__.replace('.', '') > '30':
+        if 'logs.all_logs' in self._plugins:
             self.configuration['reports'] += ',logs'
+        if 'ovirt_engine_dwh.sensitive_keys' in self._plugins:
+            self.configuration['reports'] += ',ovirt_engine_dwh'
+        if 'ovirt_engine_reports' in self._plugins:
+            self.configuration['reports'] += ',ovirt_engine_reports'
+
         self.configuration["sos_options"] = self.build_options()
         self.caller.call(
             "sosreport --batch --build \
