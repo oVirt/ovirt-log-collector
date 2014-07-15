@@ -1433,7 +1433,13 @@ to continue.
     parser.add_option(
         "", "--log-file",
         dest="log_file",
-        help="path to log file (default=%s)" % DEFAULT_LOG_FILE,
+        help="path to log file (default=%s)" %
+            os.path.join(
+                config.DEFAULT_LOG_DIR,
+                '{prefix}-<TIMESTAMP>.log'.format(
+                    prefix=config.LOG_PREFIX,
+                )
+            ),
         metavar="PATH",
         default=DEFAULT_LOG_FILE
     )
