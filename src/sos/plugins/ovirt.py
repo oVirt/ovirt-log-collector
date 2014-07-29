@@ -72,7 +72,7 @@ class ovirt(sos.plugintools.PluginBase):
         if self.getOption('jbosstrace'):
             engine_pattern = "^ovirt-engine\ -server.*jboss-modules.jar"
             pgrep = "pgrep -f '%s'" % engine_pattern
-            lines = self.callExtProg(pgrep)['output'].splitlines()
+            lines = self.callExtProg(pgrep)[1].splitlines()
             engine_pids = [int(x) for x in lines]
             if not engine_pids:
                 self.soslog.error('Unable to get ovirt-engine pid')
