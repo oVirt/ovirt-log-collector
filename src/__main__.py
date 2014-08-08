@@ -36,6 +36,8 @@ import atexit
 import time
 import socket
 import sos
+import stat
+
 
 from ovirt_engine import configfile
 
@@ -1010,6 +1012,7 @@ class LogCollector(object):
         caller.call("tar -cf '%(report)s' -C '%(directory)s' .")
         shutil.rmtree(self.conf["local_tmp_dir"])
         caller.call("%(compressor)s -1 '%(report)s'")
+        os.chmod(self.conf["path"], stat.S_IRUSR | stat.S_IWUSR)
         md5_out = caller.call("md5sum '%(compressed_report)s'")
         checksum = md5_out.split()[0]
         with open("%s.md5" % self.conf["path"], 'w') as checksum_file:
