@@ -32,6 +32,7 @@ import datetime
 import dateutil.parser
 import dateutil.tz as tz
 import tempfile
+import textwrap
 import atexit
 import time
 import socket
@@ -1368,6 +1369,22 @@ if __name__ == '__main__':
         print('This tool requires root permissions to run.')
         sys.exit(ExitCodes.CRITICAL)
     else:
+        for line in (
+            _(
+                'This command will collect system configuration and '
+                'diagnostic information from this system.'
+            ),
+            _(
+                'The generated archive may contain data considered sensitive '
+                'and its content should be reviewed by the originating '
+                'organization before being passed to any third party.'
+            ),
+            _(
+                'No changes will be made to system configuration.\n'
+            ),
+        ):
+            print('\n'.join(textwrap.wrap(line)))
+
         setup_pg_defaults()
 
     def comma_separated_list(option, opt_str, value, parser):
