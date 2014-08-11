@@ -61,7 +61,11 @@ class ovirt(sos.plugintools.PluginBase):
         self.packages = (
             'ovirt-engine',
             'ovirt-engine-dwh',
-            'ovirt-engine-reports'
+            'ovirt-engine-reports',
+            'ovirt-scheduler-proxy',
+            'rhevm',
+            'rhevm-dwh',
+            'rhevm-reports'
         )
 
     def setup(self):
