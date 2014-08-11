@@ -112,10 +112,10 @@ class postgresql(sos.plugintools.PluginBase):
             )
 
         # Copy PostgreSQL log files.
-        for filename in find("*.log", self.get_option("pghome")):
+        for filename in find("*.log", self.getOption("pghome")):
             self.addCopySpec(filename)
         # Copy PostgreSQL config files.
-        for filename in find("*.conf", self.get_option("pghome")):
+        for filename in find("*.conf", self.getOption("pghome")):
             self.addCopySpec(filename)
 
         self.addCopySpec(
