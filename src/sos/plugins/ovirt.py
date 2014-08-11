@@ -105,6 +105,14 @@ class ovirt(sos.plugintools.PluginBase):
             "/var/tmp/ovirt-engine/config"
         ])
 
+    def do_path_regex_sub(self, pathexp, regexp, subst):
+        if not hasattr(pathexp, "match"):
+            pathexp = re.compile(pathexp)
+        match = pathexp.match
+        file_list = [f for f in self.copiedFiles if match(f['srcpath'])]
+        for fileobj in file_list:
+            self.doRegexSub(fileobj['srcpath'], regexp, subst)
+
     def postproc(self):
         """
         Obfuscate sensitive keys.
@@ -147,12 +155,12 @@ class ovirt(sos.plugintools.PluginBase):
         ]
         for conf_file in passwd_files:
             conf_path = os.path.join("/etc/ovirt-engine", conf_file)
-            self.do_file_sub(
+            self.doRegexSub(
                 conf_path,
                 r"passwd=(.*)",
                 r"passwd=********"
             )
-            self.do_file_sub(
+            self.doRegexSub(
                 conf_path,
                 r"pg-pass=(.*)",
                 r"pg-pass=********"
@@ -160,7 +168,7 @@ class ovirt(sos.plugintools.PluginBase):
 
         sensitive_keys = self.DEFAULT_SENSITIVE_KEYS
         # Handle --alloptions case which set this to True.
-        keys_opt = self.get_option('sensitive_keys')
+        keys_opt = self.getOption('sensitive_keys')
         if keys_opt and keys_opt is not True:
             sensitive_keys = keys_opt
         key_list = [x for x in sensitive_keys.split(':') if x]
