@@ -89,7 +89,7 @@ class ovirt(sos.plugintools.PluginBase):
         # Copy engine config files.
         self.addCopySpecs([
             "/etc/ovirt-engine",
-            "/etc/rhevm",
+            "/etc/rhevm/*",
             "/etc/ovirt-engine-dwh",
             "/var/log/ovirt-engine",
             "/var/log/ovirt-engine-dwh",
