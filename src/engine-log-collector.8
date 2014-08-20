@@ -86,6 +86,13 @@ Display verbose output.\&
 
 Destination directory where the report will be stored.\&
 
+.IP "\fB\-\-include\-sensitive\-data\fP"
+
+Avoid to obfuscate sensitive data like passwords, etc.
+The generated archive will contain data considered sensitive
+and its content should be reviewed by the originating
+organization before being passed to any third party.
+
 .SH "oVirt Engine CONFIGURATION OPTIONS"
 The options in the oVirt Engine configuration group can be used to filter log collection from one or more hypervisors. If the \-\-no\-hypervisors option is specified, data is not collected from any hypervisor. Wild card globbing (*, ?, []) can be used to match names.\&
 
