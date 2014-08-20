@@ -89,8 +89,9 @@ class ovirt(sos.plugintools.PluginBase):
         # Copy engine config files.
         self.addCopySpecs([
             "/etc/ovirt-engine",
-            "/etc/rhevm/*",
+            "/etc/rhevm/",
             "/etc/ovirt-engine-dwh",
+            "/etc/ovirt-engine-reports",
             "/var/log/ovirt-engine",
             "/var/log/ovirt-engine-dwh",
             "/var/log/ovirt-engine-reports",
@@ -102,7 +103,9 @@ class ovirt(sos.plugintools.PluginBase):
             "/var/lib/ovirt-engine/setup-history.txt",
             "/var/lib/ovirt-engine/setup/answers",
             "/var/lib/ovirt-engine/external_truststore",
-            "/var/tmp/ovirt-engine/config"
+            "/var/tmp/ovirt-engine/config",
+            "/var/lib/ovirt-engine/jboss_runtime/config",
+            "/var/lib/ovirt-engine-reports/jboss_runtime/config"
         ])
 
     def do_path_regex_sub(self, pathexp, regexp, subst):
