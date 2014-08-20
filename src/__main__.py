@@ -31,6 +31,7 @@ import getpass
 import datetime
 import dateutil.parser
 import dateutil.tz as tz
+import errno
 import tempfile
 import textwrap
 import atexit
@@ -102,11 +103,12 @@ def get_pg_var(dbconf_param, user=None):
             "Error: unknown value type '%s' was requested" % dbconf_param
         )
     inDbAdminSection = False
-    if (os.path.exists(config.FILE_PG_PASS)):
-        logging.debug(
-            "Found existing pgpass file, fetching DB %s value" % dbconf_param
-        )
+    try:
         with open(config.FILE_PG_PASS) as pgPassFile:
+            logging.debug(
+                "Found existing pgpass file, fetching DB"
+                "%s value" % dbconf_param
+            )
             for line in pgPassFile:
 
                 # find the line with "DB ADMIN"
@@ -126,8 +128,15 @@ def get_pg_var(dbconf_param, user=None):
                     not line.startswith("#")
                 ):
                         dbcreds = line.split(":", 4)
-                        if dbcreds[3] == user:
+                        if (
+                            dbcreds and
+                            len(dbcreds) >= 4 and
+                            dbcreds[3] == user
+                        ):
                             return dbcreds[field[dbconf_param]]
+    except IOError as ioe:
+        if e.errno != errno.ENOENT:
+            raise ioe
     return None
 
 
