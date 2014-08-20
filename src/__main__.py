@@ -835,6 +835,9 @@ class ENGINEData(CollectorBase):
             self._engine_plugin: 'sensitive_keys',
             'ovirt_engine_dwh': 'dwh_sensitive_keys',
         }
+        if self.configuration['include_sensitive_data']:
+            for plugin in sensitive_keys:
+                self.configuration[sensitive_keys[plugin]] = ':'
 
         for plugin in sensitive_keys:
             if self.configuration.get(sensitive_keys[plugin]):
@@ -1497,6 +1500,17 @@ to continue.
         "", "--output", dest="output",
         help="Destination directory where the report will be stored",
         default=tempfile.gettempdir()
+    )
+
+    parser.add_option(
+        "", "--include-sensitive-data", dest="include_sensitive_data",
+        action="store_true", default=False,
+        help=(
+            "Avoid to obfuscate sensitive data like passwords, etc."
+            "The generated archive will contain data considered sensitive "
+            "and its content should be reviewed by the originating "
+            "organization before being passed to any third party."
+        )
     )
 
     engine_group = OptionGroup(
