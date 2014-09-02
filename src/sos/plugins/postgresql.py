@@ -47,10 +47,12 @@ def find(file_pattern, top_dir, max_depth=None, path_pattern=None):
 class postgresql(sos.plugintools.PluginBase):
     """PostgreSQL related information"""
 
+    password_warn_text = " (password visible in process listings)"
+
     optionList = [
         ('pghome', 'PostgreSQL server home directory.', '', '/var/lib/pgsql'),
         ('username', 'username for pg_dump', '', 'postgres'),
-        ('password', 'password for pg_dump', '', ''),
+        ('password', 'password for pg_dump' + password_warn_text, '', False),
         ('dbname', 'database name to dump for pg_dump', '', ''),
         ('dbhost', 'database hostname/IP (do not use unix socket)', '', ''),
         ('dbport', 'database server port number', '', '5432')
@@ -62,8 +64,12 @@ class postgresql(sos.plugintools.PluginBase):
 
     def pg_dump(self):
         dest_file = os.path.join(self.tmp_dir, "sos_pgdump.tar")
-        old_env_pgpassword = os.environ.get("PGPASSWORD")
-        os.environ["PGPASSWORD"] = self.getOption("password")
+        # We're only modifying this for ourself and our children so there
+        # is no need to save and restore environment variables if the user
+        # decided to pass the password on the command line.
+        if self.getOption("password") is not False:
+            os.environ["PGPASSWORD"] = self.getOption("password")
+
         if self.getOption("dbhost"):
             cmd = "pg_dump -U %s -h %s -p %s -w -f %s -F t %s" % (
                 self.getOption("username"),
@@ -78,9 +84,8 @@ class postgresql(sos.plugintools.PluginBase):
                 dest_file,
                 self.getOption("dbname")
             )
+
         (status, output, rtime) = self.callExtProg(cmd)
-        if old_env_pgpassword is not None:
-            os.environ["PGPASSWORD"] = str(old_env_pgpassword)
         if (status == 0):
             self.addCopySpec(dest_file)
         else:
@@ -88,12 +93,12 @@ class postgresql(sos.plugintools.PluginBase):
                 "Unable to execute pg_dump. Error(%s)" % (output)
             )
             self.addAlert(
-                "ERROR: Unable to execute pg_dump.  Error(%s)" % (output)
+                "ERROR: Unable to execute pg_dump. Error(%s)" % (output)
             )
 
     def setup(self):
         if self.getOption("dbname"):
-            if self.getOption("password"):
+            if self.getOption("password") or "PGPASSWORD" in os.environ:
                 self.tmp_dir = tempfile.mkdtemp()
                 self.pg_dump()
             else:
