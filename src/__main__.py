@@ -689,7 +689,10 @@ class HyperVisorData(CollectorBase):
 
         cmd = """%(ssh_cmd)s "
 VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' sos | /bin/sed 's/\.//'`;
-if [ "$VERSION" -ge "30" ]; then
+if [ "$VERSION" -ge "32" ]; then
+    /usr/sbin/sosreport {option} --batch --all-logs \
+        -o logs,%(reports)s
+elif [ "$VERSION" -ge "30" ]; then
     /usr/sbin/sosreport {option} --batch -k logs.all_logs=True \
         -o logs,%(reports)s
 elif [ "$VERSION" -ge "22" ]; then
@@ -855,13 +858,14 @@ class ENGINEData(CollectorBase):
 
         if self.configuration.get("upload"):
             opts.append("--upload=%s" % self.configuration.get("upload"))
-
-        if sos.__version__.replace('.', '') < '30':
+        sos_version = sos.__version__.replace('.', '')
+        if sos_version < '30':
             opts.append('--report')
             opts.append("-k general.all_logs=True")
-        else:
+        elif sos_version < '32':
             opts.append("-k logs.all_logs=True")
-
+        else:
+            opts.append("--all-logs")
         return " ".join(opts)
 
     def sosreport(self):
