@@ -927,10 +927,10 @@ class PostgresData(CollectorBase):
                 '-k {plugin}.dbhost=%(pg_dbhost)s '
                 '-k {plugin}.dbport=%(pg_dbport)s '
                 '-k {plugin}.username=%(pg_user)s '
-                '-k {plugin}.password=%(pg_pass)s '
             ).format(
                 plugin=self._postgres_plugin,
             )
+            os.putenv('PGPASSWORD', str(self.configuration.get('pg_pass')))
             cmdline = (
                 '/usr/sbin/sosreport --batch -o {plugin} '
                 '--tmp-dir=%(local_scratch_dir)s ' + opt
