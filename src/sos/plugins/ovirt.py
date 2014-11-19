@@ -76,7 +76,7 @@ class ovirt(sos.plugintools.PluginBase):
             engine_pids = [int(x) for x in lines]
             if not engine_pids:
                 self.soslog.error('Unable to get ovirt-engine pid')
-                self.add_alert('Unable to get ovirt-engine pid')
+                self.addAlert('Unable to get ovirt-engine pid')
             for pid in engine_pids:
                 try:
                     # backtrace written to '/var/log/ovirt-engine/console.log
