@@ -895,7 +895,7 @@ class ENGINEData(CollectorBase):
         self.configuration["sos_options"] = self.build_options()
         self.caller.call(
             "sosreport --batch --build \
-            --tmp-dir='%(local_tmp_dir)s' -o %(reports)s %(sos_options)s"
+            --tmp-dir='%(local_working_dir)s' -o %(reports)s %(sos_options)s"
         )
 
 
@@ -1024,9 +1024,20 @@ class LogCollector(object):
             'compressed_report': self.conf['path'],
             'compressor': compressor,
             'directory': self.conf["local_tmp_dir"],
+            'rname': os.path.basename(self.conf['path']).split('.')[0],
         }
         caller.configuration = config
-        caller.call("tar -cf '%(report)s' -C '%(directory)s' .")
+        shutil.move(
+            os.path.join(
+                self.conf["local_tmp_dir"],
+                'working'
+            ),
+            os.path.join(
+                self.conf["local_tmp_dir"],
+                config["rname"]
+            ),
+        )
+        caller.call("tar -cf '%(report)s' -C '%(directory)s' '%(rname)s'")
         shutil.rmtree(self.conf["local_tmp_dir"])
         caller.call("%(compressor)s -1 '%(report)s'")
         os.chmod(self.conf["path"], stat.S_IRUSR | stat.S_IWUSR)
@@ -1701,7 +1712,7 @@ host upon which the PostgreSQL database lives
             conf['pg_pass'] = pg_pass
         collector = LogCollector(conf)
 
-        # We must ensure that the working directory exits before
+        # We must ensure that the directory exits before
         # we start doing anything.
         if os.path.exists(conf["local_tmp_dir"]):
             if not os.path.isdir(conf["local_tmp_dir"]):
@@ -1716,12 +1727,31 @@ host upon which the PostgreSQL database lives
             )
             os.makedirs(conf["local_tmp_dir"])
 
+        # We need to make a temporary working directory
+        conf["local_working_dir"] = os.path.join(
+            conf["local_tmp_dir"],
+            'working'
+        )
+        try:
+            os.makedirs(conf["local_working_dir"])
+        except OSError:
+            if len(os.listdir(conf["local_working_dir"])) != 0:
+                raise Exception(
+                    "The working directory is not empty.\n"
+                    "It should be empty so that reports from a prior "
+                    "invocation of the log collector\n"
+                    "are not collected again.\n"
+                    "The directory is: %s" % (
+                        conf["local_working_dir"]
+                    )
+                )
+
         # We need to make a temporary scratch directory wherein
         # all of the output from VDSM and PostgreSQL SOS plug-ins
         # will be dumped.  The contents of this directory will be included in
         # a single .xz or .bz2 file report.
         conf["local_scratch_dir"] = os.path.join(
-            conf["local_tmp_dir"],
+            conf["local_working_dir"],
             'log-collector-data'
         )
         if not os.path.exists(conf["local_scratch_dir"]):
