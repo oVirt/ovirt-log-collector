@@ -86,6 +86,9 @@ class ovirt(sos.plugintools.PluginBase):
 
         self.addForbiddenPath('/etc/ovirt-engine/.pgpass')
         self.addForbiddenPath('/etc/rhevm/.pgpass')
+        # Copy all engine tunables and domain information
+        self.collectExtOutput("engine-config --all")
+        self.collectExtOutput("engine-manage-domains list")
         # Copy engine config files.
         self.addCopySpecs([
             "/etc/ovirt-engine",
