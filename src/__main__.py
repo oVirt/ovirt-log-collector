@@ -633,6 +633,17 @@ class HyperVisorData(CollectorBase):
             "memory",
             "rpm",
         ))
+        self.configuration['reports3'] = ",".join((
+            "processor",
+            "pci",
+            "md",
+            "block",
+            "scsi",
+            "multipath",
+            "systemd",
+            "sanlock",
+            "lvm2",
+        ))
 
         # these are the reports that will work with rhev2.2 hosts
         self.configuration['bc_reports'] = \
@@ -682,10 +693,10 @@ class HyperVisorData(CollectorBase):
 VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' sos | /bin/sed 's/\.//'`;
 if [ "$VERSION" -ge "32" ]; then
     /usr/sbin/sosreport {option} --batch --all-logs \
-        -o logs,%(reports)s
+        -o logs,%(reports)s,%(reports3)s
 elif [ "$VERSION" -ge "30" ]; then
     /usr/sbin/sosreport {option} --batch -k logs.all_logs=True \
-        -o logs,%(reports)s
+        -o logs,%(reports)s,%(reports3)s
 elif [ "$VERSION" -ge "22" ]; then
     /usr/sbin/sosreport {option} --batch -k general.all_logs=True \
         -o %(reports)s
