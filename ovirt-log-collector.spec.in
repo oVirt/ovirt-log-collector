@@ -24,19 +24,19 @@ Version:	@PACKAGE_RPM_VERSION@
 Release:	@PACKAGE_RPM_RELEASE@%{?release_suffix}%{?dist}
 License:	ASL 2.0
 URL:		http://www.ovirt.org
-Source:		http://resources.ovirt.org/pub/ovirt-3.5-snapshot/src/%{package_name}/%{package_name}-%{package_version}.tar.gz
+Source:		http://resources.ovirt.org/pub/ovirt-3.5/src/%{package_name}/%{package_name}-%{package_version}.tar.gz
 
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:	noarch
 Requires:	python
 Requires:	python-dateutil
 Requires:	python-lxml
-Requires:	ovirt-engine-sdk-python >= 3.5.0.7
+Requires:	ovirt-engine-sdk-python >= 3.5.1.0
 Requires:	ovirt-engine-lib
 Requires:	logrotate
 Requires:	openssh-clients
 
-%if 0%{?fedora} >= 19 || 0%{?rhel} >= 7
+%if 0%{?fedora} || 0%{?rhel} >= 7
 Requires:	sos >= 3.1-1.1
 %else
 Requires:	sos < 3
@@ -45,7 +45,7 @@ Requires:	sos < 3
 BuildRequires:	python2-devel
 BuildRequires:	gettext
 
-%if 0%{?fedora} >= 19 || 0%{?rhel} >= 7
+%if 0%{?fedora} || 0%{?rhel} >= 7
 BuildRequires:	sos >= 3
 %else
 BuildRequires:	sos < 3
@@ -78,11 +78,6 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %config(noreplace) %{_sysconfdir}/ovirt-engine/logcollector.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{package_name}
 %{python_sitelib}/ovirt_log_collector/
-%if 0%{?fedora}
-%if 0%{?fedora} < 19
-%{python_sitelib}/sos/plugins/*.py*
-%endif
-%endif
 
 %if 0%{?rhel}
 %if 0%{?rhel} < 7
@@ -95,6 +90,9 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %{_mandir}/man8/*
 
 %changelog
+* Mon Jan 19 2015 Sandro Bonazzola <sbonazzo@redhat.com> - 3.5.1-1
+- 3.5.1-1
+
 * Fri Sep 19 2014 Sandro Bonazzola <sbonazzo@redhat.com> - 3.5.1-0.0.master
 - 3.5.1-0.0.master
 
