@@ -702,7 +702,7 @@ class HyperVisorData(CollectorBase):
 VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' sos | /bin/sed 's/\.//'`;
 if [ "$VERSION" -ge "32" ]; then
     /usr/sbin/sosreport {option} --batch --all-logs \
-        -o logs,%(reports)s,%(reports3)s
+        -o logs,%(reports)s,%(reports3)s,ovirt_hosted_engine
 elif [ "$VERSION" -ge "30" ]; then
     /usr/sbin/sosreport {option} --batch -k logs.all_logs=True \
         -o logs,%(reports)s,%(reports3)s
