@@ -28,33 +28,43 @@ Source:		http://resources.ovirt.org/pub/ovirt-3.5-snapshot/src/%{package_name}/%
 
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildArch:	noarch
+
+Requires:	logrotate
+Requires:	openssh-clients
 Requires:	python
 Requires:	python-dateutil
 Requires:	python-lxml
-Requires:	ovirt-engine-sdk-python >= 3.5.1.0
-Requires:	ovirt-engine-lib
-Requires:	logrotate
-Requires:	openssh-clients
 
-%if 0%{?fedora} || 0%{?rhel} >= 7
-Requires:	sos >= 3.1-1.1
-%else
-Requires:	sos < 3
-%endif
+Requires:	ovirt-engine-lib
+Requires:	ovirt-engine-sdk-python >= 3.5.2.0
 
 BuildRequires:	python2-devel
 BuildRequires:	gettext
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
+Requires:	sos >= 3.2
 BuildRequires:	sos >= 3
-%else
-BuildRequires:	sos < 3
 %endif
-
-
 
 %description
 Log Collector tool for oVirt Engine
+
+
+%if 0%{?rhel}
+%if 0%{?rhel} < 7
+%package sos-plugins
+Summary:	Sos plugins for %{name}
+Requires:	sos < 3
+Requires:	%{name} >= %{version}-%{release}
+BuildRequires:	sos < 3
+License:	GPLv2+
+
+%description sos-plugins
+This package contains API documentation for %{name}.
+%endif
+%endif
+
+
 
 %prep
 %setup -q -n %{package_name}-%{package_version}
@@ -78,18 +88,23 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %config(noreplace) %{_sysconfdir}/ovirt-engine/logcollector.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{package_name}
 %{python_sitelib}/ovirt_log_collector/
+%{_bindir}/engine-log-collector
+%{_mandir}/man8/*
 
 %if 0%{?rhel}
 %if 0%{?rhel} < 7
+%files sos-plugins
+%doc AUTHORS
+%doc COPYING
 %{python_sitelib}/sos/plugins/*.py*
 %endif
 %endif
 
 
-%{_bindir}/engine-log-collector
-%{_mandir}/man8/*
-
 %changelog
+* Thu Apr  9 2015 Sandro Bonazzola <sbonazzo@redhat.com> - 3.5.3-0.1.master
+- Moved sos plugins to sub-package
+
 * Thu Apr  2 2015 Sandro Bonazzola <sbonazzo@redhat.com> - 3.5.3-0.0.master
 - 3.5.3-0.0.master
 
