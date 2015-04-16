@@ -15,6 +15,12 @@
 # limitations under the License.
 #
 
+%if 0%{?rhel} && 0%{?rhel} <= 6
+%{!?__python2: %global __python2 /usr/bin/python2}
+%{!?python2_sitelib: %global python2_sitelib %(%{__python2} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
+%{!?python2_sitearch: %global python2_sitearch %(%{__python2} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib(1))")}
+%endif
+
 %global		package_version @PACKAGE_VERSION@
 %global		package_name @PACKAGE_NAME@
 
@@ -24,9 +30,9 @@ Version:	@PACKAGE_RPM_VERSION@
 Release:	@PACKAGE_RPM_RELEASE@%{?release_suffix}%{?dist}
 License:	ASL 2.0
 URL:		http://www.ovirt.org
-Source:		http://resources.ovirt.org/pub/ovirt-master-snapshot/src/%{package_name}/%{package_name}-%{package_version}.tar.gz
+Source0:	http://resources.ovirt.org/pub/ovirt-master-snapshot/src/%{package_name}/%{package_name}-%{package_version}.tar.gz
 
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}
 BuildArch:	noarch
 
 Requires:	logrotate
@@ -38,8 +44,9 @@ Requires:	python-lxml
 Requires:	ovirt-engine-lib
 Requires:	ovirt-engine-sdk-python >= 3.6.0.0
 
-BuildRequires:	python2-devel
 BuildRequires:	gettext
+BuildRequires:	python2-devel
+
 
 %if 0%{?fedora} || 0%{?rhel} >= 7
 Requires:	sos >= 3.2
@@ -75,10 +82,12 @@ This package contains API documentation for %{name}.
 	--disable-python-syntax-check
 make %{?_smp_mflags}
 
+%check
+make check
+
 %install
 rm -rf "%{buildroot}"
 make %{?_smp_mflags} install DESTDIR="%{buildroot}"
-
 
 %files
 %doc AUTHORS
@@ -87,7 +96,7 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %dir %{_sysconfdir}/ovirt-engine/logcollector.conf.d
 %config(noreplace) %{_sysconfdir}/ovirt-engine/logcollector.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{package_name}
-%{python_sitelib}/ovirt_log_collector/
+%{python2_sitelib}/ovirt_log_collector/
 %{_bindir}/engine-log-collector
 %{_mandir}/man8/*
 
@@ -96,7 +105,7 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %files sos-plugins
 %doc AUTHORS
 %doc COPYING
-%{python_sitelib}/sos/plugins/*.py*
+%{python2_sitelib}/sos/plugins/*.py*
 %endif
 %endif
 
