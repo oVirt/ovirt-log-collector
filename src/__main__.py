@@ -135,7 +135,7 @@ def get_pg_var(dbconf_param, user=None):
                         ):
                             return dbcreds[field[dbconf_param]]
     except IOError as ioe:
-        if e.errno != errno.ENOENT:
+        if ioe.errno != errno.ENOENT:
             raise ioe
     return None
 
