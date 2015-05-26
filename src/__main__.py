@@ -798,6 +798,7 @@ fi
 class ENGINEData(CollectorBase):
     def __init__(self, hostname, configuration=None, **kwargs):
         super(ENGINEData, self).__init__(hostname, configuration)
+        self.sos_version = sos.__version__.replace('.', '')
         self._plugins = self.caller.call('sosreport --list-plugins')
         if 'ovirt.sensitive_keys' in self._plugins:
             self._engine_plugin = 'ovirt'
@@ -869,18 +870,17 @@ class ENGINEData(CollectorBase):
 
         if self.configuration.get("upload"):
             opts.append("--upload=%s" % self.configuration.get("upload"))
-        sos_version = sos.__version__.replace('.', '')
-        if sos_version < '30':
+        if self.sos_version < '30':
             opts.append('--report')
             opts.append("-k general.all_logs=True")
-        elif sos_version < '32':
+        elif self.sos_version < '32':
             opts.append("-k logs.all_logs=True")
         else:
             opts.append("--all-logs")
         return " ".join(opts)
 
     def sosreport(self):
-        self.configuration["reports"] = ",".join((
+        sos_plugins = [
             self._engine_plugin,
             "rpm",
             "libvirt",
@@ -895,7 +895,18 @@ class ENGINEData(CollectorBase):
             "kernel",
             "apache",
             "memory",
-        ))
+        ]
+        if self.sos_version > '30':
+            sos_plugins.extend([
+                "block",
+                "java",
+                "lvm2",
+                "md",
+                "pci",
+                "processor",
+                "scsi",
+            ])
+        self.configuration["reports"] = ",".join(sos_plugins)
         if 'logs.all_logs' in self._plugins:
             self.configuration['reports'] += ',logs'
         if 'ovirt_engine_dwh.sensitive_keys' in self._plugins:
