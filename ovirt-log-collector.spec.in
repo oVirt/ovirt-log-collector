@@ -111,8 +111,5 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 
 
 %changelog
-* Thu Apr  9 2015 Sandro Bonazzola <sbonazzo@redhat.com> - 3.6.0-0.1.master
-- Moved sos plugins to sub-package
-
-* Fri Jul 11 2014 Sandro Bonazzola <sbonazzo@redhat.com> - 3.6.0-0.0.master
-- 3.6.0-0.0.master
+* Wed Aug  5 2015 Sandro Bonazzola <sbonazzo@redhat.com> - 4.0.0-0.0.master
+- 4.0.0-0.0.master
