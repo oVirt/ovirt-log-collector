@@ -40,6 +40,7 @@ Requires:	openssh-clients
 Requires:	python
 Requires:	python-dateutil
 Requires:	python-lxml
+Requires:	sos >= 3.2
 
 Requires:	ovirt-engine-lib
 Requires:	ovirt-engine-sdk-python >= 3.6.0.0
@@ -48,32 +49,8 @@ BuildRequires:	gettext
 BuildRequires:	python2-devel
 
 
-%if 0%{?fedora} || 0%{?rhel} >= 7
-Requires:	sos >= 3.2
-BuildRequires:	sos >= 3
-%else
-Requires:	sos
-%endif
-
 %description
 Log Collector tool for oVirt Engine
-
-
-%if 0%{?rhel}
-%if 0%{?rhel} < 7
-%package sos-plugins
-Summary:	Sos plugins for %{name}
-Requires:	sos < 3
-Requires:	%{name} >= %{version}-%{release}
-BuildRequires:	sos < 3
-License:	GPLv2+
-
-%description sos-plugins
-This package contains API documentation for %{name}.
-%endif
-%endif
-
-
 
 %prep
 %setup -q -n %{package_name}-%{package_version}
@@ -102,14 +79,6 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %{_bindir}/engine-log-collector
 %{_mandir}/man8/*
 
-%if 0%{?rhel}
-%if 0%{?rhel} < 7
-%files sos-plugins
-%doc AUTHORS
-%doc COPYING
-%{python2_sitelib}/sos/plugins/*.py*
-%endif
-%endif
 
 
 %changelog

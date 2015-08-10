@@ -2,6 +2,4 @@
 ./src/helper/__init__.py
 ./src/__init__.py
 ./src/__main__.py
-./src/sos/plugins/ovirt.py
-./src/sos/plugins/postgresql.py
 ./src/tests.py
