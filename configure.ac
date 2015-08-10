@@ -63,29 +63,12 @@ case "${PYTHON_VERSION}" in
 esac
 
 AX_PYTHON_MODULE([ovirtsdk])
-
-
-AC_ARG_WITH(
-    [sos-version],
-    [AS_HELP_STRING([--with-sos-version], [sos version to use])],
-    [SOS_VERSION="${withval}"],
-    [
-        AX_PYTHON_MODULE([sos], [fatal])
-        SOS_VERSION="$(${PYTHON} -c "import sos; print(sos.__version__.split('.', 2)[[0]])"  2>/dev/null)"
-    ]
-)
-
-AC_MSG_CHECKING([sos version])
-AC_MSG_RESULT([${SOS_VERSION}])
-
-AM_CONDITIONAL([SOS2], [test x"${SOS_VERSION}" == x2])
+AX_PYTHON_MODULE([sos])
 
 engineconfigdir="\$(sysconfdir)/ovirt-engine"
 ovirtlogcollectorlibdir="\$(pythondir)/ovirt_log_collector"
-sospluginsdir="\$(pythondir)/sos/plugins"
 AC_SUBST([engineconfigdir])
 AC_SUBST([ovirtlogcollectorlibdir])
-AC_SUBST([sospluginsdir])
 AM_CONDITIONAL([PYTHON_SYNTAX_CHECK], [test "${enable_python_syntax_check}" = "yes"])
 
 AC_CONFIG_FILES([
@@ -93,8 +76,6 @@ AC_CONFIG_FILES([
 	ovirt-log-collector.spec
 	src/config.py.in
 	src/Makefile
-	src/sos/Makefile
-	src/sos/plugins/Makefile
 	src/helper/Makefile
 	src/logrotate.d/Makefile
 	po/Makefile.in
