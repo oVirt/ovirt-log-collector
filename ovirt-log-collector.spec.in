@@ -44,6 +44,8 @@ BuildRequires:	gettext
 %if 0%{?fedora} || 0%{?rhel} >= 7
 Requires:	sos >= 3.2
 BuildRequires:	sos >= 3
+%else
+Requires:	sos
 %endif
 
 %description
