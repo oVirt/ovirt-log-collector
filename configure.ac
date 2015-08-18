@@ -32,10 +32,9 @@ AC_SUBST([PACKAGE_RPM_RELEASE])
 AC_CONFIG_AUX_DIR([.])
 AC_CONFIG_SRCDIR([src/engine-log-collector.8])
 AC_CONFIG_MACRO_DIR([m4])
-AC_USE_SYSTEM_EXTENSIONS
 AM_INIT_AUTOMAKE
 AM_GNU_GETTEXT_VERSION([0.17])
-AM_GNU_GETTEXT([external])
+AM_PO_SUBDIRS
 
 AC_ARG_ENABLE(
 	[python-syntax-check],
@@ -100,6 +99,7 @@ AC_CONFIG_FILES([
 	src/logrotate.d/Makefile
 	po/Makefile.in
 ])
+AC_CONFIG_FILES([po/Makefile], [AM_POSTPROCESS_PO_MAKEFILE])
 AC_OUTPUT
 
 # warn about uninstalled python modules
