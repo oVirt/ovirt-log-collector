@@ -10,7 +10,10 @@ from ovirtsdk.infrastructure.errors import RequestError, ConnectionError
 from ovirtsdk.infrastructure.errors import NoCertificatesError
 
 t = gettext.translation('hypervisors', fallback=True)
-_ = t.ugettext
+try:
+    _ = t.ugettext
+except AttributeError:
+    _ = t.gettext
 
 
 class ENGINETree(object):

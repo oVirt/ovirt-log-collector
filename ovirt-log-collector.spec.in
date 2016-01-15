@@ -12,6 +12,15 @@
 #  limitations under the License.
 #
 
+%if 0%{?fedora} && 0%{?fedora} >= 23
+%global		with_python3 1
+%global		__python_bin %{__python3}
+%global		__python_sitelib %{python3_sitelib}
+%else
+%global		__python_bin %{__python2}
+%global		__python_sitelib %{python2_sitelib}
+%endif
+
 %global		package_version @PACKAGE_VERSION@
 %global		package_name @PACKAGE_NAME@
 
@@ -28,17 +37,25 @@ BuildArch:	noarch
 
 Requires:	logrotate
 Requires:	openssh-clients
-Requires:	python
-Requires:	python-dateutil
-Requires:	python-lxml
 Requires:	sos >= 3.2
 
 Requires:	ovirt-engine-lib
-Requires:	ovirt-engine-sdk-python >= 4.0.0.0
 
 BuildRequires:	gettext
-BuildRequires:	python2-devel
 
+%if 0%{?with_python3}
+Requires:	python3
+Requires:	python3-dateutil
+Requires:	python3-lxml
+Requires:	ovirt-engine-sdk-python3 >= 4.0.0.0
+BuildRequires:	python3-devel
+%else
+Requires:	python
+Requires:	python-dateutil
+Requires:	python-lxml
+Requires:	ovirt-engine-sdk-python >= 4.0.0.0
+BuildRequires:	python2-devel
+%endif
 
 %description
 Log Collector tool for oVirt Engine
@@ -49,7 +66,8 @@ Log Collector tool for oVirt Engine
 %build
 %configure \
 	--docdir="%{_docdir}/%{package_name}-%{version}" \
-	--disable-python-syntax-check
+	--disable-python-syntax-check \
+	PYTHON="%{__python_bin}"
 make %{?_smp_mflags}
 
 %check
@@ -66,7 +84,7 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %dir %{_sysconfdir}/ovirt-engine/logcollector.conf.d
 %config(noreplace) %{_sysconfdir}/ovirt-engine/logcollector.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{package_name}
-%{python2_sitelib}/ovirt_log_collector/
+%{__python_sitelib}/ovirt_log_collector/
 %{_bindir}/engine-log-collector
 %{_mandir}/man8/*
 

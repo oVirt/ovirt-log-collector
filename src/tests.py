@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# FIXME: these tests are broken and should be fixed/reworked. please note
+# that code was converted to python3 just for consistency.
+
 import unittest
 import logcollector
 
@@ -19,25 +22,25 @@ class HyperVisorDataTest(unittest.TestCase):
             queue=None)
 
     def test_format_ssh_user(self):
-        self.assertEquals(self.hvd.format_ssh_user(None), "")
-        self.assertEquals(self.hvd.format_ssh_user(""), "")
-        self.assertEquals(self.hvd.format_ssh_user("foo"), "foo@")
-        self.assertEquals(self.hvd.format_ssh_user("foo@"), "foo@")
+        self.assertEqual(self.hvd.format_ssh_user(None), "")
+        self.assertEqual(self.hvd.format_ssh_user(""), "")
+        self.assertEqual(self.hvd.format_ssh_user("foo"), "foo@")
+        self.assertEqual(self.hvd.format_ssh_user("foo@"), "foo@")
 
     def test_format_ssh_command_empty_config(self):
         params = {"hostname": "localhost"}
         self._prep(params)
-        self.assertEquals(self.hvd.format_ssh_command(), "ssh localhost")
+        self.assertEqual(self.hvd.format_ssh_command(), "ssh localhost")
 
     def test_format_ssh_command_ssh_user(self):
         params = {"hostname": "localhost", "ssh_user": "foo"}
         self._prep(params)
-        self.assertEquals(self.hvd.format_ssh_command(), "ssh foo@localhost")
+        self.assertEqual(self.hvd.format_ssh_command(), "ssh foo@localhost")
 
     def test_format_ssh_command_ssh_port(self):
         params = {"hostname": "localhost", "ssh_user": "foo", "ssh_port": "22"}
         self._prep(params)
-        self.assertEquals(
+        self.assertEqual(
             self.hvd.format_ssh_command(), "ssh -p 22 foo@localhost"
         )
 
@@ -49,7 +52,7 @@ class HyperVisorDataTest(unittest.TestCase):
             "key_file": "/tmp/foobar"
         }
         self._prep(params)
-        self.assertEquals(
+        self.assertEqual(
             self.hvd.format_ssh_command(),
             "ssh -p 22 -i /tmp/foobar foo@localhost"
         )
@@ -61,7 +64,7 @@ class HyperVisorDataTest(unittest.TestCase):
             "key_file": "/tmp/foobar"
         }
         self._prep(params)
-        self.assertEquals(
+        self.assertEqual(
             self.hvd.format_ssh_command(),
             "ssh -i /tmp/foobar foo@localhost"
         )
@@ -69,7 +72,7 @@ class HyperVisorDataTest(unittest.TestCase):
     def test_format_ssh_command_no_user(self):
         params = {"hostname": "localhost", "key_file": "/tmp/foobar"}
         self._prep(params)
-        self.assertEquals(
+        self.assertEqual(
             self.hvd.format_ssh_command(),
             "ssh -i /tmp/foobar localhost"
         )

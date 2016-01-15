@@ -38,6 +38,10 @@ SUBDIRS = \
 	logrotate.d \
 	$(NULL)
 
+bin_SCRIPTS = \
+	engine-log-collector \
+	$(NULL)
+
 ovirtlogcollectorlib_PYTHON = \
 	config.py\
 	$(NULL)
@@ -69,9 +73,6 @@ install-data-hook:
 	$(MKDIR_P) "$(DESTDIR)$(confddir)"
 	$(MKDIR_P) "$(DESTDIR)$(bindir)"
 	$(MKDIR_P) "$(DESTDIR)$(localstatedir)/log/ovirt-engine/$(PACKAGE_NAME)"
-	chmod a+x "$(DESTDIR)$(ovirtlogcollectorlibdir)/__main__.py"
-	rm -f "$(DESTDIR)$(bindir)/engine-log-collector"
-	$(LN_S) "$(ovirtlogcollectorlibdir)/__main__.py" "$(DESTDIR)$(bindir)/engine-log-collector"
 
 uninstall-hook:
 	rm -f "$(DESTDIR)$(bindir)/engine-log-collector"

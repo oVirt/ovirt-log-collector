@@ -56,7 +56,8 @@ AC_CHECK_PROGS([RPMBUILD], [rpmbuild])
 AM_PATH_PYTHON([2.6],,[AC_MSG_ERROR([Cannot find python])])
 case "${PYTHON_VERSION}" in
 	2.*);;
-	*) AC_MSG_ERROR([python 2.6 is required])
+	3.*);;
+	*) AC_MSG_ERROR([python 2.6 or newer is required])
 esac
 
 AX_PYTHON_MODULE([ovirtsdk])
@@ -72,6 +73,7 @@ AC_CONFIG_FILES([
 	Makefile
 	ovirt-log-collector.spec
 	src/config.py.in
+	src/engine-log-collector
 	src/Makefile
 	src/helper/Makefile
 	src/logrotate.d/Makefile

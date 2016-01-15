@@ -13,6 +13,8 @@
 #  limitations under the License.
 #
 
+from __future__ import absolute_import, print_function
+
 import sys
 import os
 from optparse import OptionParser, OptionGroup, SUPPRESS_HELP
@@ -41,8 +43,14 @@ import stat
 from ovirt_engine import configfile
 
 
-from helper import hypervisors
+from .helper import hypervisors
 from ovirt_log_collector import config
+
+
+try:
+    raw_input
+except NameError:
+    raw_input = input
 
 
 DEFAULT_SSH_USER = 'root'
@@ -87,7 +95,10 @@ pg_dbhost = 'localhost'
 pg_dbport = '5432'
 
 t = gettext.translation('logcollector', fallback=True)
-_ = t.ugettext
+try:
+    _ = t.ugettext
+except AttributeError:
+    _ = t.gettext
 
 
 def get_pg_var(dbconf_param, user=None):
@@ -95,7 +106,7 @@ def get_pg_var(dbconf_param, user=None):
     Provides a mechanism to extract information from .pgpass.
     '''
     field = {'pass': 4, 'admin': 3, 'host': 0, 'port': 1}
-    if dbconf_param not in field.keys():
+    if dbconf_param not in list(field.keys()):
         raise ValueError(
             "Error: unknown value type '%s' was requested" % dbconf_param
         )
@@ -193,7 +204,7 @@ def get_from_prompt(msg, default=None, prompter=raw_input):
         else:
             return default
     except EOFError:
-        print
+        print()
         return default
 
 
@@ -234,9 +245,9 @@ class Caller(object):
         logging.debug("STDERR(%s)" % stderr)
 
         if returncode == 0:
-            return stdout
+            return stdout.decode("utf-8")
         else:
-            raise Exception(stderr)
+            raise Exception(stderr.decode("utf-8"))
 
 
 class Configuration(dict):
@@ -341,7 +352,11 @@ class Configuration(dict):
                     self[option.dest] = opt_value
 
     def from_file(self, configFile):
-        import ConfigParser
+        try:
+            import ConfigParser
+        except ImportError:
+            import configparser as ConfigParser
+
         import glob
 
         configs = []
@@ -429,7 +444,7 @@ class Configuration(dict):
         dir_ = os.path.dirname(file_)
         if not os.path.exists(dir_):
             logging.info("%s does not exists. It will be created." % dir_)
-            os.makedirs(dir_, 0755)
+            os.makedirs(dir_, 0o755)
 
     def __log_to_file(self, file_, level):
         try:
@@ -439,7 +454,7 @@ class Configuration(dict):
             hdlr.setFormatter(fmt)
             logging.root.addHandler(hdlr)
             logging.root.setLevel(level)
-        except Exception, e:
+        except Exception as e:
             logging.error("Could not configure file logging: %s" % e)
 
     def __log_to_stream(self, level):
@@ -534,7 +549,7 @@ class CollectorBase(object):
 
             try:
                 lines = stdout.splitlines()
-                fileAry = filter(reportFinder, lines)
+                fileAry = list(filter(reportFinder, lines))
                 if fileAry is not None:
                     if fileAry[0] is not None and len(fileAry) > 0:
                         path = fileAry[0].strip()
@@ -553,7 +568,7 @@ class CollectorBase(object):
                     self.configuration["filename"] = None
                     self.configuration["path"] = None
 
-                fileAry = filter(md5Finder, lines)
+                fileAry = list(filter(md5Finder, lines))
                 if fileAry is not None and len(fileAry) > 0:
                     if fileAry[0] is not None:
                         md5sum = fileAry[0].partition(": ")[-1]
@@ -566,7 +581,7 @@ class CollectorBase(object):
                 logging.debug("filename(%s)" % self.configuration["filename"])
                 logging.debug("path(%s)" % self.configuration["path"])
                 logging.debug("checksum(%s)" % self.configuration["checksum"])
-            except IndexError, e:
+            except IndexError as e:
                 logging.debug("message(%s)" % e)
                 logging.debug(
                     "parse_sosreport_stdout: " + traceback.format_exc()
@@ -766,9 +781,9 @@ fi
             stdout = self.caller.call('%(ssh_cmd)s "date --iso-8601=seconds"')
             try:
                 self.get_time_diff(stdout)
-            except ValueError, e:
+            except ValueError as e:
                 logging.debug("get_time_diff: " + str(e))
-        except Exception, e:
+        except Exception as e:
             ExitCodes.exit_code = ExitCodes.WARN
             logging.error(
                 "Failed to collect logs from: %s; %s" % (
@@ -1004,7 +1019,7 @@ class LogCollector(object):
         Create a single tarball with collected data from engine, postgresql
         and all hypervisors.
         """
-        print _('Creating compressed archive...')
+        print(_('Creating compressed archive...'))
         report_file_ext = 'bz2'
         compressor = 'bzip2'
         caller = Caller({})
@@ -1120,7 +1135,7 @@ class LogCollector(object):
                                        self.conf.get("passwd"),
                                        self.conf.get("cert_file"),
                                        self.conf.get("insecure"))
-        except Exception, e:
+        except Exception as e:
             ExitCodes.exit_code = ExitCodes.WARN
             logging.error("_get_hypervisors_from_api: %s" % e)
             return set()
@@ -1270,12 +1285,12 @@ class LogCollector(object):
         host_list.sort(key=get_host)
 
         fmt = "%-20s | %-20s | %s"
-        print "Host list (datacenter=%(datacenter)s, cluster=%(cluster)s, \
-host=%(host_pattern)s):" % self.conf
-        print fmt % ("Data Center", "Cluster", "Hostname/IP Address")
-        print "\n".join(
+        print("Host list (datacenter=%(datacenter)s, cluster=%(cluster)s, \
+host=%(host_pattern)s):" % self.conf)
+        print(fmt % ("Data Center", "Cluster", "Hostname/IP Address"))
+        print("\n".join(
             fmt % (dc, cluster, host) for dc, cluster, host in host_list
-        )
+        ))
 
     def get_hypervisor_data(self):
         hosts = self.conf.get("hosts")
@@ -1377,7 +1392,7 @@ will not be collected."
                 collector = PostgresData(self.conf.get("pg_dbhost"),
                                          configuration=self.conf)
                 collector.sosreport()
-            except Exception, e:
+            except Exception as e:
                 ExitCodes.exit_code = ExitCodes.WARN
                 logging.error(
                     "Could not collect PostgreSQL information: %s" % e
@@ -1822,11 +1837,11 @@ The directory is: %s'""" % (conf["local_scratch_dir"]))
                     "No hypervisors were found, therefore no hypervisor \
 data will be listed.")
 
-    except KeyboardInterrupt, k:
-        print "Exiting on user cancel."
-    except Exception, e:
+    except KeyboardInterrupt as k:
+        print("Exiting on user cancel.")
+    except Exception as e:
         multilog(logging.error, e)
-        print "Use the -h option to see usage."
+        print("Use the -h option to see usage.")
         logging.debug("Configuration:")
         try:
             logging.debug("command: %s" % conf.command)

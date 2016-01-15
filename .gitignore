@@ -20,5 +20,6 @@ tmp.*
 src/logrotate.d/ovirt-log-collector
 src/config.py
 src/config.py.in
+src/engine-log-collector
 .idea
 .gitreview
