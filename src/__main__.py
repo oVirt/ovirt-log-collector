@@ -1473,8 +1473,8 @@ to continue.
     parser.add_option(
         "", "--local-tmp", dest="local_tmp_dir",
         help="directory to copy reports to locally. "
-             "Please note that the local-tmp directory is used "
-             "only for storing temporary reports gathered from hypervisors."
+             "Please note that the directory must be empty (if already "
+             "exists) and will be removed upon completion. "
              "(default is randomly generated like: %s)" % DEFAULT_SCRATCH_DIR,
         metavar="PATH",
         default=DEFAULT_SCRATCH_DIR
@@ -1734,12 +1734,18 @@ host upon which the PostgreSQL database lives
             conf['pg_pass'] = pg_pass
         collector = LogCollector(conf)
 
-        # We must ensure that the directory exits before
+        # We must ensure that the directory exists before
         # we start doing anything.
         if os.path.exists(conf["local_tmp_dir"]):
             if not os.path.isdir(conf["local_tmp_dir"]):
                 raise Exception(
                     '%s is not a directory.' % (conf["local_tmp_dir"])
+                )
+
+            # We must also ensure that existing directory is empty
+            if os.listdir(conf["local_tmp_dir"]):
+                raise Exception(
+                    '%s directory is not empty.' % (conf["local_tmp_dir"])
                 )
         else:
             logging.info(
