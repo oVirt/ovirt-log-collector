@@ -5,9 +5,7 @@ hypervisors
 
 import logging
 import gettext
-from ovirtsdk.api import API
-from ovirtsdk.infrastructure.errors import RequestError, ConnectionError
-from ovirtsdk.infrastructure.errors import NoCertificatesError
+import ovirtsdk4
 
 t = gettext.translation('hypervisors', fallback=True)
 try:
@@ -67,12 +65,12 @@ class ENGINETree(object):
         c_obj = self.Cluster(
             cluster.id,
             cluster.name,
-            cluster.get_gluster_service()
+            cluster.gluster_service
         )
         self.clusters.add(c_obj)
-        if cluster.get_data_center() is not None:
+        if cluster.data_center is not None:
             for dc in self.datacenters:
-                if dc.id == cluster.get_data_center().id:
+                if dc.id == cluster.data_center.id:
                     dc.add_cluster(c_obj)
         else:
             dummySeen = 0
@@ -86,11 +84,11 @@ class ENGINETree(object):
                 self.datacenters.add(dc)
 
     def add_host(self, host):
-        host_obj = self.Host(host.get_address(), host.name)
+        host_obj = self.Host(host.address, host.name)
         self.hosts.add(host_obj)
-        if host.get_cluster() is not None:
+        if host.cluster is not None:
             for cluster in self.clusters:
-                if cluster.id == host.get_cluster().id:
+                if cluster.id == host.cluster.id:
                     cluster.add_host(host_obj)
         else:
             dummySeen = 0
@@ -130,24 +128,26 @@ def _initialize_api(hostname, username, password, ca, insecure):
     url = 'https://{hostname}/ovirt-engine/api'.format(
         hostname=hostname,
     )
-    api = API(url=url,
-              username=username,
-              password=password,
-              ca_file=ca,
-              validate_cert_chain=not insecure)
-    pi = api.get_product_info()
+    # TODO: add debug support
+    conn = ovirtsdk4.Connection(url=url,
+                                username=username,
+                                password=password,
+                                ca_file=ca,
+                                insecure=insecure)
+    svc = conn.system_service().get()
+    pi = svc.product_info
     if pi is not None:
         vrm = '%s.%s.%s' % (
-            pi.get_version().get_major(),
-            pi.get_version().get_minor(),
-            pi.get_version().get_revision()
+            pi.version.major,
+            pi.version.minor,
+            pi.version.revision
         )
         logging.debug("API Vendor(%s)\tAPI Version(%s)" % (
-            pi.get_vendor(), vrm)
+            pi.vendor, vrm)
         )
     else:
-        api.test(throw_exception=True)
-    return api
+        conn.test(raise_exception=True)
+    return conn
 
 
 def paginate(entity, oquery=""):
@@ -163,7 +163,7 @@ def paginate(entity, oquery=""):
         query = "%s page %s" % (oquery, page)
         # after BZ1025320 default is provide all results
         # this limits results on each iteration to page_size
-        tanda = entity.list(query=query, max=page_size)
+        tanda = entity.list(search=query, max=page_size)
         length = len(tanda)
         for elem in tanda:
             yield elem
@@ -173,39 +173,29 @@ def get_all(hostname, username, password, ca, insecure=False):
 
     tree = ENGINETree()
     result = set()
+    conn = None
     try:
-        api = _initialize_api(hostname, username, password, ca, insecure)
+        conn = _initialize_api(hostname, username, password, ca, insecure)
+        api = conn.system_service()
         if api is not None:
-            for dc in paginate(api.datacenters):
+            for dc in paginate(api.data_centers_service()):
                 tree.add_datacenter(dc)
-            for cluster in paginate(api.clusters):
+            for cluster in paginate(api.clusters_service()):
                 tree.add_cluster(cluster)
-            for host in paginate(api.hosts):
+            for host in paginate(api.hosts_service()):
                 tree.add_host(host)
             result = set(tree.get_sortable())
-    except RequestError as re:
-        logging.error(
-            _("Unable to connect to REST API.  Reason: %s") % re.reason
-        )
-        raise re
-    except ConnectionError as ce:
-        logging.error(_(
-            "Problem connecting to the REST API."
-            "Is the service available and does the CA certificate exist?"
-        ))
-        raise ce
-    except NoCertificatesError as nce:
-        logging.error(_(
-            "Problem connecting to the REST API."
-            "The CA is invalid.  To override use the \'insecure\' option."
-        ))
-        raise nce
     except Exception as e:
+        # ovirt-engine-sdk4 does not provides specialized exceptions
+        # anymore. this bad exception is all we can have for now.
         logging.error(
             _(
-                "Failure fetching information about hypervisors from API."
-                "Error: %s"
-            ) % e
+                "Failure fetching information about hypervisors from API.\n"
+                "Error (%s): %s"
+            ) % (e.__class__.__name__, e)
         )
         raise e
+    finally:
+        if conn is not None:
+            conn.close()
     return result

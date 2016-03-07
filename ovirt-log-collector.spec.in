@@ -47,13 +47,13 @@ BuildRequires:	gettext
 Requires:	python3
 Requires:	python3-dateutil
 Requires:	python3-lxml
-Requires:	ovirt-engine-sdk-python3 >= 4.0.0.0
+Requires:	python3-ovirt-engine-sdk4 >= 4.0.0
 BuildRequires:	python3-devel
 %else
 Requires:	python
 Requires:	python-dateutil
 Requires:	python-lxml
-Requires:	ovirt-engine-sdk-python >= 4.0.0.0
+Requires:	python-ovirt-engine-sdk4 >= 4.0.0
 BuildRequires:	python2-devel
 %endif
 

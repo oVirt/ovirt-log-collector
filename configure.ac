@@ -60,7 +60,7 @@ case "${PYTHON_VERSION}" in
 	*) AC_MSG_ERROR([python 2.6 or newer is required])
 esac
 
-AX_PYTHON_MODULE([ovirtsdk])
+AX_PYTHON_MODULE([ovirtsdk4])
 AX_PYTHON_MODULE([sos])
 
 engineconfigdir="\$(sysconfdir)/ovirt-engine"
