@@ -1251,6 +1251,8 @@ class LogCollector(object):
                 )
                 sys.exit(ExitCodes.CRITICAL)
 
+        orig_hosts = self.conf['hosts'].copy()
+
         if host_patterns:
             for pattern in host_patterns:
                 host_filtered |= self._filter_hosts('host', pattern)
@@ -1273,6 +1275,16 @@ class LogCollector(object):
             for pattern in cluster_patterns:
                 cluster_filtered |= self._filter_hosts('cluster', pattern)
             self.conf['hosts'] &= cluster_filtered
+
+        # warn users if they are going to collect logs from all hosts.
+        if orig_hosts and self.conf['hosts'] == orig_hosts:
+            logging.warning(
+                _(
+                    'This ovirt-log-collector call will collect logs from '
+                    'all available hosts. This may take long time, '
+                    'depending on the size of your deployment'
+                )
+            )
 
         return bool(self.conf.get('hosts'))
 
