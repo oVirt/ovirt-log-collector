@@ -27,7 +27,7 @@ AC_SUBST([PACKAGE_RPM_VERSION])
 AC_SUBST([PACKAGE_RPM_RELEASE])
 
 AC_CONFIG_AUX_DIR([.])
-AC_CONFIG_SRCDIR([src/engine-log-collector.8])
+AC_CONFIG_SRCDIR([src/ovirt-log-collector.8])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE
 AM_GNU_GETTEXT_VERSION([0.17])
@@ -73,7 +73,7 @@ AC_CONFIG_FILES([
 	Makefile
 	ovirt-log-collector.spec
 	src/config.py.in
-	src/engine-log-collector
+	src/ovirt-log-collector
 	src/Makefile
 	src/helper/Makefile
 	src/logrotate.d/Makefile

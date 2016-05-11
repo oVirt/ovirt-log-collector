@@ -1,29 +1,29 @@
-.\" engine-log-collector - oVirt Engine Tool for Collecting Data
-.TH "engine-log-collector" "8" "" "Keith Robertson" ""
+.\" ovirt-log-collector - oVirt Engine Tool for Collecting Data
+.TH "ovirt-log-collector" "8" "" "Keith Robertson" ""
 .SH "NAME"
-engine\-log\-collector \- oVirt Log Collector
+ovirt\-log\-collector \- oVirt Log Collector
 
 .SH "SYNOPSIS"
-\fBengine\-log\-collector\fP [options] list
+\fBovirt\-log\-collector\fP [options] list
 
 .PP
 
-\fBengine\-log\-collector\fP [options] collect
+\fBovirt\-log\-collector\fP [options] collect
 
 .SH "DESCRIPTION"
 .PP
 
-The \fBengine\-log\-collector\fP command gathers data from many different components (logs, databases, and environmental information) associated with an instance of a oVirt Enterprise Virtualization Engine Manager. The tool is intended to be run from the Linux system on which the is running as the root user.\&
+The \fBovirt\-log\-collector\fP command gathers data from many different components (logs, databases, and environmental information) associated with an instance of a oVirt Enterprise Virtualization Engine Manager. The tool is intended to be run from the Linux system on which the is running as the root user.\&
 
 .PP
-The \fBengine\-log\-collector\fP will, by default, attempt to interact with the oVirt Engine REST API. This command typically gets the oVirt Engine's hostname and port number (engine=) and user name (user=) from the \fB/etc/engine/logcollector.conf\fP file. Alternatively, you can provide the user name and password from the command line. The user name and password are authenticated by the authentication service associated with the oVirt Engine.  Currently, a special local account (admin), Red Hat IPA server, and Microsoft Active Directory server is supported for this task.
+The \fBovirt\-log\-collector\fP will, by default, attempt to interact with the oVirt Engine REST API. This command typically gets the oVirt Engine's hostname and port number (engine=) and user name (user=) from the \fB/etc/engine/logcollector.conf\fP file. Alternatively, you can provide the user name and password from the command line. The user name and password are authenticated by the authentication service associated with the oVirt Engine.  Currently, a special local account (admin), Red Hat IPA server, and Microsoft Active Directory server is supported for this task.
 .PP
 
-Central to the \fBengine\-log\-collector\fP command is a series of plug\-ins to the \fBsosreport\fP(1) application. These plug\-ins and other components gather information about hypervisors managed by the oVirt Engine into a single archive (a sort of \fBsosreport\fP(1) of sosreports).
+Central to the \fBovirt\-log\-collector\fP command is a series of plug\-ins to the \fBsosreport\fP(1) application. These plug\-ins and other components gather information about hypervisors managed by the oVirt Engine into a single archive (a sort of \fBsosreport\fP(1) of sosreports).
 
 .PP
 
-The \fBlist\fP option lists hypervisors controlled by the oVirt Engine, while \fBcollect\fP (default) actually runs the collection. The result of running \fBengine\-log\-collector\fP is a compressed archive that contains logs and other information from some or all of the following:
+The \fBlist\fP option lists hypervisors controlled by the oVirt Engine, while \fBcollect\fP (default) actually runs the collection. The result of running \fBovirt\-log\-collector\fP is a compressed archive that contains logs and other information from some or all of the following:
 
 .\"TODO: Describe engine\-slimmed
 
@@ -76,7 +76,7 @@ Reduce the amount of console output (default=False).\&
 
 .IP "\fB\-\-log\-file=PATH\fP"
 
-Path to \fBengine\-log\-collector\fP log file (default=/var/log/engine\-log\-collector.log).\&
+Path to \fBovirt\-log\-collector\fP log file (default=/var/log/ovirt\-log\-collector.log).\&
 
 .IP "\fB\-v, \-\-verbose\fP"
 
@@ -163,11 +163,11 @@ The SSH user that will be used to connect to the server upon which the remote Po
 The identity file (private key) to be used for accessing the host upon which the PostgreSQL database lives (default=not needed if using localhost).\&
 
 .SH "EXAMPLES"
-Before running \fBengine\-log\-collector\fP to collect data, you should run one or more list commands, to hone in on the data you want. Here's an example of the the output using a list option to see all hosts managed by the oVirt Engine:
+Before running \fBovirt\-log\-collector\fP to collect data, you should run one or more list commands, to hone in on the data you want. Here's an example of the the output using a list option to see all hosts managed by the oVirt Engine:
 
 .PP
 
-# \fBengine\-log\-collector\fP list
+# \fBovirt\-log\-collector\fP list
 
 .br
 
@@ -185,7 +185,7 @@ Use the \-\-hosts= option to limit output to a particular host or group of hosts
 
 .PP
 
-# \fBengine\-log\-collector\fP list \-\-hosts=*.11
+# \fBovirt\-log\-collector\fP list \-\-hosts=*.11
 
 .br
 
@@ -203,7 +203,7 @@ Instead of having log collector collect logs from all hypervisors managed by the
 
 .PP
 
-# \fBengine\-log\-collector\fP collect \-\-hosts=*.11
+# \fBovirt\-log\-collector\fP collect \-\-hosts=*.11
 
 .br
 
@@ -221,7 +221,7 @@ To gather data, from multiple hosts, provide a comma\-separated list of addresse
 
 .PP
 
-# \fBengine\-log\-collector\fP collect \-\-hosts=*.11,*.15
+# \fBovirt\-log\-collector\fP collect \-\-hosts=*.11,*.15
 
 .PP
 
@@ -229,7 +229,7 @@ Use the cluster option to gather data based on cluster name. Here, information o
 
 .PP
 
-# \fBengine\-log\-collector\fP collect \-\-cluster=L* \-\-hosts=*.11,*.15
+# \fBovirt\-log\-collector\fP collect \-\-cluster=L* \-\-hosts=*.11,*.15
 
 .PP
 
@@ -237,12 +237,12 @@ Likewise, you can gather data based on data center. Here, all hosts from the exa
 
 .PP
 
-# \fBengine\-log\-collector\fP collect \-\-data\-center=L* \-\-hosts=*.example.com
+# \fBovirt\-log\-collector\fP collect \-\-data\-center=L* \-\-hosts=*.example.com
 
 .br
 
 .SH "CONFIGURATION FILE"
-To get configuration information, \fBengine\-log\-collector\fP refers to the \fB/etc/engine/logcollector.conf\fP configuration file. To set defaults for any of the options described in this man page, uncomment the settings you want in this file. Here examples of a few lines from that file:
+To get configuration information, \fBovirt\-log\-collector\fP refers to the \fB/etc/engine/logcollector.conf\fP configuration file. To set defaults for any of the options described in this man page, uncomment the settings you want in this file. Here examples of a few lines from that file:
 
 .PP
 
@@ -300,7 +300,7 @@ The program encountered a problem gathering data but was able to continue.\&
 
 /tmp/logcollector
 
-/var/log/engine\-log\-collector.log
+/var/log/ovirt\-log\-collector.log
 
 .fi
 

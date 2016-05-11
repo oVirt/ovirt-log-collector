@@ -39,7 +39,7 @@ SUBDIRS = \
 	$(NULL)
 
 bin_SCRIPTS = \
-	engine-log-collector \
+	ovirt-log-collector \
 	$(NULL)
 
 ovirtlogcollectorlib_PYTHON = \
@@ -52,7 +52,7 @@ dist_ovirtlogcollectorlib_PYTHON = \
 	$(NULL)
 
 dist_man_MANS = \
-	engine-log-collector.8 \
+	ovirt-log-collector.8 \
 	$(NULL)
 
 dist_engineconfig_DATA = \
@@ -75,4 +75,4 @@ install-data-hook:
 	$(MKDIR_P) "$(DESTDIR)$(localstatedir)/log/ovirt-engine/$(PACKAGE_NAME)"
 
 uninstall-hook:
-	rm -f "$(DESTDIR)$(bindir)/engine-log-collector"
+	rm -f "$(DESTDIR)$(bindir)/ovirt-log-collector"

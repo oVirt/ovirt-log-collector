@@ -85,7 +85,7 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %config(noreplace) %{_sysconfdir}/ovirt-engine/logcollector.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{package_name}
 %{__python_sitelib}/ovirt_log_collector/
-%{_bindir}/engine-log-collector
+%{_bindir}/ovirt-log-collector
 %{_mandir}/man8/*
 
 %changelog
