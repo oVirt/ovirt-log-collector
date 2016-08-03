@@ -121,7 +121,7 @@ class ENGINETree(object):
         ]
 
 
-def _initialize_api(hostname, username, password, ca, insecure):
+def _initialize_api(hostname, username, password, ca, insecure, kerberos):
     """
     Initialize the oVirt RESTful API
     """
@@ -133,7 +133,8 @@ def _initialize_api(hostname, username, password, ca, insecure):
                                 username=username,
                                 password=password,
                                 ca_file=ca,
-                                insecure=insecure)
+                                insecure=insecure,
+                                kerberos=kerberos)
     svc = conn.system_service().get()
     pi = svc.product_info
     if pi is not None:
@@ -169,13 +170,14 @@ def paginate(entity, oquery=""):
             yield elem
 
 
-def get_all(hostname, username, password, ca, insecure=False):
+def get_all(hostname, username, password, ca, insecure=False, kerberos=False):
 
     tree = ENGINETree()
     result = set()
     conn = None
     try:
-        conn = _initialize_api(hostname, username, password, ca, insecure)
+        conn = _initialize_api(hostname, username, password, ca, insecure,
+                               kerberos)
         api = conn.system_service()
         if api is not None:
             for dc in paginate(api.data_centers_service()):

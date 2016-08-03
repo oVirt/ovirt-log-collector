@@ -1114,15 +1114,21 @@ class LogCollector(object):
         if not self.conf:
             raise Exception("No configuration.")
 
+        with_kerberos = bool(self.conf.get("kerberos"))
+
         try:
             self.conf.prompt("engine", msg="hostname of oVirt Engine")
-            self.conf.prompt("user", msg="REST API username for oVirt Engine")
-            self.conf.getpass(
-                "passwd",
-                msg="REST API password for the %s oVirt Engine user" % (
-                    self.conf.get("user")
+            if not with_kerberos:
+                self.conf.prompt(
+                    "user",
+                    msg="REST API username for oVirt Engine"
                 )
-            )
+                self.conf.getpass(
+                    "passwd",
+                    msg="REST API password for the %s oVirt Engine user" % (
+                        self.conf.get("user")
+                    )
+                )
         except Configuration.SkipException:
             logging.info(
                 "Will not collect hypervisor list from oVirt Engine API."
@@ -1134,7 +1140,8 @@ class LogCollector(object):
                                        self.conf.get("user"),
                                        self.conf.get("passwd"),
                                        self.conf.get("cert_file"),
-                                       self.conf.get("insecure"))
+                                       self.conf.get("insecure"),
+                                       with_kerberos)
         except Exception as e:
             ExitCodes.exit_code = ExitCodes.WARN
             logging.error("_get_hypervisors_from_api: %s" % e)
@@ -1602,6 +1609,18 @@ This should be in UPN format.",
         "--passwd",
         dest="passwd",
         help=SUPPRESS_HELP
+    )
+
+    engine_group.add_option(
+        "",
+        "--with-kerberos",
+        dest="kerberos",
+        help=_(
+            "Enable Kerberos authentication instead of the default "
+            "basic authentication."
+        ),
+        action="store_true",
+        default=False
     )
 
     engine_group.add_option(
