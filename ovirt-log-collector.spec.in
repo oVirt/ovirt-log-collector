@@ -60,6 +60,13 @@ BuildRequires:	python2-devel
 %description
 Log Collector tool for oVirt Engine
 
+%package analyzer
+Summary:	Log Collector for oVirt Engine - Analysis tools
+Requires:	rubygem-asciidoctor
+
+%description analyzer
+This package contains tools to help analyze oVirt Log Collector archives
+
 %prep
 %setup -q -n %{package_name}-%{package_version}
 
@@ -87,6 +94,11 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %{__python_sitelib}/ovirt_log_collector/
 %{_bindir}/ovirt-log-collector
 %{_mandir}/man8/*
+
+%files analyzer
+%{_bindir}/ovirt-log-collector-analyzer
+%dir %{_datadir}/%{name}/analyzer
+%{_datadir}/%{name}/analyzer/
 
 %changelog
 * Thu Aug  4 2016 Sandro Bonazzola <sbonazzo@redhat.com> - 4.1.0-0.0.master

@@ -35,6 +35,7 @@ config.py: \
 
 SUBDIRS = \
 	helper \
+	inventory_report \
 	logrotate.d \
 	$(NULL)
 

@@ -65,8 +65,10 @@ AX_PYTHON_MODULE([sos])
 
 engineconfigdir="\$(sysconfdir)/ovirt-engine"
 ovirtlogcollectorlibdir="\$(pythondir)/ovirt_log_collector"
+ovirtlogcollectoranalyzerdir="\$(pkgdatadir)/analyzer"
 AC_SUBST([engineconfigdir])
 AC_SUBST([ovirtlogcollectorlibdir])
+AC_SUBST([ovirtlogcollectoranalyzerdir])
 AM_CONDITIONAL([PYTHON_SYNTAX_CHECK], [test "${enable_python_syntax_check}" = "yes"])
 
 AC_CONFIG_FILES([
@@ -76,6 +78,7 @@ AC_CONFIG_FILES([
 	src/ovirt-log-collector
 	src/Makefile
 	src/helper/Makefile
+	src/inventory_report/Makefile
 	src/logrotate.d/Makefile
 	po/Makefile.in
 ])
