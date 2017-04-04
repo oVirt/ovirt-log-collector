@@ -37,7 +37,7 @@ BuildArch:	noarch
 
 Requires:	logrotate
 Requires:	openssh-clients
-Requires:	sos >= 3.2
+Requires:	sos >= 3.3
 
 Requires:	ovirt-engine-lib
 
