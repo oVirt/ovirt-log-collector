@@ -12,6 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
+DB_NAME="report";
+SOS_REPORT_UNPACK_DIR=$1
+PSQL="psql --quiet --tuples-only --no-align --dbname $DB_NAME --username engine --host $PGRUN"
 
 function printUsage() {
 cat << __EOF__
@@ -29,8 +32,16 @@ function initDbVariables() {
     PGRUN=$DBDIR/pgrun
 }
 
+function execute_SQL_from_file() {
+    ${PSQL} --file "$1";
+}
+
 function executeSQL() {
-    psql -t -A -d $DB_NAME -U engine -h $PGRUN -c "$1";
+    ${PSQL} --command "$1";
+}
+
+function cleanup_db() {
+    execute_SQL_from_file sqls/cleanup.sql &> /dev/null
 }
 
 function bulletize() {
@@ -79,6 +90,7 @@ function projectionCountingRowsWithOrder() {
     echo "row_number() OVER (ORDER BY $@ NULLs last) AS \"NO.\" "
 
 }
+
 function printSection() {
     echo
     if [ -n "${ADOC}" ]; then
@@ -186,6 +198,7 @@ function initNetworksTableQuery() {
     fi
 
 }
+
 function initVariablesForVaryingNamesInSchema() {
     CLUSTER_TABLE=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM   information_schema.tables WHERE  table_name = 'vds_groups')) WHEN TRUE then 'vds_groups' else 'cluster' END AS name;" )
     NETWORK_ATTACHMENTS_TABLE_EXISTS=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM   information_schema.tables WHERE  table_name = 'network_attachments')) WHEN TRUE then 'exists' else 'does not exist' END AS name;")
@@ -199,8 +212,6 @@ function initVariablesForVaryingNamesInSchema() {
 }
 #-----------------------------------------------------------------------------------------------------------------------
 
-DB_NAME="report";
-SOS_REPORT_UNPACK_DIR=$1
 initDbVariables
 
 if [ $# -ne 2 ]; then
@@ -218,9 +229,17 @@ else
     exit 1
 fi
 
+# Make sure nothing was left behind in case an exception happen during runtime
+cleanup_db
+
+execute_SQL_from_file sqls/hosts_create_related_lookup_tables.sql
 initVariablesForVaryingNamesInSchema
 
 printFileHeader
+
+printSection "Pre-upgrade checks:"
+echo "List of hosts for health check:"
+execute_SQL_from_file sqls/hosts_query_check_health.sql
 
 printSection "Engine details"
 echo ".≈ version of initially installed engine footnote:[<actually version of first update script>]"
@@ -253,29 +272,6 @@ printTable "SELECT
             ORDER BY c.name"
 
 printSection " Hosts"
-CREATE_TEMP_TABLES_SQL="create TEMPORARY table host_status_temp (id NUMERIC, text varchar);
-insert into host_status_temp values
-        (0, 'Unassigned'),
-        (1, 'Down'),
-        (2, 'Maintenance'),
-        (3, 'Up'),
-        (4, 'NonResponsive'),
-        (5, 'Error'),
-        (6, 'Installing'),
-        (7, 'InstallFailed'),
-        (8, 'Reboot'),
-        (9, 'PreparingForMaintenance'),
-        (10, 'NonOperational'),
-        (11, 'PendingApproval'),
-        (12, 'Initializing'),
-        (13, 'Connecting'),
-        (14, 'InstallingOS'),
-        (15, 'Kdumping');
-create TEMPORARY table host_type_temp (id NUMERIC, text varchar);
-insert into host_type_temp values
-        (0, 'rhel'),
-        (1, 'ngn/rhvh'),
-        (2, 'rhev-h');"
 QUERY_HOSTS="SELECT
      $(projectionCountingRowsWithOrder c.name, v.vds_name),
      v.vds_name AS \"Name of Host\",
@@ -303,7 +299,7 @@ QUERY_HOSTS="SELECT
      c.name, v.vds_name";
 QUERY_HOSTS_AS_CSV=$(createStatementExportingToCsvFromSelect "$QUERY_HOSTS" "$SEPARATOR_FOR_COLUMNS")
 
-executeSQL "$CREATE_TEMP_TABLES_SQL $QUERY_HOSTS_AS_CSV" | createAsciidocTableWhenProducingAsciidoc;
+executeSQL "$QUERY_HOSTS_AS_CSV" | createAsciidocTableWhenProducingAsciidoc;
 
 printSection " Storage Domains"
 
@@ -377,5 +373,4 @@ printTable "SELECT
             ORDER BY surname, name"
 
 
-
-
+cleanup_db
