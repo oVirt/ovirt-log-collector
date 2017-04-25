@@ -16,6 +16,12 @@ DB_NAME="report";
 SOS_REPORT_UNPACK_DIR=$1
 PSQL="psql --quiet --tuples-only --no-align --dbname $DB_NAME --username engine --host $PGRUN"
 
+# PKI
+ENGINE_PKI_CONF_DIR="/etc/ovirt-engine/engine.conf.d"
+ENGINE_PKI_FILE="10-setup-pki.conf"
+ENGINE_PKI_SETTINGS="${ENGINE_PKI_CONF_DIR}/${ENGINE_PKI_FILE}"
+DEFAULT_PKI_TRUSTSTORE="/etc/pki/ovirt-engine/.truststore"
+
 function printUsage() {
 cat << __EOF__
 Usage: $0 <analyzer_working_dir> <csv|adoc>
@@ -238,8 +244,34 @@ initVariablesForVaryingNamesInSchema
 printFileHeader
 
 printSection "Pre-upgrade checks:"
-echo "List of hosts for health check:"
+echo "- List of hosts for health check:"
 execute_SQL_from_file sqls/hosts_query_check_health.sql
+
+pki_file_path=$(find "${SOS_REPORT_UNPACK_DIR}" -name ${ENGINE_PKI_FILE})
+if [[ $? != 0 ]]; then
+    echo "Could not find ${ENGINE_PKI_FILE} in the sosreport, exiting"
+    exit $?
+fi
+dir_pki_conf=$(dirname "${pki_file_path}")
+
+# Read the variables from conf files in /etc/ovirt-engine/engine.conf.d
+for file in ${dir_pki_conf}/*.conf
+do
+    [ -f "$file" ] && source $file
+done
+
+if [ ! -z "${ENGINE_PKI_TRUST_STORE}" ] && [ "${ENGINE_PKI_TRUST_STORE}" != ${DEFAULT_PKI_TRUSTSTORE} ]; then
+    echo
+    echo "- PKI Trust Store:"
+    echo "CAUTION: ENGINE_PKI_TRUST_STORE has non-default value"
+    echo "ENGINE_PKI_TRUST_STORE defaults to ${DEFAULT_PKI_TRUSTSTORE}"
+    echo "ENGINE_PKI_TRUST_STORE is currently ${ENGINE_PKI_TRUST_STORE}"
+    echo
+    echo "To change this value, use the files in ${ENGINE_PKI_CONF_DIR}"
+    echo
+    echo "For more information about this topic, see also:"
+    echo "https://bugzilla.redhat.com/1336838"
+fi
 
 printSection "Engine details"
 echo ".≈ version of initially installed engine footnote:[<actually version of first update script>]"
