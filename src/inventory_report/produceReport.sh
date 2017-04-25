@@ -239,6 +239,7 @@ fi
 cleanup_db
 
 execute_SQL_from_file sqls/hosts_create_related_lookup_tables.sql
+execute_SQL_from_file sqls/storage_create_related_lookup_tables.sql
 initVariablesForVaryingNamesInSchema
 
 printFileHeader
@@ -334,28 +335,6 @@ QUERY_HOSTS_AS_CSV=$(createStatementExportingToCsvFromSelect "$QUERY_HOSTS" "$SE
 executeSQL "$QUERY_HOSTS_AS_CSV" | createAsciidocTableWhenProducingAsciidoc;
 
 printSection " Storage Domains"
-
-CREATE_TEMP_TABLES_SQL="create TEMPORARY table storage_type_temp (id NUMERIC, text varchar);
-    insert into storage_type_temp values
-    (0, 'UNKNOWN'),
-    (1, 'NFS'),
-    (2, 'FCP'),
-    (3, 'ISCSI'),
-    (4, 'LOCALFS'),
-    (6, 'POSIXFS'),
-    (7, 'GLUSTERFS'),
-    (8, 'GLANCE'),
-    (9, 'CINDER');
-
-    create TEMPORARY table storage_domain_type_temp (id NUMERIC, text varchar);
-    insert into storage_domain_type_temp values
-    (0, 'Master'),
-    (1, 'Data'),
-    (2, 'ISO'),
-    (3, 'ImportExport'),
-    (4, 'Image'),
-    (5, 'Volume'),
-    (6, 'Unknown');"
 
 QUERY_STORAGE_DOMAIN="SELECT
       $(projectionCountingRowsWithOrder sds.storage_name),
