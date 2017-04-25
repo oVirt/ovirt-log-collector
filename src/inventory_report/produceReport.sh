@@ -240,6 +240,8 @@ cleanup_db
 
 execute_SQL_from_file sqls/hosts_create_related_lookup_tables.sql
 execute_SQL_from_file sqls/storage_create_related_lookup_tables.sql
+execute_SQL_from_file sqls/vms_create_related_lookup_tables.sql
+
 initVariablesForVaryingNamesInSchema
 
 printFileHeader
@@ -247,6 +249,10 @@ printFileHeader
 printSection "Pre-upgrade checks:"
 echo "- List of hosts for health check:"
 execute_SQL_from_file sqls/hosts_query_check_health.sql
+
+echo
+echo "- List of vms for health check:"
+execute_SQL_from_file sqls/vms_query_health.sql
 
 pki_file_path=$(find "${SOS_REPORT_UNPACK_DIR}" -name ${ENGINE_PKI_FILE})
 if [[ $? != 0 ]]; then
