@@ -1087,7 +1087,7 @@ class LogCollector(object):
             size = '%.1fM' % archiveSize
 
             msg = _(
-                'Log files have been collected and placed in {path}.\n'
+                'Log files have been collected and placed in {path}\n'
                 'The MD5 for this file is {checksum} and its size is {size}'
             ).format(
                 path=self.conf["path"],
