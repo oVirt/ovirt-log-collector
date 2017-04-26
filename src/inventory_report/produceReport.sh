@@ -13,7 +13,11 @@
 #  limitations under the License.
 #
 DB_NAME="report";
-SOS_REPORT_UNPACK_DIR=$1
+SOS_REPORT_UNPACK_DIR="${1}"
+DBDIR="${SOS_REPORT_UNPACK_DIR}"/postgresDb
+PGDATA="${DBDIR}"/pgdata
+PGRUN="${DBDIR}"/pgrun
+SQLS=$(dirname "${0}")/sqls
 PSQL="psql --quiet --tuples-only --no-align --dbname $DB_NAME --username engine --host $PGRUN"
 
 # PKI
@@ -31,13 +35,6 @@ __EOF__
 
 }
 
-function initDbVariables() {
-    DBDIR=$SOS_REPORT_UNPACK_DIR/postgresDb
-
-    PGDATA=$DBDIR/pgdata
-    PGRUN=$DBDIR/pgrun
-}
-
 function execute_SQL_from_file() {
     ${PSQL} --file "$1";
 }
@@ -47,7 +44,7 @@ function executeSQL() {
 }
 
 function cleanup_db() {
-    execute_SQL_from_file sqls/cleanup.sql &> /dev/null
+    execute_SQL_from_file "${SQLS}"/cleanup.sql &> /dev/null
 }
 
 function bulletize() {
@@ -229,8 +226,6 @@ function initVariablesForVaryingNamesInSchema() {
 }
 #-----------------------------------------------------------------------------------------------------------------------
 
-initDbVariables
-
 if [ $# -ne 2 ]; then
     printUsage
     exit 1
@@ -249,9 +244,9 @@ fi
 # Make sure nothing was left behind in case an exception happen during runtime
 cleanup_db
 
-execute_SQL_from_file sqls/hosts_create_related_lookup_tables.sql
-execute_SQL_from_file sqls/storage_create_related_lookup_tables.sql
-execute_SQL_from_file sqls/vms_create_related_lookup_tables.sql
+execute_SQL_from_file "${SQLS}"/hosts_create_related_lookup_tables.sql
+execute_SQL_from_file "${SQLS}"/storage_create_related_lookup_tables.sql
+execute_SQL_from_file "${SQLS}"/vms_create_related_lookup_tables.sql
 
 initVariablesForVaryingNamesInSchema
 
@@ -259,11 +254,11 @@ printFileHeader
 
 printSection "Pre-upgrade checks:"
 echo "List of hosts for health check:"
-execute_SQL_from_file sqls/hosts_query_check_health.sql | createAsciidocTableWhenProducingAsciidoc "noheader"
+execute_SQL_from_file "${SQLS}"/hosts_query_check_health.sql | createAsciidocTableWhenProducingAsciidoc "noheader"
 
 echo
 echo "List of vms for health check:"
-execute_SQL_from_file sqls/vms_query_health.sql | createAsciidocTableWhenProducingAsciidoc "noheader"
+execute_SQL_from_file "${SQLS}"/vms_query_health.sql | createAsciidocTableWhenProducingAsciidoc "noheader"
 
 pki_file_path=$(find "${SOS_REPORT_UNPACK_DIR}" -name ${ENGINE_PKI_FILE})
 if [[ $? != 0 ]]; then
