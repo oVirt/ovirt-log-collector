@@ -137,82 +137,6 @@ function printFileHeader() {
     fi
 }
 
-function initNetworksTableQuery() {
-    local queryNetworksUsingNetworkAttachments="SELECT
-          $(projectionCountingRowsWithOrder vs.vds_name, n.name),
-          n.name AS \"Network\",
-          vs.vds_name AS \"Host Name\",
-          sp.name AS \"Data Center\",
-          nic.name AS \"Nic Name\",
-          CASE
-            WHEN
-              nic.is_bond
-            THEN
-              (
-                SELECT 'Bond(slaves: '||string_agg(slave.name, ', ')||')'
-                FROM vds_interface slave
-                WHERE slave.bond_name = nic.name AND slave.vds_id=nic.vds_id
-              )
-            WHEN
-              n.vlan_id IS NOT NULL
-            THEN
-              'Vlan'
-            ELSE
-               'Regular Nic'
-          END AS \"Attached To Nic Type\",
-
-          na.address AS \"Ipv4 Address\",
-          n.vlan_id AS \"Vlan ID\"
-
-        FROM
-          network n
-          LEFT OUTER JOIN storage_pool sp on n.storage_pool_id = sp.id
-          LEFT OUTER JOIN network_attachments na on n.id = na.network_id
-          LEFT OUTER JOIN vds_interface nic on na.nic_id = nic.id
-          LEFT OUTER JOIN vds_static vs on nic.vds_id = vs.vds_id
-          ORDER BY vs.vds_name, n.name";
-
-    local queryNetworksNotUsingNetworkAttachments="SELECT
-      $(projectionCountingRowsWithOrder vs.vds_name, n.name),
-      n.name AS \"Network\",
-      vs.vds_name AS \"Host Name\",
-      sp.name AS \"Data Center\",
-      nic.name AS \"Attached to Nic\",
-
-      CASE
-        WHEN
-          nic.is_bond
-        THEN
-          (
-            SELECT 'Bond(slaves:'||string_agg(slave.name, ', ')||')'
-            FROM vds_interface slave
-            WHERE slave.bond_name = nic.name AND slave.vds_id=nic.vds_id
-          )
-        WHEN
-          n.vlan_id IS NOT NULL
-        THEN
-          'Vlan'
-        ELSE
-           'Regular Nic'
-      END \"Nic Type\",
-
-      n.addr AS \"Ipv4 Address\",
-      n.vlan_id AS \"Vlan ID\"
-    FROM
-      network n
-      LEFT OUTER JOIN storage_pool sp on n.storage_pool_id = sp.id
-      LEFT OUTER JOIN vds_interface nic on n.name = nic.network_name
-      LEFT OUTER JOIN vds_static vs on nic.vds_id = vs.vds_id
-      ORDER BY vs.vds_name, n.name";
-
-    if [ "$NETWORK_ATTACHMENTS_TABLE_EXISTS" = "exists" ]; then
-        NETWORKS_TABLE_QUERY=$queryNetworksUsingNetworkAttachments;
-    else
-        NETWORKS_TABLE_QUERY=$queryNetworksNotUsingNetworkAttachments;
-    fi
-
-}
-
 function initVariablesForVaryingNamesInSchema() {
     CLUSTER_TABLE=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM   information_schema.tables WHERE  table_name = 'vds_groups')) WHEN TRUE then 'vds_groups' else 'cluster' END AS name;" )
     NETWORK_ATTACHMENTS_TABLE_EXISTS=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM   information_schema.tables WHERE  table_name = 'network_attachments')) WHEN TRUE then 'exists' else 'does not exist' END AS name;")
@@ -221,8 +145,6 @@ function initVariablesForVaryingNamesInSchema() {
     VMS_CLUSTER_FK_COLUMN=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'vms' AND column_name='vds_group_id')) WHEN TRUE THEN 'vds_group_id' else 'cluster_id' END AS name;" )
     VMS_CLUSTER_COMPATIBILITY_VERSION_COLUMN=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'vms' AND column_name='vds_group_compatibility_version')) WHEN TRUE THEN 'vds_group_compatibility_version' else 'cluster_compatibility_version' END AS name;" )
     VDS_AGENT_IP_COLUMN=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'vds' AND column_name='agent_ip')) WHEN TRUE THEN 'agent_ip' else 'ip' END AS name;" )
-
-    initNetworksTableQuery
 }
 #-----------------------------------------------------------------------------------------------------------------------
 
@@ -287,12 +209,24 @@ if [ ! -z "${ENGINE_PKI_TRUST_STORE}" ] && [ "${ENGINE_PKI_TRUST_STORE}" != ${DE
 fi
 
 printSection "Engine details"
-echo ".≈ version of initially installed engine footnote:[<actually version of first update script>]"
-executeSQL "SELECT regexp_replace( (SELECT version FROM schema_version ORDER BY version ASC LIMIT 1), '^(\d{2})(\d{2}).*$', '\1.\2' );"
+
+PAST_ENGINE_VERSIONS=$(execute_SQL_from_file "${SQLS}"/engine_versions_through_all_upgrades.sql)
+
+echo ".Approximate version of initially installed engine"
+echo "${PAST_ENGINE_VERSIONS}" | head -n 1
 echo
 
-echo ".≈ current engine version footnote:[<actually version of last update script>]"
-executeSQL "SELECT regexp_replace( (SELECT version FROM schema_version ORDER BY version DESC LIMIT 1), '^(\d{2})(\d{2}).*$', '\1.\2' );"
+echo ".Approximate current engine version"
+echo "${PAST_ENGINE_VERSIONS}" | tail -n 1
+echo
+
+echo ".Probable past engine versions as engine was upgraded in past " \
+     "footnote:[<we group upgrade script by time when script was fully applied. " \
+     "All script which finished in same 30 minutes span are considered to be " \
+     "related to same single upgrade. Last script then identifies version " \
+     "of this 'upgrade'.>]"
+
+echo "${PAST_ENGINE_VERSIONS}" | bulletize
 echo
 
 echo ".Engine FQDN";
@@ -333,7 +267,9 @@ QUERY_HOSTS="SELECT
      hst.text AS \"Status\",
      v.host_os AS \"Operating System\",
      v.vm_count AS \"Vm Count\",
-     v.mem_available \"Available memory\"
+     v.mem_available \"Available memory\",
+     v.usage_mem_percent \"Used memory %\",
+     v.usage_cpu_percent \"Cpu load %\"
    FROM
      vds v
      JOIN $CLUSTER_TABLE c ON c.$CLUSTER_PK_COLUMN=v.$VDS_CLUSTER_FK_COLUMN
@@ -372,6 +308,13 @@ WHERE
   var_name = 'dwhHostname') AS \"Host Name\""
 
 printSection "Networks"
+
+if [ "$NETWORK_ATTACHMENTS_TABLE_EXISTS" = "exists" ]; then
+    NETWORKS_TABLE_QUERY=$(cat "${SQLS}"/networks_table_using_network_attachments.sql)
+else
+    NETWORKS_TABLE_QUERY=$(cat "${SQLS}"/networks_table_not_using_network_attachments.sql)
+fi
+
 printTable "$NETWORKS_TABLE_QUERY";
 
 tablesWithOverriddenCompatibilityVersionSQL="SELECT
