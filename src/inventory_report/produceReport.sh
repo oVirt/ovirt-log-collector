@@ -76,10 +76,21 @@ function printTable() {
 
 #function you can pipe output into, and which rearrange data to produce asciidoc table.
 function createAsciidocTableWhenProducingAsciidoc() {
+    # Creates an ascii doc table
+    #
+    # Args that affect adoc output:
+    #     - If no argument, the header option will be
+    #       included (first item displayed in bold)
+    #
+    #     - noheader, no additional option will be added
     if [ -n "${ADOC}" ]; then
-        echo "[options=\"header\"]"
-        echo "|===="
+        if [[ ! -z ${1} && ${1} == "noheader" ]]; then
+            echo "[options=\"\"]"
+        else
+            echo "[options=\"header\"]"
+        fi
 
+        echo "|===="
         while read A; do echo $SEPARATOR_FOR_COLUMNS$A;done
         echo "|===="
     else
@@ -247,12 +258,12 @@ initVariablesForVaryingNamesInSchema
 printFileHeader
 
 printSection "Pre-upgrade checks:"
-echo "- List of hosts for health check:"
-execute_SQL_from_file sqls/hosts_query_check_health.sql
+echo "List of hosts for health check:"
+execute_SQL_from_file sqls/hosts_query_check_health.sql | createAsciidocTableWhenProducingAsciidoc "noheader"
 
 echo
-echo "- List of vms for health check:"
-execute_SQL_from_file sqls/vms_query_health.sql
+echo "List of vms for health check:"
+execute_SQL_from_file sqls/vms_query_health.sql | createAsciidocTableWhenProducingAsciidoc "noheader"
 
 pki_file_path=$(find "${SOS_REPORT_UNPACK_DIR}" -name ${ENGINE_PKI_FILE})
 if [[ $? != 0 ]]; then
