@@ -175,8 +175,11 @@ initVariablesForVaryingNamesInSchema
 printFileHeader
 
 printSection "Pre-upgrade checks:"
-echo "List of hosts for health check:"
-execute_SQL_from_file "${SQLS}"/hosts_query_check_health.sql | createAsciidocTableWhenProducingAsciidoc "noheader"
+hosts_health_check=$(execute_SQL_from_file "${SQLS}"/hosts_query_check_health.sql)
+if [ ${#hosts_health_check} -gt 0 ]; then
+    echo "List of hosts for health check:"
+    echo "${hosts_health_check}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+fi
 
 echo
 echo "List of vms for health check:"
