@@ -181,9 +181,12 @@ if [ ${#hosts_health_check} -gt 0 ]; then
     echo "${hosts_health_check}" | createAsciidocTableWhenProducingAsciidoc "noheader"
 fi
 
-echo
-echo "List of vms for health check:"
-execute_SQL_from_file "${SQLS}"/vms_query_health.sql | createAsciidocTableWhenProducingAsciidoc "noheader"
+vms_health_check=$(execute_SQL_from_file "${SQLS}"/vms_query_health.sql)
+if [ ${#vms_health_check} -gt 0 ]; then
+    echo
+    echo "List of vms for health check:"
+    echo "${vms_health_check}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+fi
 
 pki_file_path=$(find "${SOS_REPORT_UNPACK_DIR}" -name ${ENGINE_PKI_FILE})
 if [[ $? != 0 ]]; then
