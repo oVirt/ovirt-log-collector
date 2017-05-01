@@ -31,6 +31,20 @@ dist_ovirtlogcollectoranalyzer_SCRIPTS = \
 dist_ovirtlogcollectoranalyzer_DATA = \
 	$(NULL)
 
+sqldir=$(ovirtlogcollectoranalyzerdir)/sqls
+dist_sql_SCRIPTS = \
+	produceReport/sqls/cleanup.sql \
+	produceReport/sqls/hosts_create_related_lookup_tables.sql \
+	produceReport/sqls/networks_table_using_network_attachments.sql \
+	produceReport/sqls/vms_query_health.sql \
+	produceReport/sqls/cluster_query_check_datacenter.sql \
+	produceReport/sqls/hosts_query_check_health.sql \
+	produceReport/sqls/storage_create_related_lookup_tables.sql \
+	produceReport/sqls/engine_versions_through_all_upgrades.sql \
+	produceReport/sqls/networks_table_not_using_network_attachments.sql \
+	produceReport/sqls/vms_create_related_lookup_tables.sql \
+	$(NULL)
+
 install-data-hook:
 	$(MKDIR_P) "$(DESTDIR)$(bindir)"
 	$(LN_S) "$(ovirtlogcollectoranalyzerdir)/ovirt-log-collector-analyzer.sh" "$(DESTDIR)$(bindir)/ovirt-log-collector-analyzer"
