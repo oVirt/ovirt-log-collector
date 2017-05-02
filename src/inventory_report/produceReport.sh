@@ -208,6 +208,13 @@ if [ ! -z "${ENGINE_PKI_TRUST_STORE}" ] && [ "${ENGINE_PKI_TRUST_STORE}" != ${DE
     echo "https://bugzilla.redhat.com/1336838"
 fi
 
+clusters_without_attached_datacenter=$(execute_SQL_from_file "${SQLS}"/cluster_query_check_datacenter.sql)
+if [ ${#clusters_without_attached_datacenter} -gt 0 ]; then
+    echo
+    echo "The following cluster(s) have no attached datacenter:"
+    echo "${clusters_without_attached_datacenter}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+fi
+
 printSection "Engine details"
 
 PAST_ENGINE_VERSIONS=$(execute_SQL_from_file "${SQLS}"/engine_versions_through_all_upgrades.sql)
