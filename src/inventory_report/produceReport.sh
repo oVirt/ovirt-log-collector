@@ -175,51 +175,12 @@ initVariablesForVaryingNamesInSchema
 printFileHeader
 
 printSection "Pre-upgrade checks:"
-hosts_health_check=$(execute_SQL_from_file "${SQLS}"/hosts_query_check_health.sql)
-if [ ${#hosts_health_check} -gt 0 ]; then
-    echo "List of hosts for health check:"
-    echo "${hosts_health_check}" | createAsciidocTableWhenProducingAsciidoc "noheader"
-fi
+. $(dirname "${0}")/pre-upgrade-checks
 
-vms_health_check=$(execute_SQL_from_file "${SQLS}"/vms_query_health.sql)
-if [ ${#vms_health_check} -gt 0 ]; then
-    echo
-    echo "List of vms for health check:"
-    echo "${vms_health_check}" | createAsciidocTableWhenProducingAsciidoc "noheader"
-fi
-
-pki_file_path=$(find "${SOS_REPORT_UNPACK_DIR}" -name ${ENGINE_PKI_FILE})
-if [[ $? != 0 ]]; then
-    echo "Could not find ${ENGINE_PKI_FILE} in the sosreport, exiting"
-    exit $?
-fi
-dir_pki_conf=$(dirname "${pki_file_path}")
-
-# Read the variables from conf files in /etc/ovirt-engine/engine.conf.d
-for file in ${dir_pki_conf}/*.conf
-do
-    [ -f "$file" ] && source $file
-done
-
-if [ ! -z "${ENGINE_PKI_TRUST_STORE}" ] && [ "${ENGINE_PKI_TRUST_STORE}" != ${DEFAULT_PKI_TRUSTSTORE} ]; then
-    echo
-    echo "- PKI Trust Store:"
-    echo "CAUTION: ENGINE_PKI_TRUST_STORE has non-default value"
-    echo "ENGINE_PKI_TRUST_STORE defaults to ${DEFAULT_PKI_TRUSTSTORE}"
-    echo "ENGINE_PKI_TRUST_STORE is currently ${ENGINE_PKI_TRUST_STORE}"
-    echo
-    echo "To change this value, use the files in ${ENGINE_PKI_CONF_DIR}"
-    echo
-    echo "For more information about this topic, see also:"
-    echo "https://bugzilla.redhat.com/1336838"
-fi
-
-clusters_without_attached_datacenter=$(execute_SQL_from_file "${SQLS}"/cluster_query_check_datacenter.sql)
-if [ ${#clusters_without_attached_datacenter} -gt 0 ]; then
-    echo
-    echo "The following cluster(s) have no attached datacenter:"
-    echo "${clusters_without_attached_datacenter}" | createAsciidocTableWhenProducingAsciidoc "noheader"
-fi
+check_hosts_health
+check_vms_health
+check_cluster_no_dc
+check_third_party_certificate
 
 printSection "Engine details"
 
