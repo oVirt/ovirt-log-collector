@@ -22,16 +22,20 @@ SUFFIXES = .in
 
 dist_ovirtlogcollectoranalyzer_SCRIPTS = \
 	importDumpIntoNewDb.sh \
-	produceReport/produceReport.sh \
-	produceReport/pre-upgrade-checks \
 	unpackAndPrepareDump.sh \
 	ovirt-log-collector-analyzer.sh \
+	$(NULL)
+
+produceReportdir=$(ovirtlogcollectoranalyzerdir)/produceReport
+dist_produceReport_SCRIPTS = \
+	produceReport/produceReport.sh \
+	produceReport/pre-upgrade-checks \
 	$(NULL)
 
 dist_ovirtlogcollectoranalyzer_DATA = \
 	$(NULL)
 
-sqldir=$(ovirtlogcollectoranalyzerdir)/sqls
+sqldir=$(produceReportdir)/sqls
 dist_sql_SCRIPTS = \
 	produceReport/sqls/cleanup.sql \
 	produceReport/sqls/hosts_create_related_lookup_tables.sql \
