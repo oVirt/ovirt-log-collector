@@ -52,13 +52,13 @@ TMPREPOS = tmp.repos
 srpm:	dist
 	rm -fr "$(TMPREPOS)"
 	mkdir -p $(TMPREPOS)/{SPECS,RPMS,SRPMS,SOURCES}
-	$(RPMBUILD) --define="_topdir `pwd`/$(TMPREPOS)" -ts "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.gz"
+	rpmbuild --define="_topdir `pwd`/$(TMPREPOS)" -ts "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.gz"
 	@echo
 	@echo "srpm available at '$(TMPREPOS)'"
 	@echo
 
 rpm:	srpm
-	$(RPMBUILD) --define="_topdir `pwd`/$(TMPREPOS)" --rebuild "$(TMPREPOS)"/SRPMS/*.src.rpm
+	rpmbuild --define="_topdir `pwd`/$(TMPREPOS)" --rebuild "$(TMPREPOS)"/SRPMS/*.src.rpm
 	@echo
 	@echo "rpm(s) available at '$(TMPREPOS)'"
 	@echo
