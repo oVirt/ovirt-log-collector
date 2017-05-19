@@ -42,7 +42,7 @@ function initAndStartDb() {
     mkdir -p "$PGDATA" "$PGRUN";
     local initdblog="${WORK_DIR}/initdb.log"
     echo "Creating a temporary database in $PGDATA. Log of initdb is in ${initdblog}"
-    initdb "$PGDATA" > "${initdblog}" 2>&1
+    initdb "$PGDATA" > "${initdblog}"
 
     $WORK_DIR/startDb.sh
 }
