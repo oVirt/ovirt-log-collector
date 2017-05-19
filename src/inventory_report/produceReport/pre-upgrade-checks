@@ -8,6 +8,8 @@ function check_hosts_health() {
     if [ ${#hosts_health_check} -gt 0 ]; then
         echo "List of hosts for health check:"
         echo "${hosts_health_check}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+    else
+        echo "- PASSED: Hosts health check"
     fi
 }
 
@@ -18,6 +20,8 @@ function check_vms_health() {
         echo
         echo "List of vms for health check:"
         echo "${vms_health_check}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+    else
+        echo "- PASSED: Virtual machines health check"
     fi
 }
 
@@ -28,6 +32,8 @@ function check_cluster_no_dc() {
         echo
         echo "The following cluster(s) have no datacenter assigned:"
         echo "${cluster_no_dc}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+    else
+        echo "- PASSED: clusters contain datacenter assigned"
     fi
 }
 
@@ -57,6 +63,8 @@ function check_third_party_certificate() {
         echo
         echo "For more information about this topic, see also:"
         echo "https://bugzilla.redhat.com/1336838"
+    else
+        echo "- PASSED: ENGINE_PKI_TRUST_STORE has default value"
     fi
 }
 
@@ -70,5 +78,7 @@ function check_vms_running_obsolete_cluster() {
         echo "See some considerations before upgrade to 3.6:"
         echo "https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Virtualization/3.6/html/Upgrade_Guide/Red_Hat_Enterprise_Virtualization_3.6_Upgrade_Considerations.html"
         echo "${vms_out_date}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+    else
+        echo "- PASSED: All virtual machines have cluster level >= 3.6"
     fi
 }
