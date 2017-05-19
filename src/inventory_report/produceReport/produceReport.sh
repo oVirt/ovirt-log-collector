@@ -274,13 +274,8 @@ QUERY_STORAGE_DOMAIN_AS_CSV=$(createStatementExportingToCsvFromSelect "$QUERY_ST
 executeSQL "$CREATE_TEMP_TABLES_SQL $QUERY_STORAGE_DOMAIN_AS_CSV" | createAsciidocTableWhenProducingAsciidoc;
 
 printSection "DWH"
-printTable "SELECT
-(SELECT replace(replace(var_value::varchar,'1','Yes'),'0','No') FROM dwh_history_timekeeping
-WHERE
-var_name = 'DwhCurrentlyRunning') AS \"DWH running\",
-(SELECT var_value FROM dwh_history_timekeeping
-WHERE
-  var_name = 'dwhHostname') AS \"Host Name\""
+DWS_CHECK_RUUNING_QUERY=$(cat "${SQLS}"/dws_query_check_if_its_running.sql)
+printTable "${DWS_CHECK_RUUNING_QUERY}"
 
 printSection "Networks"
 
