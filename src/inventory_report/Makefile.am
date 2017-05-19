@@ -47,6 +47,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/engine_versions_through_all_upgrades.sql \
 	produceReport/sqls/networks_table_not_using_network_attachments.sql \
 	produceReport/sqls/vms_create_related_lookup_tables.sql \
+	produceReport/sqls/vms_query_check_obsolete_cluster.sql \
 	$(NULL)
 
 install-data-hook:
