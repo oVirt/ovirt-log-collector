@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION __temp_hosts_check_obsolete_cluster()
-  RETURNS TABLE(vm_name VARCHAR(255), compat_name VARCHAR(255)) AS
+  RETURNS TABLE(vms bigint) AS
 $PROCEDURE$
 BEGIN
     -- new versions of database the vds_group_compatibility_version was
@@ -7,7 +7,7 @@ BEGIN
     IF EXISTS (SELECT column_name FROM information_schema.columns WHERE table_name='vms' and column_name='cluster_compatibility_version') THEN
          RETURN QUERY EXECUTE format('
              SELECT
-                 vm_name, cluster_compatibility_version
+                 COUNT(vm_name)
              FROM
                  vms
              WHERE
@@ -17,7 +17,7 @@ BEGIN
     ELSE
          RETURN QUERY EXECUTE format('
              SELECT
-                 vm_name, vds_group_compatibility_version
+                 COUNT(vm_name)
              FROM
                  vms
              WHERE
