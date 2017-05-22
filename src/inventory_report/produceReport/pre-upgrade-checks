@@ -89,7 +89,7 @@ function check_vms_with_no_timezone_set() {
     vms_no_timezone_set=$(executeSQL "${sql_cmd}")
     if [ ${#vms_no_timezone_set} -gt 0 ]; then
         echo
-        echo "The following virtual machine(s) have no timezone set and might affect cluster upgrade,"
+        echo "WARNING: The following virtual machine(s) have no timezone set and might affect cluster upgrade,"
         echo "related bugzilla report:"
         echo "https://bugzilla.redhat.com/show_bug.cgi?id=1386507"
         printTable "${sql_cmd}"
