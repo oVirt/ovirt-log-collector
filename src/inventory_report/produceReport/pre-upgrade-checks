@@ -31,7 +31,8 @@ function check_cluster_no_dc() {
     if [ ${#cluster_no_dc} -gt 0 ]; then
         echo
         echo "The following cluster(s) have no datacenter assigned:"
-        echo "${cluster_no_dc}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+        echo "${cluster_no_dc}"
+        echo
     else
         echo "- PASSED: clusters contain datacenter assigned"
     fi
@@ -72,12 +73,12 @@ function check_vms_running_obsolete_cluster() {
     # In oVirt Engine 4.0, the minimum cluster level supported is 3.6.
     # So we must inform in case there is vm in 3.5 cluster level
     vms_out_date=$(execute_SQL_from_file "${SQLS}"/vms_query_check_obsolete_cluster.sql)
-    if [ ${#vms_out_date} -gt 0 ]; then
+    if [ ${vms_out_date} -gt 0 ]; then
         echo
-        echo "The following virtual machine(s) have cluster level (<= 3.5), cluster level must be upgraded to 3.6:"
+        echo "WARNING: Number of virtual machines in cluster <= 3.5: ${vms_out_date}"
+        echo
         echo "See some considerations before upgrade to 3.6:"
         echo "https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Virtualization/3.6/html/Upgrade_Guide/Red_Hat_Enterprise_Virtualization_3.6_Upgrade_Considerations.html"
-        echo "${vms_out_date}" | createAsciidocTableWhenProducingAsciidoc "noheader"
     else
         echo "- PASSED: All virtual machines have cluster level >= 3.6"
     fi
