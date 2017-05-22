@@ -4,12 +4,14 @@
 
 function check_hosts_health() {
     # Hosts health validation
-    hosts_health_check=$(execute_SQL_from_file "${SQLS}"/hosts_query_check_health.sql)
+    sql_cmd=$(cat "${SQLS}"/hosts_query_check_health.sql)
+    hosts_health_check=$(executeSQL "${sql_cmd}")
     if [ ${#hosts_health_check} -gt 0 ]; then
-        echo "List of hosts for health check:"
-        echo "${hosts_health_check}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+        echo -e "IMPORTANT:  Make sure the following hosts are in proper status:"
+        printTable "${sql_cmd}"
+        echo
     else
-        echo "- PASSED: Hosts health check"
+        echo -e "- PASSED: Hosts health check\n"
     fi
 }
 
@@ -17,11 +19,10 @@ function check_vms_health() {
     # Virtual Machines health validation
     vms_health_check=$(execute_SQL_from_file "${SQLS}"/vms_query_health.sql)
     if [ ${#vms_health_check} -gt 0 ]; then
-        echo
         echo "List of vms for health check:"
         echo "${vms_health_check}" | createAsciidocTableWhenProducingAsciidoc "noheader"
     else
-        echo "- PASSED: Virtual machines health check"
+        echo -e "- PASSED: Virtual machines health check\n"
     fi
 }
 
@@ -34,7 +35,7 @@ function check_cluster_no_dc() {
         echo "${cluster_no_dc}"
         echo
     else
-        echo "- PASSED: clusters contain datacenter assigned"
+        echo -e "- PASSED: clusters contain datacenter assigned\n"
     fi
 }
 
@@ -65,7 +66,7 @@ function check_third_party_certificate() {
         echo "For more information about this topic, see also:"
         echo "https://bugzilla.redhat.com/1336838"
     else
-        echo "- PASSED: ENGINE_PKI_TRUST_STORE has default value"
+        echo -e "- PASSED: ENGINE_PKI_TRUST_STORE has default value\n"
     fi
 }
 
@@ -74,13 +75,11 @@ function check_vms_running_obsolete_cluster() {
     # So we must inform in case there is vm in 3.5 cluster level
     vms_out_date=$(execute_SQL_from_file "${SQLS}"/vms_query_check_obsolete_cluster.sql)
     if [ ${vms_out_date} -gt 0 ]; then
-        echo
         echo "WARNING: Number of virtual machines in cluster <= 3.5: ${vms_out_date}"
-        echo
         echo "See some considerations before upgrade to 3.6:"
-        echo "https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Virtualization/3.6/html/Upgrade_Guide/Red_Hat_Enterprise_Virtualization_3.6_Upgrade_Considerations.html"
+        echo -e "https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Virtualization/3.6/html/Upgrade_Guide/Red_Hat_Enterprise_Virtualization_3.6_Upgrade_Considerations.html\n"
     else
-        echo "- PASSED: All virtual machines have cluster level >= 3.6"
+        echo -e "- PASSED: All virtual machines have cluster level >= 3.6\n"
     fi
 }
 
@@ -88,13 +87,11 @@ function check_vms_with_no_timezone_set() {
     sql_cmd=$(cat "${SQLS}"/vms_check_no_timezone_set.sql)
     vms_no_timezone_set=$(executeSQL "${sql_cmd}")
     if [ ${#vms_no_timezone_set} -gt 0 ]; then
-        echo
-        echo "WARNING: The following virtual machine(s) have no timezone set and might affect cluster upgrade,"
+        echo -e "WARNING: The following virtual machine(s) have no timezone set and might affect cluster upgrade,"
         echo "related bugzilla report:"
         echo "https://bugzilla.redhat.com/show_bug.cgi?id=1386507"
         printTable "${sql_cmd}"
-        echo
     else
-        echo "- PASSED: Timezone is set for all virtual machines"
+        echo -e "- PASSED: Timezone is set for all virtual machines\n"
     fi
 }

@@ -32,8 +32,9 @@ WITH hosts_unavailable AS (
           status=10
 )
 SELECT
-    vds_name, host_status_temp.text
+    vds_name AS "Host",
+    host_status_temp.text AS "Status"
 FROM
     hosts_unavailable
 LEFT JOIN
-    host_status_temp ON hosts_unavailable.status = host_status_temp.id;
+    host_status_temp ON hosts_unavailable.status = host_status_temp.id
