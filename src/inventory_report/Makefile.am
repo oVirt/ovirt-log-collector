@@ -49,6 +49,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/vms_create_related_lookup_tables.sql \
 	produceReport/sqls/vms_query_check_obsolete_cluster.sql \
 	produceReport/sqls/dws_query_check_if_its_running.sql \
+	produceReport/sqls/vms_check_no_timezone_set.sql \
 	$(NULL)
 
 install-data-hook:
