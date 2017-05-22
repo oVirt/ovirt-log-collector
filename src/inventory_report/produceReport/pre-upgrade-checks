@@ -82,3 +82,18 @@ function check_vms_running_obsolete_cluster() {
         echo "- PASSED: All virtual machines have cluster level >= 3.6"
     fi
 }
+
+function check_vms_with_no_timezone_set() {
+    sql_cmd=$(cat "${SQLS}"/vms_check_no_timezone_set.sql)
+    vms_no_timezone_set=$(executeSQL "${sql_cmd}")
+    if [ ${#vms_no_timezone_set} -gt 0 ]; then
+        echo
+        echo "The following virtual machine(s) have no timezone set and might affect cluster upgrade,"
+        echo "related bugzilla report:"
+        echo "https://bugzilla.redhat.com/show_bug.cgi?id=1386507"
+        printTable "${sql_cmd}"
+        echo
+    else
+        echo "- PASSED: Timezone is set for all virtual machines"
+    fi
+}

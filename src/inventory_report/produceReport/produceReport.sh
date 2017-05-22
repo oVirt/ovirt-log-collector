@@ -182,6 +182,7 @@ check_vms_health
 check_cluster_no_dc
 check_third_party_certificate
 check_vms_running_obsolete_cluster
+check_vms_with_no_timezone_set
 
 printSection "Engine details"
 
