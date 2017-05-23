@@ -214,13 +214,13 @@ echo ".Engine DB size"
 echo "${DB_SIZE}"
 echo
 
-printSection " Data Centers"
+printSection "Data Centers"
 executeSQL "SELECT
                 name AS \"Data Center\"
             FROM storage_pool
             ORDER BY name;" | enumerate
 
-printSection " Clusters"
+printSection "Clusters"
 printTable "SELECT
               $(projectionCountingRowsWithOrder c.name),
               c.name  AS \"Cluster Name\",
@@ -231,7 +231,7 @@ printTable "SELECT
               LEFT OUTER JOIN storage_pool sp ON c.storage_pool_id=sp.id
             ORDER BY c.name"
 
-printSection " Hosts"
+printSection "Hosts"
 QUERY_HOSTS="SELECT
      $(projectionCountingRowsWithOrder c.name, v.vds_name),
      v.vds_name AS \"Name of Host\",
@@ -248,9 +248,9 @@ QUERY_HOSTS="SELECT
      hst.text AS \"Status\",
      v.host_os AS \"Operating System\",
      v.vm_count AS \"Vm Count\",
-     v.mem_available \"Available memory\",
-     v.usage_mem_percent \"Used memory %\",
-     v.usage_cpu_percent \"Cpu load %\"
+     v.mem_available AS \"Available memory\",
+     v.usage_mem_percent AS \"Used memory %\",
+     v.usage_cpu_percent AS \"Cpu load %\"
    FROM
      vds v
      JOIN $CLUSTER_TABLE c ON c.$CLUSTER_PK_COLUMN=v.$VDS_CLUSTER_FK_COLUMN
@@ -263,7 +263,7 @@ QUERY_HOSTS_AS_CSV=$(createStatementExportingToCsvFromSelect "$QUERY_HOSTS" "$SE
 
 executeSQL "$QUERY_HOSTS_AS_CSV" | createAsciidocTableWhenProducingAsciidoc;
 
-printSection " Storage Domains"
+printSection "Storage Domains"
 
 QUERY_STORAGE_DOMAIN="SELECT
       $(projectionCountingRowsWithOrder sds.storage_name),
@@ -303,7 +303,7 @@ if [ $(executeSQL "$tablesWithOverriddenCompatibilityVersionSQL" | wc -l) -gt 0 
   printTable "$tablesWithOverriddenCompatibilityVersionSQL"
 fi
 
-printSection " System Users"
+printSection "System Users"
 printTable "SELECT
                 $(projectionCountingRowsWithOrder surname, name),
                 surname  AS \"Surname\",
