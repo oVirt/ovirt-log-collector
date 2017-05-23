@@ -51,6 +51,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/dws_query_check_if_its_running.sql \
 	produceReport/sqls/vms_check_no_timezone_set.sql \
 	produceReport/sqls/database_size.sql \
+	produceReport/sqls/vdc_options_query_checkmixedrhelversion.sql \
 	$(NULL)
 
 install-data-hook:
