@@ -91,7 +91,22 @@ function check_vms_with_no_timezone_set() {
         echo "related bugzilla report:"
         echo "https://bugzilla.redhat.com/show_bug.cgi?id=1386507"
         printTable "${sql_cmd}"
+        echo
     else
         echo -e "- PASSED: Timezone is set for all virtual machines\n"
+    fi
+}
+
+function check_mixedrhelversion() {
+    sql_cmd=$(cat "${SQLS}"/vdc_options_query_checkmixedrhelversion.sql)
+    sql_ret=$(executeSQL "${sql_cmd}")
+    if [ ${#sql_ret} -gt 0 ]; then
+        echo -e "WARNING: *After* upgrading all hosts to EL7 and *BEFORE* " \
+                "upgrading the Manager to >= 4.y make sure " \
+                "CheckMixedRhelVersions are true"
+        printTable "${sql_cmd}"
+        echo
+    else
+        echo -e "- PASSED: CheckMixedRhelVersions validation\n"
     fi
 }
