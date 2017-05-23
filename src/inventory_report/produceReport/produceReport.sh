@@ -209,6 +209,11 @@ echo ".Engine FQDN";
 find "${SOS_REPORT_UNPACK_DIR}" -name "10-setup-protocols.conf" -exec grep "ENGINE_FQDN" '{}' \; | sed "s/^.*=//"
 echo
 
+DB_SIZE=$(execute_SQL_from_file "${SQLS}"/database_size.sql)
+echo ".Engine DB size"
+echo "${DB_SIZE}"
+echo
+
 printSection " Data Centers"
 executeSQL "SELECT
                 name AS \"Data Center\"
