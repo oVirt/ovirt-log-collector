@@ -664,6 +664,8 @@ class HyperVisorData(CollectorBase):
             "systemd",
             "sanlock",
             "lvm2",
+            "chrony",
+            "systemd",
         ))
 
         # these are the reports that will work with rhev2.2 hosts
@@ -917,6 +919,8 @@ class ENGINEData(CollectorBase):
                 "pci",
                 "processor",
                 "scsi",
+                "chrony",
+                "systemd",
             ])
         self.configuration["reports"] = ",".join(sos_plugins)
         if 'logs.all_logs' in self._plugins:
