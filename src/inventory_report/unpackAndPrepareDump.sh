@@ -40,7 +40,7 @@ PG_DUMP_DIR="$TMP_ROOT/pg_dump_dir"
 
 mkdir -p $UNPACKED_SOSREPORT $PG_DUMP_DIR
 
-echo "Unpacking postgress data. This can take up to several minutes."
+echo "Unpacking postgres data. This can take up to several minutes."
 
 tar -C "$UNPACKED_SOSREPORT" -xf "$SOS_REPORT"
 TAR_WITH_POSTGRES_SOSREPORT=$(find "$UNPACKED_SOSREPORT" -name "*postgresql-sosreport*tar.xz")
