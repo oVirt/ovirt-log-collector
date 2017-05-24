@@ -8,7 +8,11 @@ PACKAGE_NAME = "@PACKAGE_NAME@"
 PACKAGE_VERSION = "@PACKAGE_VERSION@"
 
 FILE_PG_PASS = "@engineconfigdir_POST@/.pgpass"
-ENGINE_DEFAULTS = "@datadir_POST@/conf/engine.conf.defaults"
+
+ENGINE_DEFAULTS = (
+    "@datadir_POST@/ovirt-engine/services/ovirt-engine/ovirt-engine.conf"
+)
+
 ENGINE_CONF = "@engineconfigdir_POST@/engine.conf"
 
 ENGINE_SERVICE_DEFAULTS = os.path.join(
