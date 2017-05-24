@@ -629,11 +629,13 @@ class HyperVisorData(CollectorBase):
                  semaphore=None,
                  queue=None,
                  gluster_enabled=False,
+                 time_diff_only=False,
                  **kwargs):
         super(HyperVisorData, self).__init__(hostname, configuration)
         self.semaphore = semaphore
         self.queue = queue
         self.gluster_enabled = gluster_enabled
+        self.time_diff_only = time_diff_only
 
     def prep(self):
         self.configuration["hostname"] = self.hostname
@@ -748,37 +750,38 @@ fi
             logging.info(
                 "collecting information from %(hostname)s" % self.configuration
             )
-            stdout = self.sosreport()
-            self.parse_sosreport_stdout(stdout)
-            self.configuration["hypervisor_dir"] = os.path.join(
-                self.configuration.get("local_scratch_dir"),
-                self.configuration.get("hostname")
-            )
-            os.mkdir(self.configuration["hypervisor_dir"])
-            self.configuration['archive_name'] = "%s-%s" % (
-                self.configuration.get("hostname"),
-                os.path.basename(self.configuration.get("path"))
-            )
-            self.caller.call(
-                '%(scp_cmd)s:%(path)s %(hypervisor_dir)s/%(archive_name)s'
-            )
-            self.caller.call('%(ssh_cmd)s "/bin/rm %(path)s*"')
-            stdout = self.caller.call(
-                '%(ssh_cmd)s "/bin/ls -lRZ /etc /var /rhev"'
-            )
-            self.configuration['selinux_dir'] = os.path.join(
-                self.configuration.get('hypervisor_dir'),
-                'selinux',
-            )
-            os.mkdir(self.configuration['selinux_dir'])
-            with open(
-                os.path.join(
-                    self.configuration['selinux_dir'],
-                    'ls_-lRZ_etc_var_rhev',
-                ),
-                'w',
-            ) as f:
-                f.write(stdout)
+            if not self.time_diff_only:
+                stdout = self.sosreport()
+                self.parse_sosreport_stdout(stdout)
+                self.configuration["hypervisor_dir"] = os.path.join(
+                    self.configuration.get("local_scratch_dir"),
+                    self.configuration.get("hostname")
+                )
+                os.mkdir(self.configuration["hypervisor_dir"])
+                self.configuration['archive_name'] = "%s-%s" % (
+                    self.configuration.get("hostname"),
+                    os.path.basename(self.configuration.get("path"))
+                )
+                self.caller.call(
+                    '%(scp_cmd)s:%(path)s %(hypervisor_dir)s/%(archive_name)s'
+                )
+                self.caller.call('%(ssh_cmd)s "/bin/rm %(path)s*"')
+                stdout = self.caller.call(
+                    '%(ssh_cmd)s "/bin/ls -lRZ /etc /var /rhev"'
+                )
+                self.configuration['selinux_dir'] = os.path.join(
+                    self.configuration.get('hypervisor_dir'),
+                    'selinux',
+                )
+                os.mkdir(self.configuration['selinux_dir'])
+                with open(
+                    os.path.join(
+                        self.configuration['selinux_dir'],
+                        'ls_-lRZ_etc_var_rhev',
+                    ),
+                    'w',
+                ) as f:
+                    f.write(stdout)
 
             stdout = self.caller.call('%(ssh_cmd)s "date --iso-8601=seconds"')
             try:
@@ -1372,7 +1375,8 @@ host=%(host_pattern)s):" % self.conf)
                     configuration=self.conf,
                     semaphore=sem,
                     queue=time_diff_queue,
-                    gluster_enabled=cluster.gluster_enabled
+                    gluster_enabled=cluster.gluster_enabled,
+                    time_diff_only=self.conf.get("time_only")
                 )
                 thread = threading.Thread(target=collector.run)
                 thread.start()
@@ -1601,6 +1605,13 @@ option is specified, data is not collected from any hypervisor."""
         default=False
     )
 
+    engine_group.add_option(
+        "", "--time-only",
+        help="Just gather time diff from specified hypervisors",
+        dest="time_only",
+        action="store_true",
+        default=False
+    )
     engine_group.add_option(
         "-u", "--user", dest="user",
         help="username to use with the REST API. \
