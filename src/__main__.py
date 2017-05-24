@@ -39,6 +39,8 @@ import socket
 import sos
 import stat
 
+from functools import partial
+
 
 from ovirt_engine import configfile
 
@@ -717,17 +719,17 @@ class HyperVisorData(CollectorBase):
         cmd = """%(ssh_cmd)s "
 VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' sos | /bin/sed 's/\.//'`;
 if [ "$VERSION" -ge "32" ]; then
-    /usr/sbin/sosreport {option} --batch --all-logs \
+    /usr/sbin/sosreport {option} {log_size} --batch --all-logs \
         -o logs,%(reports)s,%(reports3)s,ovirt_hosted_engine
 elif [ "$VERSION" -ge "30" ]; then
-    /usr/sbin/sosreport {option} --batch -k logs.all_logs=True \
+    /usr/sbin/sosreport {option} {log_size} --batch -k logs.all_logs=True \
         -o logs,%(reports)s,%(reports3)s
 elif [ "$VERSION" -ge "22" ]; then
-    /usr/sbin/sosreport {option} --batch -k general.all_logs=True \
+    /usr/sbin/sosreport {option} {log_size} --batch -k general.all_logs=True \
         -o %(reports)s
 elif [ "$VERSION" -ge "17" ]; then
-    /usr/sbin/sosreport {option} --no-progressbar -k general.all_logs=True \
-        -o %(bc_reports)s
+    /usr/sbin/sosreport {option} {log_size} --no-progressbar -k
+        general.all_logs=True -o %(bc_reports)s
 else
     /bin/echo "No valid version of sosreport found." 1>&2
     exit 1
@@ -736,11 +738,18 @@ fi
         """
 
         if self.configuration.get("ticket_number"):
-            cmd = cmd.format(option='--ticket-number={number}'.format(
+            cmd = partial(cmd.format, option='--ticket-number={number}'.format(
                 number=self.configuration.get("ticket_number")
             ))
         else:
-            cmd = cmd.format(option='')
+            cmd = partial(cmd.format, option='')
+
+        if self.configuration.get('log_size'):
+            cmd = cmd(log_size='-k logs.log_days=1 --log-size={size}'.format(
+                size=self.configuration.get('log_size')
+            ))
+        else:
+            cmd = cmd(log_size="")
 
         return self.caller.call(cmd)
 
@@ -885,6 +894,12 @@ class ENGINEData(CollectorBase):
                 "--ticket-number=%s" % self.configuration.get("ticket_number")
             )
 
+        if self.configuration.get("log_size"):
+            opts.append(
+                "-k logs.log_days=1 --log-size=%s" %
+                self.configuration.get('log_size')
+            )
+
         if self.configuration.get("upload"):
             opts.append("--upload=%s" % self.configuration.get("upload"))
         if self.sos_version < '30':
@@ -970,6 +985,9 @@ class PostgresData(CollectorBase):
         opt = ""
         if self.configuration.get("ticket_number"):
             opt += '--ticket-number=%(ticket_number)s '
+
+        if self.configuration.get("log_size"):
+            opt += '-k logs.log_days=1 --log-size=%(log_size)s '
 
         if sos.__version__.replace('.', '') < '30':
             opt += '--report '
@@ -1526,6 +1544,12 @@ to continue.
         "", "--ticket-number", dest="ticket_number",
         help="ticket number to pass with the sosreport",
         metavar="TICKET"
+    )
+
+    parser.add_option(
+        "", "--log-size", dest="log_size",
+        help="maximum log size to collect on each host in MiB",
+        metavar="SIZE"
     )
 
     parser.add_option(
