@@ -7,11 +7,11 @@ function check_hosts_health() {
     sql_cmd=$(cat "${SQLS}"/hosts_query_check_health.sql)
     hosts_health_check=$(executeSQL "${sql_cmd}")
     if [ ${#hosts_health_check} -gt 0 ]; then
-        echo -e "IMPORTANT:  Make sure the following hosts are in proper status:"
+        echo -e "IMPORTANT: The following hosts are not ready for upgrade:"
         printTable "${sql_cmd}"
         echo
     else
-        echo -e "icon:check-circle-o[size=2x] Hosts health check\n"
+        echo -e "icon:check-circle-o[size=2x] No blocker status found in the hosts"
     fi
 }
 
@@ -19,10 +19,10 @@ function check_vms_health() {
     # Virtual Machines health validation
     vms_health_check=$(execute_SQL_from_file "${SQLS}"/vms_query_health.sql)
     if [ ${#vms_health_check} -gt 0 ]; then
-        echo "List of vms for health check:"
+        echo "IMPORTANT: The following VMs are not ready for upgrade:"
         echo "${vms_health_check}" | createAsciidocTableWhenProducingAsciidoc "noheader"
     else
-        echo -e "icon:check-circle-o[size=2x] Virtual machines health check\n"
+        echo -e "icon:check-circle-o[size=2x] No blocker status found in the VMs\n"
     fi
 }
 
@@ -31,7 +31,7 @@ function check_cluster_no_dc() {
     cluster_no_dc=$(execute_SQL_from_file "${SQLS}"/cluster_query_check_datacenter.sql)
     if [ ${#cluster_no_dc} -gt 0 ]; then
         echo
-        echo "The following cluster(s) have no datacenter assigned:"
+        echo "WARNING: The following cluster(s) have no datacenter assigned:"
         echo "${cluster_no_dc}"
         echo
     else
@@ -75,8 +75,8 @@ function check_vms_running_obsolete_cluster() {
     # So we must inform in case there is vm in 3.5 cluster level
     vms_out_date=$(execute_SQL_from_file "${SQLS}"/vms_query_check_obsolete_cluster.sql)
     if [ ${vms_out_date} -gt 0 ]; then
-        echo "WARNING: There are ${vms_out_date} VMs in version 3.5 and prior clusters. These clusters need to be upgraded to version 3.6 prior to version 4.0."
-        echo "See 3.6 upgrade considerations:"
+        echo "WARNING: There are ${vms_out_date} VMs in version 3.5 and prior clusters. These clusters need to be upgraded to version 3.6 prior upgrading to version 4.0."
+        echo "See 3.6 Upgrade Considerations:"
         echo -e "https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Virtualization/3.6/html/Upgrade_Guide/Red_Hat_Enterprise_Virtualization_3.6_Upgrade_Considerations.html\n"
     else
         echo -e "icon:check-circle-o[size=2x] All virtual machines have cluster level >= 3.6\n"
@@ -87,8 +87,8 @@ function check_vms_with_no_timezone_set() {
     sql_cmd=$(cat "${SQLS}"/vms_check_no_timezone_set.sql)
     vms_no_timezone_set=$(executeSQL "${sql_cmd}")
     if [ ${#vms_no_timezone_set} -gt 0 ]; then
-        echo -e "WARNING: The following virtual machine(s) have no timezone set and might affect cluster upgrade,"
-        echo "related bugzilla report:"
+        echo -e "WARNING: The following virtual machine(s) have no timezone set and might affect cluster upgrade."
+        echo "We recommend update it manually via Engine Web Admin, related bugzilla report:"
         echo "https://bugzilla.redhat.com/show_bug.cgi?id=1386507"
         printTable "${sql_cmd}"
         echo
@@ -103,7 +103,7 @@ function check_mixedrhelversion() {
     if [ ${#sql_ret} -gt 0 ]; then
         echo -e "WARNING: *After* upgrading all hosts to EL7 and *BEFORE* " \
                 "upgrading the Manager to >= 4.y make sure " \
-                "CheckMixedRhelVersions are true"
+                "CheckMixedRhelVersions is true"
         printTable "${sql_cmd}"
         echo
     else
