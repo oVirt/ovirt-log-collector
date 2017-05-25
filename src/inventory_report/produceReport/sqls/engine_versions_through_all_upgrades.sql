@@ -4,7 +4,7 @@
 -- 'maximum value'. Value of this column is numbers separated by underscore so ordering should be ok. Version field
 -- contains major and minor numbers as first two, followed by script number. Only major and minor version is reported.
 SELECT
-  regexp_replace(max(version), '^(\d{2})(\d{2}).*$', '\1.\2')
+  regexp_replace(max(version), '^(0(\d{1})|(\d{2}))(0(\d{1})|(\d{2})).*$', '\2\3.\5\6')
 FROM
   schema_version
 GROUP BY
