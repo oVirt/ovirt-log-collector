@@ -197,10 +197,10 @@ echo ".Approximate current engine version"
 echo "${PAST_ENGINE_VERSIONS}" | tail -n 1
 echo
 
-echo ".Probable past engine versions as engine was upgraded in past " \
-     "footnote:[<we group upgrade script by time when script was fully applied. " \
-     "All script which finished in same 30 minutes span are considered to be " \
-     "related to same single upgrade. Last script then identifies version " \
+echo ".Probable past the engine versions as engine was upgraded in the past " \
+     "footnote:[<We group the upgrade scripts by the time when the script was fully applied. " \
+     "All scripts which finished in same 30 minutes span are considered to be " \
+     "related to same upgrade. The last script then determines the version " \
      "of this 'upgrade'.>]"
 
 echo "${PAST_ENGINE_VERSIONS}" | bulletize
