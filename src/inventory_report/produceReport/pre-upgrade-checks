@@ -11,7 +11,7 @@ function check_hosts_health() {
         printTable "${sql_cmd}"
         echo
     else
-        echo -e "- PASSED: Hosts health check\n"
+        echo -e "icon:check-circle-o[size=2x] Hosts health check\n"
     fi
 }
 
@@ -22,7 +22,7 @@ function check_vms_health() {
         echo "List of vms for health check:"
         echo "${vms_health_check}" | createAsciidocTableWhenProducingAsciidoc "noheader"
     else
-        echo -e "- PASSED: Virtual machines health check\n"
+        echo -e "icon:check-circle-o[size=2x] Virtual machines health check\n"
     fi
 }
 
@@ -35,7 +35,7 @@ function check_cluster_no_dc() {
         echo "${cluster_no_dc}"
         echo
     else
-        echo -e "- PASSED: clusters contain datacenter assigned\n"
+        echo -e "icon:check-circle-o[size=2x] All clusters contain datacenter assigned\n"
     fi
 }
 
@@ -66,7 +66,7 @@ function check_third_party_certificate() {
         echo "For more information about this topic, see also:"
         echo "https://bugzilla.redhat.com/1336838"
     else
-        echo -e "- PASSED: ENGINE_PKI_TRUST_STORE has default value\n"
+        echo -e "icon:check-circle-o[size=2x] ENGINE_PKI_TRUST_STORE has default value\n"
     fi
 }
 
@@ -79,7 +79,7 @@ function check_vms_running_obsolete_cluster() {
         echo "See 3.6 upgrade considerations:"
         echo -e "https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Virtualization/3.6/html/Upgrade_Guide/Red_Hat_Enterprise_Virtualization_3.6_Upgrade_Considerations.html\n"
     else
-        echo -e "- PASSED: All virtual machines have cluster level >= 3.6\n"
+        echo -e "icon:check-circle-o[size=2x] All virtual machines have cluster level >= 3.6\n"
     fi
 }
 
@@ -93,7 +93,7 @@ function check_vms_with_no_timezone_set() {
         printTable "${sql_cmd}"
         echo
     else
-        echo -e "- PASSED: Timezone is set for all virtual machines\n"
+        echo -e "icon:check-circle-o[size=2x] Timezone is set for all virtual machines\n"
     fi
 }
 
@@ -107,6 +107,6 @@ function check_mixedrhelversion() {
         printTable "${sql_cmd}"
         echo
     else
-        echo -e "- PASSED: CheckMixedRhelVersions validation\n"
+        echo -e "icon:check-circle-o[size=2x] CheckMixedRhelVersions validation\n"
     fi
 }

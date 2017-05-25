@@ -122,11 +122,6 @@ function printFileHeader() {
 :source-highlighter: coderay
 :listing-caption: Listing
 :pdf-page-size: A4
-
-++++
-<link rel="stylesheet"  href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome.min.css">
-++++
-
 :toc:
 :toc-placement: preamble
 :icons: font
