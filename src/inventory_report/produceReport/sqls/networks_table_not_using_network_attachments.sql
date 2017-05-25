@@ -3,7 +3,7 @@ SELECT
   n.name AS "Network",
   vs.vds_name AS "Host Name",
   sp.name AS "Data Center",
-  nic.name AS "Attached to Nic",
+  nic.name AS "Attached to NIC",
 
   CASE
     WHEN
@@ -17,14 +17,14 @@ SELECT
     WHEN
       n.vlan_id IS NOT NULL
     THEN
-      'Vlan'
+      'VLAN'
     ELSE
-       'Regular Nic'
-  END "Nic Type",
+       'Regular NIC'
+  END "NIC Type",
 
   ARRAY_TO_STRING(ARRAY[nic.mac_addr, (SELECT STRING_AGG(slave.mac_addr, ', ') FROM vds_interface slave WHERE slave.bond_name = nic.name AND slave.vds_id=nic.vds_id)], ', ') AS "Related MAC addresses",
-  n.addr AS "Ipv4 Address",
-  n.vlan_id AS "Vlan ID"
+  n.addr AS "IPV4 Address",
+  n.vlan_id AS "VLAN ID"
 FROM
   network n
   LEFT OUTER JOIN storage_pool sp on n.storage_pool_id = sp.id
