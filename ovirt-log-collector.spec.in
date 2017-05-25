@@ -12,7 +12,7 @@
 #  limitations under the License.
 #
 
-%if 0%{?fedora} && 0%{?fedora} >= 23
+%if 0%{?fedora}
 %global		with_python3 1
 %global		__python_bin %{__python3}
 %global		__python_sitelib %{python3_sitelib}
@@ -47,13 +47,13 @@ BuildRequires:	gettext
 Requires:	python3
 Requires:	python3-dateutil
 Requires:	python3-lxml
-Requires:	python3-ovirt-engine-sdk4 >= 4.0.0
+Requires:	python3-ovirt-engine-sdk4 >= 4.2.0
 BuildRequires:	python3-devel
 %else
 Requires:	python
 Requires:	python-dateutil
 Requires:	python-lxml
-Requires:	python-ovirt-engine-sdk4 >= 4.0.0
+Requires:	python-ovirt-engine-sdk4 >= 4.2.0
 BuildRequires:	python2-devel
 %endif
 
@@ -102,6 +102,9 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %{_datadir}/%{name}/analyzer/
 
 %changelog
+* Thu May 25 2017 Sandro Bonazzola <sbonazzo@redhat.com> - 4.2.0-0.0.master
+- 4.2.0-0.0.master
+
 * Thu Aug  4 2016 Sandro Bonazzola <sbonazzo@redhat.com> - 4.1.0-0.0.master
 - 4.1.0-0.0.master
 
