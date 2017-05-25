@@ -234,19 +234,19 @@ QUERY_HOSTS="SELECT
      coalesce(htt.text, 'Unknown (id='||v.vds_type||')') AS \"Host Type\",
      c.name AS \"Cluster\",
      c.name AS \"Data Center\",
-     v.$VDS_AGENT_IP_COLUMN,
+     v.$VDS_AGENT_IP_COLUMN AS \"Agent IP\",
      v.host_name AS \"Host Name\",
-     v.rpm_version AS \"Rpm Version\",
-     v.kvm_version AS \"Kvm Version\",
+     v.rpm_version AS \"VDSM Version\",
+     v.kvm_version AS \"KVM Version\",
      v.libvirt_version AS \"Libvirt Version\",
      v.spice_version AS \"Spice Version\",
      v.kernel_version AS \"Kernel Version\",
      hst.text AS \"Status\",
      v.host_os AS \"Operating System\",
-     v.vm_count AS \"Vm Count\",
+     v.vm_count AS \"VM Count\",
      v.mem_available AS \"Available memory\",
      v.usage_mem_percent AS \"Used memory %\",
-     v.usage_cpu_percent AS \"Cpu load %\"
+     v.usage_cpu_percent AS \"CPU load %\"
    FROM
      vds v
      JOIN $CLUSTER_TABLE c ON c.$CLUSTER_PK_COLUMN=v.$VDS_CLUSTER_FK_COLUMN
