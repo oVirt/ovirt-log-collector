@@ -75,8 +75,8 @@ function check_vms_running_obsolete_cluster() {
     # So we must inform in case there is vm in 3.5 cluster level
     vms_out_date=$(execute_SQL_from_file "${SQLS}"/vms_query_check_obsolete_cluster.sql)
     if [ ${vms_out_date} -gt 0 ]; then
-        echo "WARNING: Number of virtual machines in cluster <= 3.5: ${vms_out_date}"
-        echo "See some considerations before upgrade to 3.6:"
+        echo "WARNING: There are ${vms_out_date} VMs in version 3.5 and prior clusters. These clusters need to be upgraded to version 3.6 prior to version 4.0."
+        echo "See 3.6 upgrade considerations:"
         echo -e "https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Virtualization/3.6/html/Upgrade_Guide/Red_Hat_Enterprise_Virtualization_3.6_Upgrade_Considerations.html\n"
     else
         echo -e "- PASSED: All virtual machines have cluster level >= 3.6\n"
