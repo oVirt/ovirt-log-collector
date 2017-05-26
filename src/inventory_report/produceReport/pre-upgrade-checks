@@ -11,7 +11,7 @@ function check_hosts_health() {
         printTable "${sql_cmd}"
         echo
     else
-        echo -e "icon:check-circle-o[size=2x] No blocker status found in the hosts"
+        echo -e "icon:check-circle-o[size=2x] No blocker status found in the hosts\n"
     fi
 }
 
