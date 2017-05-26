@@ -84,16 +84,16 @@ rm -rf \"$WORK_DIR\"
 
 Some commands you can use:
 ==========================
-\"$WORK_DIR\"/help
-\"$WORK_DIR\"/startDb.sh
-psql -h \"$WORK_DIR\"/postgresDb/pgrun ${DB_NAME}
-\"$WORK_DIR\"/produceHtml.sh
-\"$WORK_DIR\"/produceCsv.sh
-\"$WORK_DIR\"/stopDb.sh
+${WORK_DIR}/help
+${WORK_DIR}/startDb.sh
+psql -h ${WORK_DIR}/postgresDb/pgrun ${DB_NAME}
+${WORK_DIR}/produceHtml.sh
+${WORK_DIR}/produceCsv.sh
+${WORK_DIR}/stopDb.sh
 
 When done, to clean up, do:
 ===========================
-\"$WORK_DIR\"/cleanup.sh
+${WORK_DIR}/cleanup.sh
 __EOF__
 "
 }
