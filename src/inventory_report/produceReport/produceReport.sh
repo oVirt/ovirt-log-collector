@@ -179,6 +179,7 @@ check_third_party_certificate
 check_vms_running_obsolete_cluster
 check_vms_with_no_timezone_set
 check_mixedrhelversion
+check_vds_groups_and_cluster_tables_coexist
 
 printSection "Engine details"
 

@@ -110,3 +110,13 @@ function check_mixedrhelversion() {
         echo -e "icon:check-circle-o[size=2x] CheckMixedRhelVersions validation\n"
     fi
 }
+
+function check_vds_groups_and_cluster_tables_coexist() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/table_check_if_vds_groups_and_cluster_coexist.sql)
+    if [ ${sql_ret} -gt 1 ]; then
+        echo -e "WARNING: tables vds_groups and cluster *SHOULD NOT* coexist, " \
+                "vds_groups has been renamed to cluster.\n"
+    else
+        echo -e "icon:check-circle-o[size=2x] tables vds_groups and cluster should not coexist\n"
+    fi
+}

@@ -52,6 +52,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/vms_check_no_timezone_set.sql \
 	produceReport/sqls/database_size.sql \
 	produceReport/sqls/vdc_options_query_checkmixedrhelversion.sql \
+	produceReport/sqls/table_check_if_vds_groups_and_cluster_coexist.sql \
 	$(NULL)
 
 install-data-hook:
