@@ -183,24 +183,28 @@ check_vds_groups_and_cluster_tables_coexist
 
 printSection "Engine details"
 
-PAST_ENGINE_VERSIONS=$(execute_SQL_from_file "${SQLS}"/engine_versions_through_all_upgrades.sql)
+ENGINE_VERSIONS=$(execute_SQL_from_file "${SQLS}"/engine_versions_through_all_upgrades.sql)
 
 echo ".Approximate version of initially installed engine"
-echo "${PAST_ENGINE_VERSIONS}" | head -n 1
+ENGINE_FIRST_VERSION=$(echo "${ENGINE_VERSIONS}" | head -n 1)
+echo ${ENGINE_FIRST_VERSION}
 echo
 
 echo ".Approximate current engine version"
-echo "${PAST_ENGINE_VERSIONS}" | tail -n 1
+ENGINE_CURRENT_VERSION=$(echo "${ENGINE_VERSIONS}" | tail -n 1)
+echo ${ENGINE_CURRENT_VERSION}
 echo
 
-echo ".Probable past the engine versions as engine was upgraded in the past " \
-     "footnote:[<We group the upgrade scripts by the time when the script was fully applied. " \
-     "All scripts which finished in same 30 minutes span are considered to be " \
-     "related to same upgrade. The last script then determines the version " \
-     "of this 'upgrade'.>]"
-
-echo "${PAST_ENGINE_VERSIONS}" | bulletize
-echo
+ENGINE_PAST_VERSIONS=$(echo "${ENGINE_VERSIONS}" | sed -e s/"${ENGINE_CURRENT_VERSION}"//)
+if [ ${#ENGINE_PAST_VERSIONS} -gt 0 ]; then
+    echo ".Probable past the engine versions as engine was upgraded in the past " \
+         "footnote:[<We group the upgrade scripts by the time when the script was fully applied. " \
+         "All scripts which finished in same 30 minutes span are considered to be " \
+         "related to same upgrade. The last script then determines the version " \
+         "of this 'upgrade'.>]"
+    echo "${ENGINE_PAST_VERSIONS}" | bulletize
+    echo
+fi
 
 echo ".Engine FQDN";
 find "${SOS_REPORT_UNPACK_DIR}" -name "10-setup-protocols.conf" -exec grep "ENGINE_FQDN" '{}' \; | sed "s/^.*=//"
