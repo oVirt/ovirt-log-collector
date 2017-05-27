@@ -195,7 +195,7 @@ ENGINE_CURRENT_VERSION=$(echo "${ENGINE_VERSIONS}" | tail -n 1)
 echo ${ENGINE_CURRENT_VERSION}
 echo
 
-ENGINE_PAST_VERSIONS=$(echo "${ENGINE_VERSIONS}" | sed -e s/"${ENGINE_CURRENT_VERSION}"//)
+ENGINE_PAST_VERSIONS=$(echo "${ENGINE_VERSIONS}" | sort -u | sed -e s/"${ENGINE_CURRENT_VERSION}//")
 if [ ${#ENGINE_PAST_VERSIONS} -gt 0 ]; then
     echo ".Probable past the engine versions as engine was upgraded in the past " \
          "footnote:[<We group the upgrade scripts by the time when the script was fully applied. " \
