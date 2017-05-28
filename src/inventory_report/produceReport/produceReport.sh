@@ -315,5 +315,10 @@ printTable "SELECT
                 users
             ORDER BY surname, name"
 
+printSection "Main Packages installed in the Engine system:"
+rpm_version "rhevm" | bulletize
+rpm_version "engine" | bulletize
+rpm_version "postgresql" | bulletize
+rpm_version "spice" | bulletize
 
 cleanup_db

@@ -120,3 +120,7 @@ function check_vds_groups_and_cluster_tables_coexist() {
         echo -e "icon:check-circle-o[size=2x] Tables vds_groups and cluster should not coexist\n"
     fi
 }
+
+function rpm_version() {
+    find "${SOS_REPORT_UNPACK_DIR}" -name "installed-rpms" -exec grep $1 '{}' \; | cut -f 1 -d " "
+}
