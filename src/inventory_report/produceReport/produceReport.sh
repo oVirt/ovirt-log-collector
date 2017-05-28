@@ -169,7 +169,7 @@ initVariablesForVaryingNamesInSchema
 
 printFileHeader
 
-printSection "Pre-upgrade checks:"
+printSection "Pre-upgrade checks"
 . $(dirname "${0}")/pre-upgrade-checks
 
 check_hosts_health
