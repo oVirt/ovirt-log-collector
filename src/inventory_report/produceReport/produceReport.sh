@@ -173,6 +173,7 @@ printSection "Pre-upgrade checks"
 . $(dirname "${0}")/pre-upgrade-checks
 
 check_hosts_health
+check_hosts_pretty_name
 check_vms_health
 check_cluster_no_dc
 check_third_party_certificate
