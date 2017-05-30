@@ -308,8 +308,8 @@ fi
 printSection "System Users"
 printTable "SELECT
                 $(projectionCountingRowsWithOrder surname, name),
-                surname  AS \"Surname\",
                 name  AS \"First Name\",
+                surname  AS \"Last Name\",
                 username  AS \"User name\",
                 email  AS \"E-mail\"
             FROM
