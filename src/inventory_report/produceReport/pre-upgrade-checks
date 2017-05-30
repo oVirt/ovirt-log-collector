@@ -15,6 +15,15 @@ function check_hosts_health() {
     fi
 }
 
+function check_hosts_pretty_name() {
+    # Hosts pretty name value validation
+    hosts_pretty_name=$(execute_SQL_from_file "${SQLS}"/hosts_query_check_pretty_name.sql)
+    if [ ${#hosts_pretty_name} -gt 0 ]; then
+        echo "List of hosts with empty OS Description value which may cause Host type not to be recognized correctly. Such hosts will need to be reinstalled after upgrade to work properly."
+        echo "${hosts_pretty_name}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+    fi
+}
+
 function check_vms_health() {
     # Virtual Machines health validation
     vms_health_check=$(execute_SQL_from_file "${SQLS}"/vms_query_health.sql)
