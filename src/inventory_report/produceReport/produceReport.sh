@@ -217,10 +217,7 @@ echo "${DB_SIZE}"
 echo
 
 printSection "Data Centers"
-executeSQL "SELECT
-                name AS \"Data Center\"
-            FROM storage_pool
-            ORDER BY name;" | enumerate
+execute_SQL_from_file "${SQLS}"/datacenter_show_all.sql | enumerate
 
 printSection "Clusters"
 printTable "SELECT
