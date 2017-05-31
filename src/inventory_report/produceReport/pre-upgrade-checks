@@ -19,8 +19,12 @@ function check_hosts_pretty_name() {
     # Hosts pretty name value validation
     hosts_pretty_name=$(execute_SQL_from_file "${SQLS}"/hosts_query_check_pretty_name.sql)
     if [ ${#hosts_pretty_name} -gt 0 ]; then
-        echo "List of hosts with empty OS Description value which may cause Host type not to be recognized correctly. Such hosts will need to be reinstalled after upgrade to work properly."
+        echo "WARNING: List of hosts with empty OS description value which " \
+             "may cause Host type not to be recognized correctly. Such hosts" \
+             " will need to be reinstalled after upgrade to work properly."
         echo "${hosts_pretty_name}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+    else
+        echo -e "icon:check-circle-o[size=2x] No hosts with empty OS description\n"
     fi
 }
 
