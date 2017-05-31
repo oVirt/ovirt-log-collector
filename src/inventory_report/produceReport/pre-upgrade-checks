@@ -7,11 +7,11 @@ function check_hosts_health() {
     sql_cmd=$(cat "${SQLS}"/hosts_query_check_health.sql)
     hosts_health_check=$(executeSQL "${sql_cmd}")
     if [ ${#hosts_health_check} -gt 0 ]; then
-        echo -e "IMPORTANT: The following hosts are not ready for upgrade:"
+        echo -e "{IMPORTANT} The following hosts are not ready for upgrade:"
         printTable "${sql_cmd}"
         echo
     else
-        echo -e "icon:check-circle-o[size=2x] No blocker status found in the hosts\n"
+        echo -e "{OK} No blocker status found in the hosts\n"
     fi
 }
 
@@ -19,12 +19,12 @@ function check_hosts_pretty_name() {
     # Hosts pretty name value validation
     hosts_pretty_name=$(execute_SQL_from_file "${SQLS}"/hosts_query_check_pretty_name.sql)
     if [ ${#hosts_pretty_name} -gt 0 ]; then
-        echo "WARNING: List of hosts with empty OS description value which " \
+        echo "{WARNING} List of hosts with empty OS description value which " \
              "may cause Host type not to be recognized correctly. Such hosts" \
              " will need to be reinstalled after upgrade to work properly."
         echo "${hosts_pretty_name}" | createAsciidocTableWhenProducingAsciidoc "noheader"
     else
-        echo -e "icon:check-circle-o[size=2x] No hosts with empty OS description\n"
+        echo -e "{OK} No hosts with empty OS description\n"
     fi
 }
 
@@ -32,10 +32,10 @@ function check_vms_health() {
     # Virtual Machines health validation
     vms_health_check=$(execute_SQL_from_file "${SQLS}"/vms_query_health.sql)
     if [ ${#vms_health_check} -gt 0 ]; then
-        echo "IMPORTANT: The following VMs are not ready for upgrade:"
+        echo "{IMPORTANT} The following VMs are not ready for upgrade:"
         echo "${vms_health_check}" | createAsciidocTableWhenProducingAsciidoc "noheader"
     else
-        echo -e "icon:check-circle-o[size=2x] No blocker status found in the VMs\n"
+        echo -e "{OK} No blocker status found in the VMs\n"
     fi
 }
 
@@ -44,11 +44,11 @@ function check_cluster_no_dc() {
     cluster_no_dc=$(execute_SQL_from_file "${SQLS}"/cluster_query_check_datacenter.sql)
     if [ ${#cluster_no_dc} -gt 0 ]; then
         echo
-        echo "WARNING: The following cluster(s) have no datacenter assigned:"
+        echo "{WARNING} The following cluster(s) have no datacenter assigned:"
         echo "${cluster_no_dc}"
         echo
     else
-        echo -e "icon:check-circle-o[size=2x] All clusters contain datacenter assigned\n"
+        echo -e "{OK} All clusters contain datacenter assigned\n"
     fi
 }
 
@@ -70,7 +70,7 @@ function check_third_party_certificate() {
     if [ ! -z "${ENGINE_PKI_TRUST_STORE}" ] && [ "${ENGINE_PKI_TRUST_STORE}" != ${DEFAULT_PKI_TRUSTSTORE} ]; then
         echo
         echo "- PKI Trust Store:"
-        echo "CAUTION: ENGINE_PKI_TRUST_STORE has non-default value"
+        echo "{IMPORTANT} ENGINE_PKI_TRUST_STORE has non-default value"
         echo "ENGINE_PKI_TRUST_STORE defaults to ${DEFAULT_PKI_TRUSTSTORE}"
         echo "ENGINE_PKI_TRUST_STORE is currently ${ENGINE_PKI_TRUST_STORE}"
         echo
@@ -79,7 +79,7 @@ function check_third_party_certificate() {
         echo "For more information about this topic, see also:"
         echo "https://bugzilla.redhat.com/1336838"
     else
-        echo -e "icon:check-circle-o[size=2x] ENGINE_PKI_TRUST_STORE has default value\n"
+        echo -e "{OK} ENGINE_PKI_TRUST_STORE has default value\n"
     fi
 }
 
@@ -88,11 +88,11 @@ function check_vms_running_obsolete_cluster() {
     # So we must inform in case there is vm in 3.5 cluster level
     vms_out_date=$(execute_SQL_from_file "${SQLS}"/vms_query_check_obsolete_cluster.sql)
     if [ ${vms_out_date} -gt 0 ]; then
-        echo "WARNING: There are ${vms_out_date} VMs in version 3.5 and prior clusters. These clusters need to be upgraded to version 3.6 prior upgrading to version 4.0."
+        echo "{WARNING} There are ${vms_out_date} VMs in version 3.5 and prior clusters. These clusters need to be upgraded to version 3.6 prior upgrading to version 4.0."
         echo "See 3.6 Upgrade Considerations:"
         echo -e "https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Virtualization/3.6/html/Upgrade_Guide/Red_Hat_Enterprise_Virtualization_3.6_Upgrade_Considerations.html\n"
     else
-        echo -e "icon:check-circle-o[size=2x] All virtual machines have cluster level >= 3.6\n"
+        echo -e "{OK} All virtual machines have cluster level >= 3.6\n"
     fi
 }
 
@@ -100,13 +100,13 @@ function check_vms_with_no_timezone_set() {
     sql_cmd=$(cat "${SQLS}"/vms_check_no_timezone_set.sql)
     vms_no_timezone_set=$(executeSQL "${sql_cmd}")
     if [ ${#vms_no_timezone_set} -gt 0 ]; then
-        echo -e "WARNING: The following virtual machine(s) have no timezone set and might affect cluster upgrade."
+        echo -e "{WARNING} The following virtual machine(s) have no timezone set and might affect cluster upgrade."
         echo "We recommend update it manually via Engine Web Admin, related bugzilla report:"
         echo "https://bugzilla.redhat.com/show_bug.cgi?id=1386507"
         printTable "${sql_cmd}"
         echo
     else
-        echo -e "icon:check-circle-o[size=2x] Timezone is set for all virtual machines\n"
+        echo -e "{OK} Timezone is set for all virtual machines\n"
     fi
 }
 
@@ -114,23 +114,23 @@ function check_mixedrhelversion() {
     sql_cmd=$(cat "${SQLS}"/vdc_options_query_checkmixedrhelversion.sql)
     sql_ret=$(executeSQL "${sql_cmd}")
     if [ ${#sql_ret} -gt 0 ]; then
-        echo -e "WARNING: *After* upgrading all hosts to EL7 and *BEFORE* " \
+        echo -e "{WARNING} *After* upgrading all hosts to EL7 and *BEFORE* " \
                 "upgrading the Manager to >= 4.y make sure " \
                 "CheckMixedRhelVersions is true"
         printTable "${sql_cmd}"
         echo
     else
-        echo -e "icon:check-circle-o[size=2x] CheckMixedRhelVersions validation\n"
+        echo -e "{OK} CheckMixedRhelVersions validation\n"
     fi
 }
 
 function check_vds_groups_and_cluster_tables_coexist() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/table_check_if_vds_groups_and_cluster_coexist.sql)
     if [ ${sql_ret} -gt 1 ]; then
-        echo -e "WARNING: Tables vds_groups and cluster *SHOULD NOT* coexist, " \
+        echo -e "{WARNING} Tables vds_groups and cluster *SHOULD NOT* coexist, " \
                 "vds_groups has been renamed to cluster.\n"
     else
-        echo -e "icon:check-circle-o[size=2x] Tables vds_groups and cluster should not coexist\n"
+        echo -e "{OK} Tables vds_groups and cluster should not coexist\n"
     fi
 }
 
