@@ -925,15 +925,18 @@ class ENGINEData(CollectorBase):
                 "chrony",
                 "systemd",
             ])
+        self.configuration["sos_options"] = self.build_options()
         self.configuration["reports"] = ",".join(sos_plugins)
-        if 'logs.all_logs' in self._plugins:
+        if (
+            'logs.all_logs' in self.configuration['sos_options'] or
+            '--all-logs' in self.configuration['sos_options']
+        ):
             self.configuration['reports'] += ',logs'
         if 'ovirt_engine_dwh.sensitive_keys' in self._plugins:
             self.configuration['reports'] += ',ovirt_engine_dwh'
         if 'ovirt_engine_reports' in self._plugins:
             self.configuration['reports'] += ',ovirt_engine_reports'
 
-        self.configuration["sos_options"] = self.build_options()
         self.caller.call(
             "sosreport --batch --build \
             --tmp-dir='%(local_working_dir)s' -o %(reports)s %(sos_options)s"
