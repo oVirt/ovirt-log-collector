@@ -184,6 +184,7 @@ check_vms_running_obsolete_cluster
 check_vms_with_no_timezone_set
 check_mixedrhelversion
 check_vds_groups_and_cluster_tables_coexist
+check_vms_windows_with_incorrect_timezone
 
 printSection "Engine details"
 

@@ -39,6 +39,7 @@ sqldir=$(produceReportdir)/sqls
 dist_sql_SCRIPTS = \
 	produceReport/sqls/cleanup.sql \
 	produceReport/sqls/datacenter_show_all.sql \
+	produceReport/sqls/vms_query_windows_vms_with_incorrect_timezone.sql \
 	produceReport/sqls/hosts_create_related_lookup_tables.sql \
 	produceReport/sqls/networks_table_using_network_attachments.sql \
 	produceReport/sqls/vms_query_health.sql \
