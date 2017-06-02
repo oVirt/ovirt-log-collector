@@ -38,6 +38,7 @@ dist_ovirtlogcollectoranalyzer_DATA = \
 sqldir=$(produceReportdir)/sqls
 dist_sql_SCRIPTS = \
 	produceReport/sqls/cleanup.sql \
+	produceReport/sqls/vms_query_linux_and_others_vms_with_incorrect_timezone.sql \
 	produceReport/sqls/datacenter_show_all.sql \
 	produceReport/sqls/vms_query_windows_vms_with_incorrect_timezone.sql \
 	produceReport/sqls/hosts_create_related_lookup_tables.sql \
