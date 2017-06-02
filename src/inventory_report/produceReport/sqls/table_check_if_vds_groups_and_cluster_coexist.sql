@@ -4,4 +4,4 @@ SELECT
 FROM
     information_schema.tables
 WHERE
-    table_name in ('cluster', 'vds_groups');
+    table_name IN ('cluster', 'vds_groups');
