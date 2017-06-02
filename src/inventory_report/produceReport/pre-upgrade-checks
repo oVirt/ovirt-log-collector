@@ -149,3 +149,16 @@ function check_vms_windows_with_incorrect_timezone() {
         echo -e "{OK} All VMs with Windows OS have correct timezone\n"
     fi
 }
+
+function check_vms_linux_and_others_with_incorrect_timezone() {
+   sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_query_linux_and_others_vms_with_incorrect_timezone.sql)
+    if [ ${#sql_ret} -gt 0 ]; then
+        echo -e "{WARNING} The following VMs with Linux OS or marked as " \
+                "Other OS contain incorrect timezone, please adjust the " \
+                "timezone via Web Admin. A list of possible values can " \
+                "be found via: [https://github.com/oVirt/ovirt-engine/blob/5ec729e5f8b5504b5c166c6d4217267a9bda7728/backend/manager/modules/common/src/main/java/org/ovirt/engine/core/common/TimeZoneType.java#L20-L103]"
+        echo "${sql_ret}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+    else
+        echo -e "{OK} All VMs with Linux or Other OS have correct timezone\n"
+    fi
+}
