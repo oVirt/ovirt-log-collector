@@ -116,7 +116,8 @@ function check_mixedrhelversion() {
     if [ ${#sql_ret} -gt 0 ]; then
         echo -e "{WARNING} *After* upgrading all hosts to EL7 and *BEFORE* " \
                 "upgrading the Manager to >= 4.y make sure " \
-                "CheckMixedRhelVersions is true"
+                "CheckMixedRhelVersions is true. More information about " \
+                "this topic check: [https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Virtualization/3.6/html/Upgrade_Guide/Upgrading_Hosts_in_a_Red_Hat_Enterprise_Linux_6_Cluster_to_Red_Hat_Enterprise_Linux_7.html]"
         printTable "${sql_cmd}"
         echo
     else
