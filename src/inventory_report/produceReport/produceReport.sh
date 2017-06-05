@@ -186,6 +186,7 @@ check_mixedrhelversion
 check_vds_groups_and_cluster_tables_coexist
 check_vms_windows_with_incorrect_timezone
 check_vms_linux_and_others_with_incorrect_timezone
+check_vms_with_cluster_lower_3_6_with_virtio_serial_console
 
 printSection "Engine details"
 
