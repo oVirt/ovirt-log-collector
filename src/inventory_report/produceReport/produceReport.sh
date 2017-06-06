@@ -127,7 +127,6 @@ function printFileHeader() {
 :icons: font
 :OK: icon:check-circle-o[size=2x]
 :WARNING: icon:exclamation-triangle[size=2x]
-:IMPORTANT: icon:exclamation[size=2x]
 :sectnums:
     ';
     else
