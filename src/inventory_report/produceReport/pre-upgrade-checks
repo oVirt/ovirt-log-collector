@@ -7,7 +7,7 @@ function check_hosts_health() {
     sql_cmd=$(cat "${SQLS}"/hosts_query_check_health.sql)
     hosts_health_check=$(executeSQL "${sql_cmd}")
     if [ ${#hosts_health_check} -gt 0 ]; then
-        echo -e "{IMPORTANT} The following hosts are not ready for upgrade:"
+        echo -e "{WARNING} The following hosts are not ready for upgrade:"
         printTable "${sql_cmd}"
         echo
     else
@@ -32,7 +32,7 @@ function check_vms_health() {
     # Virtual Machines health validation
     vms_health_check=$(execute_SQL_from_file "${SQLS}"/vms_query_health.sql)
     if [ ${#vms_health_check} -gt 0 ]; then
-        echo "{IMPORTANT} The following VMs are not ready for upgrade:"
+        echo "{WARNING} The following VMs are not ready for upgrade:"
         echo "${vms_health_check}" | createAsciidocTableWhenProducingAsciidoc "noheader"
     else
         echo -e "{OK} No blocker status found in the VMs\n"
@@ -70,7 +70,7 @@ function check_third_party_certificate() {
     if [ ! -z "${ENGINE_PKI_TRUST_STORE}" ] && [ "${ENGINE_PKI_TRUST_STORE}" != ${DEFAULT_PKI_TRUSTSTORE} ]; then
         echo
         echo "- PKI Trust Store:"
-        echo "{IMPORTANT} ENGINE_PKI_TRUST_STORE has non-default value"
+        echo "{WARNING} ENGINE_PKI_TRUST_STORE has non-default value"
         echo "ENGINE_PKI_TRUST_STORE defaults to ${DEFAULT_PKI_TRUSTSTORE}"
         echo "ENGINE_PKI_TRUST_STORE is currently ${ENGINE_PKI_TRUST_STORE}"
         echo
