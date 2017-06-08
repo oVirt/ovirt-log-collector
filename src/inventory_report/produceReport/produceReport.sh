@@ -127,6 +127,7 @@ function printFileHeader() {
 :icons: font
 :OK: icon:check-circle-o[size=2x]
 :WARNING: icon:exclamation-triangle[size=2x]
+:INFO: icon:info-circle[size=2x]
 :sectnums:
     ';
     else
@@ -188,6 +189,9 @@ check_vms_linux_and_others_with_incorrect_timezone
 check_vms_with_cluster_lower_3_6_with_virtio_serial_console
 
 printSection "Engine details"
+
+echo "{INFO} Before engine upgrades it is recommended to execute *engine-upgrade-check*"
+echo
 
 ENGINE_VERSIONS=$(execute_SQL_from_file "${SQLS}"/engine_versions_through_all_upgrades.sql)
 
