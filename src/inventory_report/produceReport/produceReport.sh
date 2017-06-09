@@ -123,7 +123,6 @@ function printFileHeader() {
 :listing-caption: Listing
 :pdf-page-size: A4
 :toc:
-:toc-placement: preamble
 :icons: font
 :OK: icon:check-circle-o[size=2x]
 :WARNING: icon:exclamation-triangle[size=2x]
