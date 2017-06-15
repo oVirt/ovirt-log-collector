@@ -670,6 +670,7 @@ class HyperVisorData(CollectorBase):
             "lvm2",
             "chrony",
             "systemd",
+            "ipmitool",
         ))
 
         # these are the reports that will work with rhev2.2 hosts
