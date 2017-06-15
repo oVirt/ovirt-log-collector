@@ -180,3 +180,18 @@ function check_vms_with_cluster_lower_3_6_with_virtio_serial_console() {
                 " levels 3.5 and below\n"
     fi
 }
+
+function check_async_tasks() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/async_tasks_query_running_tasks.sql)
+    if [ ${#sql_ret} -gt 0 ]; then
+        echo
+        echo "{WARNING} The following async tasks are still running. " \
+             "Please make sure that there are no running tasks before any " \
+             "engine upgrade. You might use taskcleaner.sh tool, see: " \
+             "https://github.com/oVirt/ovirt-engine/blob/bf3abca7848496f7cf60d44d9335e2ec0bd3f852/packaging/setup/dbutils/taskcleaner.sh"
+        echo "${sql_ret}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+        echo
+    else
+        echo -e "{OK} No async tasks running\n"
+    fi
+}
