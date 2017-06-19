@@ -41,6 +41,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/vms_query_linux_and_others_vms_with_incorrect_timezone.sql \
 	produceReport/sqls/datacenter_show_all.sql \
 	produceReport/sqls/async_tasks_query_running_tasks.sql \
+	produceReport/sqls/command_entities_query_get_running_commands.sql \
 	produceReport/sqls/vms_with_cluster_lower_3_6_with_virtio_serial_console.sql \
 	produceReport/sqls/vms_query_windows_vms_with_incorrect_timezone.sql \
 	produceReport/sqls/hosts_create_related_lookup_tables.sql \
