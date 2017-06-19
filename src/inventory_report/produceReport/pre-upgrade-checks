@@ -192,7 +192,7 @@ function check_async_tasks() {
         echo "${sql_ret}" | createAsciidocTableWhenProducingAsciidoc "noheader"
         echo
     else
-        echo -e "{OK} No async tasks running\n"
+        echo -e "{OK} No async tasks running in Engine\n"
     fi
 }
 
