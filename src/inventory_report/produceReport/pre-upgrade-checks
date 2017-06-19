@@ -195,3 +195,18 @@ function check_async_tasks() {
         echo -e "{OK} No async tasks running\n"
     fi
 }
+
+function check_runnning_commands() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/command_entities_query_get_running_commands.sql)
+    if [ ${#sql_ret} -gt 0 ]; then
+        echo
+        echo "{WARNING} The following commands are still running. " \
+             "Please make sure that there are no commands running before any " \
+             "engine upgrade. You might use taskcleaner.sh tool, see: " \
+             "https://github.com/oVirt/ovirt-engine/blob/bf3abca7848496f7cf60d44d9335e2ec0bd3f852/packaging/setup/dbutils/taskcleaner.sh"
+        echo "${sql_ret}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+        echo
+    else
+        echo -e "{OK} No commands running in Engine\n"
+    fi
+}
