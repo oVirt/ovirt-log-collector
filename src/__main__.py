@@ -89,6 +89,10 @@ class NotAnError(logging.Filter):
 # }
 
 
+class NoSosReportError(Exception):
+    pass
+
+
 # Default DB connection params
 pg_user = 'postgres'
 pg_pass = None
@@ -552,8 +556,10 @@ class CollectorBase(object):
             try:
                 lines = stdout.splitlines()
                 fileAry = list(filter(reportFinder, lines))
+                self.configuration["filename"] = None
+                self.configuration["path"] = None
                 if fileAry is not None:
-                    if fileAry[0] is not None and len(fileAry) > 0:
+                    if len(fileAry) > 0 and fileAry[0] is not None:
                         path = fileAry[0].strip()
                         filename = os.path.basename(path)
                         self.configuration["filename"] = filename
@@ -563,22 +569,14 @@ class CollectorBase(object):
                             self.configuration["path"] = os.path.join(
                                 self.configuration["local_tmp_dir"], filename
                             )
-                    else:
-                        self.configuration["filename"] = None
-                        self.configuration["path"] = None
-                else:
-                    self.configuration["filename"] = None
-                    self.configuration["path"] = None
-
+                if self.configuration["filename"] is None:
+                    raise NoSosReportError("Could not parse sosreport output")
                 fileAry = list(filter(md5Finder, lines))
+                self.configuration["checksum"] = None
                 if fileAry is not None and len(fileAry) > 0:
                     if fileAry[0] is not None:
                         md5sum = fileAry[0].partition(": ")[-1]
                         self.configuration["checksum"] = md5sum
-                    else:
-                        self.configuration["checksum"] = None
-                else:
-                    self.configuration["checksum"] = None
 
                 logging.debug("filename(%s)" % self.configuration["filename"])
                 logging.debug("path(%s)" % self.configuration["path"])
@@ -798,6 +796,14 @@ fi
                 self.get_time_diff(stdout)
             except ValueError as e:
                 logging.debug("get_time_diff: " + str(e))
+        except NoSosReportError as s:
+            ExitCodes.exit_code = ExitCodes.CRITICAL
+            logging.error(
+                "Failed to get a sosreport from: %s; %s" % (
+                    self.configuration.get("hostname"),
+                    s
+                )
+            )
         except Exception as e:
             ExitCodes.exit_code = ExitCodes.WARN
             logging.error(
