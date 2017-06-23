@@ -45,7 +45,7 @@ function check_cluster_no_dc() {
     if [ ${#cluster_no_dc} -gt 0 ]; then
         echo
         echo "{WARNING} The following cluster(s) have no datacenter assigned:"
-        echo "${cluster_no_dc}"
+        echo "${cluster_no_dc}" | createAsciidocTableWhenProducingAsciidoc "noheader"
         echo
     else
         echo -e "{OK} All clusters contain datacenter assigned\n"
