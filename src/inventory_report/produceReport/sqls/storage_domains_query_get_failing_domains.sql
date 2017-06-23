@@ -1,0 +1,1 @@
+SELECT GetFailingStorage_domains();
