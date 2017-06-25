@@ -189,6 +189,7 @@ check_vms_with_cluster_lower_3_6_with_virtio_serial_console
 check_async_tasks
 check_runnning_commands
 check_compensation_tasks
+check_storage_domains_failing
 
 printSection "Engine details"
 
