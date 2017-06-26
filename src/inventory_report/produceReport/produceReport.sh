@@ -242,6 +242,11 @@ printTable "SELECT
               LEFT OUTER JOIN storage_pool sp ON c.storage_pool_id=sp.id
             ORDER BY c.name"
 
+printSection "Virtual Machines"
+TOTAL_NUMBER_OF_VMS=$(execute_SQL_from_file "${SQLS}/vms_query_total_number_of_virtual_machines_in_engine.sql")
+
+echo "Total number of virtual machines in Engine: ${TOTAL_NUMBER_OF_VMS}"
+
 printSection "Hosts"
 QUERY_HOSTS="SELECT
      $(projectionCountingRowsWithOrder c.name, v.vds_name),
