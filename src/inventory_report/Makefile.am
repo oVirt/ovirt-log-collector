@@ -66,7 +66,8 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/prepare_procedures_for_reporting_agent_passwords_as_csv.sql \
 	produceReport/sqls/business_entity_snapshot_query_running_compensation_tasks.sql \
 	produceReport/sqls/vms_query_total_number_of_virtual_machines_windows_OS.sql \
-	produceReport/sqls/vms_query_total_number_of_virtual_machines_in_engine.sql
+	produceReport/sqls/vms_query_total_number_of_virtual_machines_in_engine.sql \
+	produceReport/sqls/vms_query_total_number_of_virtual_machines_linux_other_OS.sql \
 	$(NULL)
 
 install-data-hook:
