@@ -244,8 +244,10 @@ printTable "SELECT
 
 printSection "Virtual Machines"
 TOTAL_NUMBER_OF_VMS=$(execute_SQL_from_file "${SQLS}/vms_query_total_number_of_virtual_machines_in_engine.sql")
+TOTAL_WIN_VMS=$(execute_SQL_from_file "${SQLS}/vms_query_total_number_of_virtual_machines_windows_OS.sql")
 
-echo "Total number of virtual machines in Engine: ${TOTAL_NUMBER_OF_VMS}"
+echo -e "Total number of virtual machines in Engine: *${TOTAL_NUMBER_OF_VMS}*\n"
+echo -e "Virtual machines with Windows Operational System: *${TOTAL_WIN_VMS}*\n"
 
 printSection "Hosts"
 QUERY_HOSTS="SELECT
