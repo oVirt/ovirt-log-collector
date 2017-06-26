@@ -7,7 +7,7 @@ BEGIN
     IF EXISTS (SELECT column_name
                FROM information_schema.columns
                WHERE table_name='cluster') THEN
-        RETURN QUERY EXECUTE format('
+        RETURN QUERY (
         SELECT
             cluster.name AS "Cluster",
             count(vm_static.vm_name) AS "Number of VMs"
@@ -15,20 +15,33 @@ BEGIN
             cluster
         INNER JOIN vm_static ON cluster.cluster_id=vm_static.cluster_id
         GROUP BY cluster.name
-        ');
+        ORDER BY cluster.name
+        );
     ELSE
         -- Compat mode, engine database < 4.0
-        RETURN QUERY EXECUTE format('
+        RETURN QUERY (
         SELECT
-            vds_groups.name AS "Cluster",
+             vds_groups.name AS "Cluster",
             count(vm_static.vm_name) AS "Number of VMs"
         FROM
             vds_groups
         INNER JOIN vm_static ON vds_groups.vds_group_id=vm_static.vds_group_id
         GROUP BY vds_groups.name
-        ');
+        ORDER BY vds_groups.name
+        );
     END IF;
 END; $PROCEDURE$
 LANGUAGE plpgsql;
-SELECT __temp_vms_per_cluster();
+
+Copy (
+  SELECT
+    row_number() OVER (ORDER BY name NULLs last) AS "NO.",
+    name,
+    vms_count
+  from
+    __temp_vms_per_cluster()
+  order by
+    name
+) To STDOUT With CSV DELIMITER E'\|' HEADER;
+
 DROP FUNCTION __temp_vms_per_cluster();

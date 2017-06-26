@@ -51,27 +51,6 @@ function bulletize() {
     sed "s/^/* /"
 }
 
-function adjust_table_chars_from_psql_functions() {
-    # psql functions can return tables and the output would be:
-    # (${CLUSTER_NAME}, ${TOTAL_NUMBER_OF_VMS})
-    #
-    # To improve the format to users in the report, removing the following
-    # chars: (),
-    # Remove the chars: (),
-    #
-    # Finally, we want it enumerated and with \n in the end and bold
-    #
-    # In adoc format:
-    #
-    # * * bold
-    # .   is enumerate
-    #
-    sed -e 's/^/. */' \
-        -e 's/)/\n/' \
-        -e 's/(//g' \
-        -e 's/,/*: /g'
-}
-
 function enumerate() {
     sed "s/^/. /"
 }
@@ -241,10 +220,9 @@ printSection "Virtual Machines"
 TOTAL_NUMBER_OF_VMS=$(execute_SQL_from_file "${SQLS}/vms_query_total_number_of_virtual_machines_in_engine.sql")
 TOTAL_WIN_VMS=$(execute_SQL_from_file "${SQLS}/vms_query_total_number_of_virtual_machines_windows_OS.sql")
 TOTAL_LINUX_OR_OTHER_OS=$(execute_SQL_from_file "${SQLS}/vms_query_total_number_of_virtual_machines_linux_other_OS.sql")
-VMS_PER_CLUSTER=$(execute_SQL_from_file "${SQLS}"/cluster_query_vms_per_cluster.sql)
 
-echo -e "Number of virtual machines per cluster:\n"
-echo "${VMS_PER_CLUSTER}" | adjust_table_chars_from_psql_functions
+echo -e ".Number of virtual machines per cluster:\n"
+execute_SQL_from_file "${SQLS}"/cluster_query_vms_per_cluster.sql | createAsciidocTable
 
 echo -e "Virtual machines with Linux OS or Other OS: *${TOTAL_LINUX_OR_OTHER_OS}*\n"
 echo -e "Virtual machines with Windows Operational System: *${TOTAL_WIN_VMS}*\n"
