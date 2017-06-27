@@ -62,7 +62,6 @@ Log Collector tool for oVirt Engine
 %package analyzer
 Summary:	Log Collector for oVirt Engine - Analysis tools
 Requires:	rubygem-asciidoctor
-Requires:	csv
 
 %description analyzer
 This package contains tools to help analyze oVirt Log Collector archives
