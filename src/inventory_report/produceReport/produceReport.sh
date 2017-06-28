@@ -125,6 +125,11 @@ function initVariablesForVaryingNamesInSchema() {
     VMS_CLUSTER_COMPATIBILITY_VERSION_COLUMN=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'vms' AND column_name='vds_group_compatibility_version')) WHEN TRUE THEN 'vds_group_compatibility_version' else 'cluster_compatibility_version' END AS name;" )
     VDS_AGENT_IP_COLUMN=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'vds' AND column_name='agent_ip')) WHEN TRUE THEN 'agent_ip' else 'ip' END AS name;" )
 }
+
+function list_rhn_channels() {
+    # Look for the rhn channels based on yum_-C_repolist file from sosreport
+    find "${SOS_REPORT_UNPACK_DIR}" -name yum_-C_repolist -exec tail -n +3 '{}' \; | cut -f 1 -d ' ' | sed -e '/repolist:/d' -e '/This/d' -e '/repo/d' | bulletize
+}
 #-----------------------------------------------------------------------------------------------------------------------
 
 if [ $# -ne 1 ]; then
@@ -200,6 +205,10 @@ echo
 DB_SIZE=$(execute_SQL_from_file "${SQLS}"/database_size.sql)
 echo ".Engine DB size"
 echo "${DB_SIZE}"
+echo
+
+echo ".Engine subscribed channels"
+list_rhn_channels
 echo
 
 printSection "Data Centers"
