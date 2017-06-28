@@ -28,9 +28,9 @@ DEFAULT_PKI_TRUSTSTORE="/etc/pki/ovirt-engine/.truststore"
 
 function printUsage() {
 cat << __EOF__
-Usage: $0 <analyzer_working_dir> <csv|adoc>
+Usage: $0 <analyzer_working_dir>
 
-Script generates from db adoc or csv file describing current system.
+Script generates from db adoc file describing current system.
 __EOF__
 
 }
@@ -48,11 +48,7 @@ function cleanup_db() {
 }
 
 function bulletize() {
-    if [ -n "${ADOC}" ]; then
-        sed "s/^/* /"
-    else
-        sed "s/^//"
-    fi
+    sed "s/^/* /"
 }
 
 function adjust_table_chars_from_psql_functions() {
@@ -77,49 +73,43 @@ function adjust_table_chars_from_psql_functions() {
 }
 
 function enumerate() {
-    if [ -n "${ADOC}" ]; then
-        sed "s/^/. /"
-    else
-        sed "s/^//"
-    fi
+    sed "s/^/. /"
 }
 
 function createStatementExportingToCsvFromSelect() {
-    echo "Copy ($1) To STDOUT With CSV DELIMITER E'$2' HEADER;"
+    echo "Copy ($1) To STDOUT With CSV DELIMITER E'${CSV_SEPARATOR}' HEADER;"
 }
 
 function printTable() {
-    executeSQL "$(createStatementExportingToCsvFromSelect "$1" "$SEPARATOR_FOR_COLUMNS")" | createAsciidocTableWhenProducingAsciidoc
+    executeSQL "$(createStatementExportingToCsvFromSelect "$1")" | createAsciidocTable
 }
 
 #function you can pipe output into, and which rearrange data to produce asciidoc table.
-function createAsciidocTableWhenProducingAsciidoc() {
-    # Creates an ascii doc table
+# Creates an ascii doc table
     #
     # Args that affect adoc output:
     #     - If no argument, the header option will be
     #       included (first item displayed in bold)
     #
     #     - noheader, no additional option will be added
-    if [ -n "${ADOC}" ]; then
-        if [[ ! -z ${1} && ${1} == "noheader" ]]; then
-            echo "[options=\"\"]"
-        else
-            echo "[options=\"header\"]"
-        fi
-
-        echo "|===="
-        while read A; do echo $SEPARATOR_FOR_COLUMNS$A;done
-        echo "|===="
+function createAsciidocTable() {
+    if [[ ! -z ${1} && ${1} == "noheader" ]]; then
+        echo "[options=\"\"]"
     else
-        while read A; do echo $A;done
-
+        echo "[options=\"header\"]"
     fi
+
+    echo "|===="
+    while read A; do echo ${CSV_SEPARATOR}${A};done
+    echo "|===="
+
 }
 
 function projectionCountingRowsWithOrder() {
     if [ $# -eq 0 ]; then
         #coding error
+
+        echo "Coding error, supply at least one projection" >&2
         exit 1
     fi
     echo "row_number() OVER (ORDER BY $@ NULLs last) AS \"NO.\" "
@@ -128,16 +118,11 @@ function projectionCountingRowsWithOrder() {
 
 function printSection() {
     echo
-    if [ -n "${ADOC}" ]; then
-        echo "== $1"
-    else
-        echo "# $1"
-    fi
+    echo "== $1"
 }
 
 function printFileHeader() {
-    if [ -n "${ADOC}" ]; then
-        echo '
+echo '
 = oVirt Report
 :doctype: book
 :source-highlighter: coderay
@@ -149,10 +134,7 @@ function printFileHeader() {
 :WARNING: icon:exclamation-triangle[size=2x]
 :INFO: icon:info-circle[size=2x]
 :sectnums:
-    ';
-    else
-        echo "# oVirt Report"
-    fi
+';
 }
 
 function initVariablesForVaryingNamesInSchema() {
@@ -166,20 +148,12 @@ function initVariablesForVaryingNamesInSchema() {
 }
 #-----------------------------------------------------------------------------------------------------------------------
 
-if [ $# -ne 2 ]; then
+if [ $# -ne 1 ]; then
     printUsage
     exit 1
 fi
 
-if [ $2 = "csv" ]; then
-    SEPARATOR_FOR_COLUMNS=,;
-elif [ $2 = "adoc" ]; then
-    ADOC=1;
-    SEPARATOR_FOR_COLUMNS=\|;
-else
-    printUsage
-    exit 1
-fi
+CSV_SEPARATOR=\|;
 
 # Make sure nothing was left behind in case an exception happen during runtime
 cleanup_db
@@ -304,19 +278,19 @@ QUERY_HOSTS="SELECT
      LEFT OUTER JOIN host_type_temp htt ON htt.id = v.vds_type
    ORDER BY
      c.name, v.vds_name";
-QUERY_HOSTS_AS_CSV=$(createStatementExportingToCsvFromSelect "$QUERY_HOSTS" "$SEPARATOR_FOR_COLUMNS")
+QUERY_HOSTS_AS_CSV=$(createStatementExportingToCsvFromSelect "$QUERY_HOSTS")
 
-executeSQL "$QUERY_HOSTS_AS_CSV" | createAsciidocTableWhenProducingAsciidoc;
+executeSQL "$QUERY_HOSTS_AS_CSV" | createAsciidocTable;
 
 execute_SQL_from_file "${SQLS}/prepare_procedures_for_reporting_agent_passwords_as_csv.sql"
 AGENT_PASSWORDS_QUERY=$(cat "${SQLS}"/agent_passwords.sql)
-AGENT_PASSWORDS_AS_CSV=$(executeSQL "$(createStatementExportingToCsvFromSelect "$AGENT_PASSWORDS_QUERY" "$SEPARATOR_FOR_COLUMNS")")
+AGENT_PASSWORDS_AS_CSV=$(executeSQL "$(createStatementExportingToCsvFromSelect "$AGENT_PASSWORDS_QUERY")")
 execute_SQL_from_file "${SQLS}/cleanup_procedures_for_reporting_agent_passwords_as_csv.sql"
 
 #note gt 1, ie >1. It's because csv contains header, thus 0 records = 1 line.
 if [ $(echo "${AGENT_PASSWORDS_AS_CSV}" | wc -l) -gt 1 ]; then
     printSection "Agent password per host"
-    echo "${AGENT_PASSWORDS_AS_CSV}" | createAsciidocTableWhenProducingAsciidoc
+    echo "${AGENT_PASSWORDS_AS_CSV}" | createAsciidocTable
 fi
 
 printSection "Storage Domains"
@@ -331,9 +305,9 @@ QUERY_STORAGE_DOMAIN="SELECT
     JOIN storage_domain_type_temp sdtt ON sds.storage_domain_type=sdtt.id
     ORDER BY sds.storage_name"
 
-QUERY_STORAGE_DOMAIN_AS_CSV=$(createStatementExportingToCsvFromSelect "$QUERY_STORAGE_DOMAIN" "$SEPARATOR_FOR_COLUMNS")
+QUERY_STORAGE_DOMAIN_AS_CSV=$(createStatementExportingToCsvFromSelect "$QUERY_STORAGE_DOMAIN" )
 
-executeSQL "$CREATE_TEMP_TABLES_SQL $QUERY_STORAGE_DOMAIN_AS_CSV" | createAsciidocTableWhenProducingAsciidoc;
+executeSQL "$CREATE_TEMP_TABLES_SQL $QUERY_STORAGE_DOMAIN_AS_CSV" | createAsciidocTable;
 
 printSection "Data Warehouse (DWH)"
 DWS_CHECK_RUUNING_QUERY=$(cat "${SQLS}"/dws_query_check_if_its_running.sql)

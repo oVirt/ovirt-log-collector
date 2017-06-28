@@ -18,12 +18,10 @@ cat << __EOF__
 Usage: $0 [options] <tar-file>
     --keep-working-dir
         Do not remove the temporary working directory in the end.
-    --csv=<file>
-        Write csv report to <file>. Defaults to ${CSV_OUT} .
     --html=<file>
         Write html report to <file>. Defaults to ${HTML_OUT} .
 
-Script unpacks sosreport, import it into db and generates csv and html report into current directory.
+Script unpacks sosreport, import it into db and generates html report into current directory.
 __EOF__
 exit 1;
 
@@ -31,7 +29,6 @@ exit 1;
 
 KEEP_WORKING_DIR=
 TAR_FILE=
-CSV_OUT=analyzer_report.csv
 HTML_OUT=analyzer_report.html
 
 while [ -n "$1" ]; do
@@ -44,9 +41,6 @@ while [ -n "$1" ]; do
 		;;
 		--keep-working-dir)
 			KEEP_WORKING_DIR=1
-		;;
-                --csv=*)
-			CSV_OUT="${v}"
 		;;
                 --html=*)
 			HTML_OUT="${v}"
@@ -72,13 +66,12 @@ echo "======================"
 echo "Temporary working directory is ${WORK_DIR}"
 
 "$SCRIPT_DIR"/unpackAndPrepareDump.sh "$TAR_FILE" "$WORK_DIR"
-"$SCRIPT_DIR"/importDumpIntoNewDb.sh "$WORK_DIR" "${CSV_OUT}" "${HTML_OUT}" 0>/dev/null
+"$SCRIPT_DIR"/importDumpIntoNewDb.sh "$WORK_DIR" "${HTML_OUT}" 0>/dev/null
 
 echo
 echo "Generating reports:"
 echo "==================="
 "$WORK_DIR"/produceHtml.sh || echo "html report cannot be generated"
-"$WORK_DIR"/produceCsv.sh || echo "csv report cannot be generated"
 
 if [ -z "${KEEP_WORKING_DIR}" ]; then
 	"$WORK_DIR"/cleanup.sh
