@@ -13,11 +13,11 @@
 #  limitations under the License.
 #
 
-if [ $# -ne 3 ]; then
+if [ $# -ne 2 ]; then
 cat << __EOF__
-Usage: $0 <analyzer-working-dir> <csv-out-file> <html-out-file>
+Usage: $0 <analyzer-working-dir> <html-out-file>
 
-Script generates from db adoc or csv file describing current system.
+Script generates from db adoc file describing current system.
 __EOF__
 
 	exit 1;
@@ -61,8 +61,7 @@ function createExecutableBashScript() {
 
 function createUserScripts() {
     createExecutableBashScript \
-        "$WORK_DIR/produceHtml.sh" "$(dirname $0)/produceReport/produceReport.sh \"$WORK_DIR\" adoc | asciidoctor -a toc -o ${HTML_OUT} -;echo \"Generated ${HTML_OUT}\""
-    createExecutableBashScript "$WORK_DIR/produceCsv.sh" "$(dirname $0)/produceReport/produceReport.sh \"$WORK_DIR\" csv > ${CSV_OUT}; echo \"Generated ${CSV_OUT}\""
+        "$WORK_DIR/produceHtml.sh" "$(dirname $0)/produceReport/produceReport.sh \"$WORK_DIR\" | asciidoctor -a toc -o ${HTML_OUT} -;echo \"Generated ${HTML_OUT}\""
     createExecutableBashScript "$WORK_DIR/startDb.sh" "pg_ctl start -D $PGDATA -s -o \"-h '' -k $PGRUN\" -w"
     createExecutableBashScript "$WORK_DIR/stopDb.sh" "pg_ctl stop -D $PGDATA -s -m fast"
 
@@ -88,7 +87,6 @@ ${WORK_DIR}/help
 ${WORK_DIR}/startDb.sh
 psql -h ${WORK_DIR}/postgresDb/pgrun ${DB_NAME}
 ${WORK_DIR}/produceHtml.sh
-${WORK_DIR}/produceCsv.sh
 ${WORK_DIR}/stopDb.sh
 
 When done, to clean up, do:
@@ -101,8 +99,7 @@ __EOF__
 
 DB_NAME="report"
 WORK_DIR=$1
-CSV_OUT="$2"
-HTML_OUT="$3"
+HTML_OUT="$2"
 initDbVariables
 PG_DUMP_DIR=$WORK_DIR/pg_dump_dir
 SOS_REPORT_DIR=$WORK_DIR/unpacked_sosreport

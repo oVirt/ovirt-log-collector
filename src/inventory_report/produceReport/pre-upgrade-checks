@@ -22,7 +22,7 @@ function check_hosts_pretty_name() {
         echo "{WARNING} List of hosts with empty OS description value which " \
              "may cause Host type not to be recognized correctly. Such hosts" \
              " will need to be reinstalled after upgrade to work properly."
-        echo "${hosts_pretty_name}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+        echo "${hosts_pretty_name}" | createAsciidocTable "noheader"
     else
         echo -e "{OK} No hosts with empty OS description\n"
     fi
@@ -33,7 +33,7 @@ function check_vms_health() {
     vms_health_check=$(execute_SQL_from_file "${SQLS}"/vms_query_health.sql)
     if [ ${#vms_health_check} -gt 0 ]; then
         echo "{WARNING} The following VMs are not ready for upgrade:"
-        echo "${vms_health_check}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+        echo "${vms_health_check}" | createAsciidocTable "noheader"
     else
         echo -e "{OK} No blocker status found in the VMs\n"
     fi
@@ -45,7 +45,7 @@ function check_cluster_no_dc() {
     if [ ${#cluster_no_dc} -gt 0 ]; then
         echo
         echo "{WARNING} The following cluster(s) have no datacenter assigned:"
-        echo "${cluster_no_dc}"
+	echo "${cluster_no_dc}" | createAsciidocTable "noheader"
         echo
     else
         echo -e "{OK} All clusters contain datacenter assigned\n"
@@ -145,7 +145,7 @@ function check_vms_windows_with_incorrect_timezone() {
         echo -e "{WARNING} The following VMs with Windows OS contain incorrect" \
                 " timezone, please adjust the timezone via Web Admin. A list " \
                 "of possible values can be found via: [https://github.com/oVirt/ovirt-engine/blob/master/backend/manager/modules/compat/src/main/java/org/ovirt/engine/core/compat/WindowsJavaTimezoneMapping.java]"
-        echo "${sql_ret}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+        echo "${sql_ret}" | createAsciidocTable "noheader"
     else
         echo -e "{OK} All VMs with Windows OS have correct timezone\n"
     fi
@@ -158,7 +158,7 @@ function check_vms_linux_and_others_with_incorrect_timezone() {
                 "Other OS contain incorrect timezone, please adjust the " \
                 "timezone via Web Admin. A list of possible values can " \
                 "be found via: [https://github.com/oVirt/ovirt-engine/blob/5ec729e5f8b5504b5c166c6d4217267a9bda7728/backend/manager/modules/common/src/main/java/org/ovirt/engine/core/common/TimeZoneType.java#L20-L103]"
-        echo "${sql_ret}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+        echo "${sql_ret}" | createAsciidocTable "noheader"
     else
         echo -e "{OK} All VMs with Linux or Other OS have correct timezone\n"
     fi
@@ -174,7 +174,7 @@ function check_vms_with_cluster_lower_3_6_with_virtio_serial_console() {
                 "console feature while the VM is still in a 3.5 cluster. " \
                 "It can be re-enabled once the VM is in a 3.6 cluster." \
                 "Related bug report: [https://bugzilla.redhat.com/show_bug.cgi?id=1434401]"
-        echo "${sql_ret}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+        echo "${sql_ret}" | createAsciidocTable "noheader"
     else
         echo -e "{OK} No VMs with VirtIO serial console enabled in cluster" \
                 " levels 3.5 and below\n"
@@ -189,7 +189,7 @@ function check_async_tasks() {
              "Please make sure that there are no running tasks before any " \
              "engine upgrade. You might use taskcleaner.sh tool, see: " \
              "https://github.com/oVirt/ovirt-engine/blob/bf3abca7848496f7cf60d44d9335e2ec0bd3f852/packaging/setup/dbutils/taskcleaner.sh"
-        echo "${sql_ret}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+        echo "${sql_ret}" | createAsciidocTable "noheader"
         echo
     else
         echo -e "{OK} No async tasks running in Engine\n"
@@ -204,7 +204,7 @@ function check_runnning_commands() {
              "Please make sure that there are no commands running before any " \
              "engine upgrade. You might use taskcleaner.sh tool, see: " \
              "https://github.com/oVirt/ovirt-engine/blob/bf3abca7848496f7cf60d44d9335e2ec0bd3f852/packaging/setup/dbutils/taskcleaner.sh"
-        echo "${sql_ret}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+        echo "${sql_ret}" | createAsciidocTable "noheader"
         echo
     else
         echo -e "{OK} No commands running in Engine\n"
@@ -219,7 +219,7 @@ function check_compensation_tasks() {
              "Please make sure that there are no running tasks before any " \
              "engine upgrade. You might use taskcleaner.sh tool, see: " \
              "https://github.com/oVirt/ovirt-engine/blob/bf3abca7848496f7cf60d44d9335e2ec0bd3f852/packaging/setup/dbutils/taskcleaner.sh"
-        echo "${sql_ret}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+        echo "${sql_ret}" | createAsciidocTable "noheader"
         echo
     else
         echo -e "{OK} No compensation tasks running in Engine\n"
@@ -233,7 +233,7 @@ function check_storage_domains_failing() {
         echo "{WARNING} The following storage domains are inactive. " \
              "Please make sure all storage domains required for the system " \
              "are available and active before upgrading the environment"
-        echo "${sql_ret}" | createAsciidocTableWhenProducingAsciidoc "noheader"
+        echo "${sql_ret}" | createAsciidocTable "noheader"
         echo
     else
         echo -e "{OK} No storage domain inactive\n"
