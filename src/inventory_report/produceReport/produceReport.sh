@@ -233,11 +233,11 @@ echo ".Engine DB size"
 echo "${DB_SIZE}"
 echo
 
-printSection "RHN data from Engine"
 user_rhn=$(collect_rhn_data "username")
 id_rhn=$(collect_rhn_data "system_id")
 
 if [ ${#user_rhn} -gt 0 ]; then
+    printSection "RHN data from Engine"
     echo "*RHN Username*:"
     echo "${user_rhn}"
     echo
@@ -250,7 +250,7 @@ if [ ${#id_rhn} -gt 0 ]; then
 fi
 
 rhn_channels=$(list_rhn_channels)
-if [ ${#rhn_channels} -gt 0 ]; then
+if [[ ${#rhn_channels} -gt 0 && ${#user_rhn} -gt 0 ]]; then
     echo ".Engine subscribed channels"
     echo "${rhn_channels}"
 fi
