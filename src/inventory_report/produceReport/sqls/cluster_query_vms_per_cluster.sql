@@ -36,11 +36,11 @@ LANGUAGE plpgsql;
 Copy (
   SELECT
     row_number() OVER (ORDER BY name NULLs last) AS "NO.",
-    name,
-    vms_count
-  from
+    name AS "Cluster",
+    vms_count AS "Number of VMs"
+  FROM
     __temp_vms_per_cluster()
-  order by
+  ORDER BY
     name
 ) To STDOUT With CSV DELIMITER E'\|' HEADER;
 
