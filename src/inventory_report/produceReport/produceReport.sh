@@ -265,7 +265,8 @@ printTable "SELECT
               $(projectionCountingRowsWithOrder c.name),
               c.name  AS \"Cluster Name\",
               sp.name AS \"Data Center Name\",
-              c.compatibility_version AS \"Compatibility Version\"
+              c.compatibility_version AS \"Compatibility Version\",
+              c.cpu_name AS \"Cluster CPU Type\"
             FROM
               $CLUSTER_TABLE c
               LEFT OUTER JOIN storage_pool sp ON c.storage_pool_id=sp.id
