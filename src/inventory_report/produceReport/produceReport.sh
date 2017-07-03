@@ -138,6 +138,24 @@ function list_rhn_channels() {
     # Look for the rhn channels based on yum_-C_repolist file from sosreport
     find "${SOS_REPORT_UNPACK_DIR}" -name yum_-C_repolist -exec tail -n +3 '{}' \; | cut -f 1 -d ' ' | sed -e '/repolist:/d' -e '/This/d' -e '/repo/d' | bulletize
 }
+
+function collect_rhn_data() {
+    #
+    # Reads /etc/sysconfig/rhn/systemid stored in sosreport
+    # and returns the value assigned to the configuration key
+    # provided as argument.
+    #
+    # Argument
+    #     configuration key, example: system_id, username, etc
+    PATH_SYSTEMID=$(find "${SOS_REPORT_UNPACK_DIR}" -name systemid)
+
+    if [[ ! -z ${PATH_SYSTEMID} ]]; then
+        xmlcmd="xmllint --xpath 'string(//member[* = \"$1\"]/value/string)' ${PATH_SYSTEMID}"
+        # Withot a subshell the xmllint command complain, for now using sh -c
+        sh -c "${xmlcmd}"
+        echo
+    fi
+}
 #-----------------------------------------------------------------------------------------------------------------------
 
 if [ $# -ne 1 ]; then
@@ -215,8 +233,27 @@ echo ".Engine DB size"
 echo "${DB_SIZE}"
 echo
 
-echo ".Engine subscribed channels"
-list_rhn_channels
+printSection "RHN data from Engine"
+user_rhn=$(collect_rhn_data "username")
+id_rhn=$(collect_rhn_data "system_id")
+
+if [ ${#user_rhn} -gt 0 ]; then
+    echo "*RHN Username*:"
+    echo "${user_rhn}"
+    echo
+fi
+
+if [ ${#id_rhn} -gt 0 ]; then
+    echo "*RHN System id*:"
+    echo "${id_rhn}"
+    echo
+fi
+
+rhn_channels=$(list_rhn_channels)
+if [ ${#rhn_channels} -gt 0 ]; then
+    echo ".Engine subscribed channels"
+    echo "${rhn_channels}"
+fi
 echo
 
 printSection "Data Centers"
