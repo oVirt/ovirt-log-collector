@@ -6,9 +6,4 @@ FROM
     vm_static
 WHERE
     time_zone = '' AND
-    vm_name != 'Tiny' AND
-    vm_name != 'XLarge' AND
-    vm_name != 'Small' AND
-    vm_name != 'Large' AND
-    vm_name != 'Medium' AND
-    vm_name != 'Blank'
+    entity_type = 'VM'
