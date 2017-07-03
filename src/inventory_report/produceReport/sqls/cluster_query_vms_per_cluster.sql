@@ -14,6 +14,7 @@ BEGIN
         FROM
             cluster
         INNER JOIN vm_static ON cluster.cluster_id=vm_static.cluster_id
+        AND entity_type = 'VM'
         GROUP BY cluster.name
         ORDER BY cluster.name
         );
@@ -26,6 +27,7 @@ BEGIN
         FROM
             vds_groups
         INNER JOIN vm_static ON vds_groups.vds_group_id=vm_static.vds_group_id
+        AND entity_type = 'VM'
         GROUP BY vds_groups.name
         ORDER BY vds_groups.name
         );
