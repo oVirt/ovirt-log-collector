@@ -60,6 +60,14 @@ function createStatementExportingToCsvFromSelect() {
 }
 
 function printTable() {
+    # Argument:
+    #   SQL query
+    #
+    # Description:
+    #   This function uses createStatementExportingToCsvFromSelect()
+    #   to insert into SQL query the COPY() statement and save the SQL
+    #   query output with CSV delimiter |. The delimiter | is used to
+    #   create AsciiDoc tables and later converted to HTML tables.
     executeSQL "$(createStatementExportingToCsvFromSelect "$1")" | createAsciidocTable
 }
 
@@ -212,7 +220,8 @@ list_rhn_channels
 echo
 
 printSection "Data Centers"
-execute_SQL_from_file "${SQLS}"/datacenter_show_all.sql | enumerate
+DC_QUERY=$(cat "${SQLS}"/datacenter_show_all.sql)
+printTable "${DC_QUERY}"
 
 printSection "Clusters"
 printTable "SELECT
