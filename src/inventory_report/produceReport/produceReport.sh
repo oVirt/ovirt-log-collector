@@ -347,6 +347,10 @@ QUERY_STORAGE_DOMAIN_AS_CSV=$(createStatementExportingToCsvFromSelect "$QUERY_ST
 
 executeSQL "$CREATE_TEMP_TABLES_SQL $QUERY_STORAGE_DOMAIN_AS_CSV" | createAsciidocTable;
 
+printSection "Disks"
+DC_QUERY=$(cat "${SQLS}"/storage_domains_query_number_of_disks.sql)
+printTable "${DC_QUERY}"
+
 printSection "Data Warehouse (DWH)"
 DWS_CHECK_RUUNING_QUERY=$(cat "${SQLS}"/dws_query_check_if_its_running.sql)
 printTable "${DWS_CHECK_RUUNING_QUERY}"
