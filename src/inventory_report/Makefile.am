@@ -60,7 +60,6 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/database_size.sql \
 	produceReport/sqls/storage_domains_query_get_failing_domains.sql \
 	produceReport/sqls/vdc_options_query_checkmixedrhelversion.sql \
-	produceReport/sqls/table_check_if_vds_groups_and_cluster_coexist.sql \
 	produceReport/sqls/agent_passwords.sql \
 	produceReport/sqls/cleanup_procedures_for_reporting_agent_passwords_as_csv.sql \
 	produceReport/sqls/prepare_procedures_for_reporting_agent_passwords_as_csv.sql \
