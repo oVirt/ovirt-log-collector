@@ -11,7 +11,7 @@ BEGIN
         SELECT
             cluster.name AS "Cluster Name",
             cluster_policies.name AS "Policy Name",
-            cluster_policies.custom_properties AS "Properties"
+            regexp_replace(cluster_policies.custom_properties, '"|{|}|\n|(:)|(^ .)|, |', '', 'g') AS "Properties"
         FROM
             cluster
         INNER JOIN cluster_policies ON cluster.cluster_policy_id=cluster_policies.id
@@ -22,7 +22,7 @@ BEGIN
         SELECT
             vds_groups.name AS "Cluster Name",
             cluster_policies.name AS "Policy Name",
-            cluster_policies.custom_properties AS "Properties"
+            regexp_replace(cluster_policies.custom_properties, '"|{|}|\n|(:)|(^ .)|, |', '', 'g') AS "Properties"
         FROM
             vds_groups
         INNER JOIN cluster_policies ON vds_groups.cluster_policy_id=cluster_policies.id
