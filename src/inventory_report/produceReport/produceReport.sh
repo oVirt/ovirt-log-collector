@@ -197,7 +197,8 @@ check_storage_domains_failing
 
 printSection "Engine details"
 
-echo "{INFO} Before engine upgrades it is recommended to execute *engine-upgrade-check*"
+echo "{INFO} Before engine upgrades it is recommended to execute " \
+     "https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.1/html-single/upgrade_guide/#Upgrading_between_Minor_Releases[engine-upgrade-check]"
 echo
 
 ENGINE_VERSIONS=$(execute_SQL_from_file "${SQLS}"/engine_versions_through_all_upgrades.sql)
