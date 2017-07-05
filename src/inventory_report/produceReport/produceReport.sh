@@ -378,15 +378,7 @@ if [ $(executeSQL "$tablesWithOverriddenCompatibilityVersionSQL" | wc -l) -gt 0 
 fi
 
 printSection "System Users"
-printTable "SELECT
-                $(projectionCountingRowsWithOrder surname, name),
-                name  AS \"First Name\",
-                surname  AS \"Last Name\",
-                username  AS \"User name\",
-                email  AS \"E-mail\"
-            FROM
-                users
-            ORDER BY surname, name"
+execute_SQL_from_file "${SQLS}"/users_query_system_users.sql | createAsciidocTable
 
 printSection "Main Packages installed in the Engine system:"
 rpm_version "rhevm" | bulletize

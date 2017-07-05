@@ -70,6 +70,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/cluster_query_vms_per_cluster.sql \
 	produceReport/sqls/storage_domains_query_number_of_disks.sql \
 	produceReport/sqls/cluster_query_migration_policies.sql \
+	produceReport/sqls/users_query_system_users.sql \
 	$(NULL)
 
 install-data-hook:
