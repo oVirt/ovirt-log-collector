@@ -350,6 +350,12 @@ QUERY_STORAGE_DOMAIN_AS_CSV=$(createStatementExportingToCsvFromSelect "$QUERY_ST
 
 executeSQL "$CREATE_TEMP_TABLES_SQL $QUERY_STORAGE_DOMAIN_AS_CSV" | createAsciidocTable;
 
+sql_query=$(execute_SQL_from_file "${SQLS}"/storage_domains_nfs_path.sql)
+if [ ${#sql_query} -gt 0 ]; then
+    printSection "Storage Domain: NFS"
+    echo "${sql_query}" | createAsciidocTable
+fi
+
 printSection "Disks"
 DC_QUERY=$(cat "${SQLS}"/storage_domains_query_number_of_disks.sql)
 printTable "${DC_QUERY}"
