@@ -72,6 +72,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/cluster_query_migration_policies.sql \
 	produceReport/sqls/users_query_system_users.sql \
 	produceReport/sqls/storage_domains_nfs_path.sql \
+	produceReport/sqls/luns_query_all_data.sql \
 	$(NULL)
 
 install-data-hook:

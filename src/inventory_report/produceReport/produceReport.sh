@@ -356,6 +356,12 @@ if [ ${#sql_query} -gt 0 ]; then
     echo "${sql_query}" | createAsciidocTable
 fi
 
+sql_query=$(execute_SQL_from_file "${SQLS}"/luns_query_all_data.sql)
+if [ ${#sql_query} -gt 0 ]; then
+    printSection "Luns"
+    echo "${sql_query}" | createAsciidocTable
+fi
+
 printSection "Disks"
 DC_QUERY=$(cat "${SQLS}"/storage_domains_query_number_of_disks.sql)
 printTable "${DC_QUERY}"
