@@ -326,7 +326,7 @@ execute_SQL_from_file "${SQLS}/cleanup_procedures_for_reporting_agent_passwords_
 
 #note gt 1, ie >1. It's because csv contains header, thus 0 records = 1 line.
 if [ $(echo "${AGENT_PASSWORDS_AS_CSV}" | wc -l) -gt 1 ]; then
-    printSection "Agent password per host"
+    printSection "Fence agent password per host"
     echo "${AGENT_PASSWORDS_AS_CSV}" | createAsciidocTable
 fi
 
