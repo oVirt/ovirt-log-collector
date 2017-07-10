@@ -356,6 +356,12 @@ if [ ${#sql_query} -gt 0 ]; then
     echo "${sql_query}" | createAsciidocTable
 fi
 
+sql_query=$(execute_SQL_from_file "${SQLS}"/lun_storage_server_connection_map_query_number_connection_map.sql)
+if [ ${sql_query} -gt 0 ]; then
+    printSection "Storage Domain: Luns"
+    execute_SQL_from_file "${SQLS}"/storage_domains_lun_data.sql | createAsciidocTable
+fi
+
 sql_query=$(execute_SQL_from_file "${SQLS}"/luns_query_all_data.sql)
 if [ ${#sql_query} -gt 0 ]; then
     printSection "Luns"

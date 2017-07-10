@@ -73,6 +73,8 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/users_query_system_users.sql \
 	produceReport/sqls/storage_domains_nfs_path.sql \
 	produceReport/sqls/luns_query_all_data.sql \
+	produceReport/sqls/storage_domains_lun_data.sql \
+	produceReport/sqls/lun_storage_server_connection_map_query_number_connection_map.sql \
 	$(NULL)
 
 install-data-hook:
