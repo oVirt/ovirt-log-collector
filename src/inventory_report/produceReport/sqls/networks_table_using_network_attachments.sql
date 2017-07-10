@@ -23,7 +23,11 @@ SELECT
 
   ARRAY_TO_STRING(ARRAY[nic.mac_addr, (SELECT STRING_AGG(slave.mac_addr, ', ') FROM vds_interface slave WHERE slave.bond_name = nic.name AND slave.vds_id=nic.vds_id)], ', ') AS "Related MAC addresses",
   na.address AS "IPV4 Address",
-  n.vlan_id AS "VLAN ID"
+  n.vlan_id AS "VLAN ID",
+  n.mtu AS "MTU",
+  n.description AS "Description",
+  n.subnet AS "Subnet",
+  n.gateway AS "Gateway"
 
 FROM
   network n
