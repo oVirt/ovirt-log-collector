@@ -126,7 +126,7 @@ function check_mixedrhelversion() {
 }
 
 function rpm_version() {
-    find "${SOS_REPORT_UNPACK_DIR}" -name "installed-rpms" -exec grep $1 '{}' \; | cut -f 1 -d " "
+    find "${SOS_REPORT_UNPACK_DIR}" -name "installed-rpms" -exec grep '(engine\|ovirt\|postgresql\|rhevm\|spice\| )' '{}' \; | cut -f 1 -d " " | sort
 }
 
 function check_vms_windows_with_incorrect_timezone() {

@@ -399,10 +399,7 @@ fi
 printSection "System Users"
 execute_SQL_from_file "${SQLS}"/users_query_system_users.sql | createAsciidocTable
 
-printSection "Main Packages installed in the Engine system:"
-rpm_version "rhevm" | bulletize
-rpm_version "engine" | bulletize
-rpm_version "postgresql" | bulletize
-rpm_version "spice" | bulletize
+printSection "Main Packages installed in the Engine system"
+rpm_version | bulletize
 
 cleanup_db
