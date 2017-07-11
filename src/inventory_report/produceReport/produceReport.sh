@@ -401,6 +401,6 @@ printSection "System Users"
 execute_SQL_from_file "${SQLS}"/users_query_system_users.sql | createAsciidocTable
 
 printSection "Main Packages installed in the Engine system"
-rpm_version | bulletize
+rpm_version | createAsciidocTable noheader
 
 cleanup_db
