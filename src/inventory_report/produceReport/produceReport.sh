@@ -303,7 +303,7 @@ QUERY_HOSTS="SELECT
      v.vds_name AS \"Name of Host\",
      coalesce(htt.text, 'Unknown (id='||v.vds_type||')') AS \"Host Type\",
      c.name AS \"Cluster\",
-     c.name AS \"Data Center\",
+     sp.name AS \"Data Center\",
      v.$VDS_AGENT_IP_COLUMN AS \"Agent IP\",
      v.host_name AS \"FQDN or IP\",
      regexp_replace(v.rpm_version, '[a-z]+.', '') AS \"vdsm\",
