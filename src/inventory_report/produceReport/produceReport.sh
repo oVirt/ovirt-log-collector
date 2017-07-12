@@ -156,6 +156,26 @@ function collect_rhn_data() {
         echo
     fi
 }
+
+function reportVirtualMachines() {
+    printSection "Virtual Machines"
+    TOTAL_NUMBER_OF_VMS=$(execute_SQL_from_file "${SQLS}/vms_query_total_number_of_virtual_machines_in_engine.sql")
+    TOTAL_WIN_VMS=$(execute_SQL_from_file "${SQLS}/vms_query_total_number_of_virtual_machines_windows_OS.sql")
+    TOTAL_LINUX_OR_OTHER_OS=$(execute_SQL_from_file "${SQLS}/vms_query_total_number_of_virtual_machines_linux_other_OS.sql")
+
+    echo -e ".Number of Virtual Machine(s) per Cluster:\n"
+    execute_SQL_from_file "${SQLS}"/cluster_query_vms_per_cluster.sql | createAsciidocTable
+
+    echo -e ".Number of Virtual Machine(s) per Operational System:\n"
+    echo "[options=\"header\"]"
+    echo "|===="
+    echo "| Operational System | Count"
+    echo "| Linux OS or Other OS | ${TOTAL_LINUX_OR_OTHER_OS}"
+    echo "| Windows OS | ${TOTAL_WIN_VMS}"
+    echo "| Total number of Virtual Machines in Engine | ${TOTAL_NUMBER_OF_VMS}"
+    echo "|===="
+}
+
 #-----------------------------------------------------------------------------------------------------------------------
 
 if [ $# -ne 1 ]; then
@@ -275,17 +295,7 @@ printTable "SELECT
 echo ".Cluster Migration Policies"
 execute_SQL_from_file "${SQLS}"/cluster_query_migration_policies.sql | createAsciidocTable
 
-printSection "Virtual Machines"
-TOTAL_NUMBER_OF_VMS=$(execute_SQL_from_file "${SQLS}/vms_query_total_number_of_virtual_machines_in_engine.sql")
-TOTAL_WIN_VMS=$(execute_SQL_from_file "${SQLS}/vms_query_total_number_of_virtual_machines_windows_OS.sql")
-TOTAL_LINUX_OR_OTHER_OS=$(execute_SQL_from_file "${SQLS}/vms_query_total_number_of_virtual_machines_linux_other_OS.sql")
-
-echo -e ".Number of virtual machines per cluster:\n"
-execute_SQL_from_file "${SQLS}"/cluster_query_vms_per_cluster.sql | createAsciidocTable
-
-echo -e "Virtual machines with Linux OS or Other OS: *${TOTAL_LINUX_OR_OTHER_OS}*\n"
-echo -e "Virtual machines with Windows Operational System: *${TOTAL_WIN_VMS}*\n"
-echo -e "Total number of virtual machines in Engine: *${TOTAL_NUMBER_OF_VMS}*\n"
+reportVirtualMachines
 
 printSection "Hosts"
 QUERY_HOSTS="SELECT
