@@ -110,7 +110,7 @@ function printSection() {
 
 function printFileHeader() {
 echo '
-= oVirt Report
+= Report
 :doctype: book
 :source-highlighter: coderay
 :listing-caption: Listing
