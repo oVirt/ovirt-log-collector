@@ -281,16 +281,7 @@ DC_QUERY=$(cat "${SQLS}"/datacenter_show_all.sql)
 printTable "${DC_QUERY}"
 
 printSection "Clusters"
-printTable "SELECT
-              $(projectionCountingRowsWithOrder c.name),
-              c.name  AS \"Cluster Name\",
-              sp.name AS \"Data Center Name\",
-              c.compatibility_version AS \"Compatibility Version\",
-              c.cpu_name AS \"Cluster CPU Type\"
-            FROM
-              $CLUSTER_TABLE c
-              LEFT OUTER JOIN storage_pool sp ON c.storage_pool_id=sp.id
-            ORDER BY c.name"
+execute_SQL_from_file "${SQLS}"/cluster_query_show_all_clusters.sql | createAsciidocTable
 
 echo ".Cluster Migration Policies"
 execute_SQL_from_file "${SQLS}"/cluster_query_migration_policies.sql | createAsciidocTable
