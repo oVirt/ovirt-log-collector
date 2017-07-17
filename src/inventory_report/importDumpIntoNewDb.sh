@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
+SCRIPT_DIR="$(dirname $(readlink -f $0))"
+. ${SCRIPT_DIR}/inventory-profile
 
 if [ $# -ne 2 ]; then
 cat << __EOF__
@@ -75,6 +77,7 @@ echo \"Stopping temporary database\"
 \"$WORK_DIR\"/stopDb.sh
 echo \"Removing temporary directory \"$WORK_DIR\"\"
 rm -rf \"$WORK_DIR\"
+rm -rf \"${HOSTS_SOSREPORT_EXTRACTED_DIR}\"
 "
 
     createExecutableBashScript \

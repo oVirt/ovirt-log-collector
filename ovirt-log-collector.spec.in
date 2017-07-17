@@ -64,6 +64,7 @@ Log Collector tool for oVirt Engine
 Summary:	Log Collector for oVirt Engine - Analysis tools
 Requires:	rubygem-asciidoctor
 Requires:	libxml2
+License:	ASL 2.0 and GPLv2+
 
 %description analyzer
 This package contains tools to help analyze oVirt Log Collector archives
@@ -97,6 +98,9 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %{_mandir}/man8/*
 
 %files analyzer
+%doc AUTHORS
+%doc COPYING
+%doc COPYING-GPL
 %{_bindir}/ovirt-log-collector-analyzer
 %dir %{_datadir}/%{name}/analyzer
 %{_datadir}/%{name}/analyzer/
