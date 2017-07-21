@@ -434,8 +434,11 @@ if [ ${sql_query} -gt 0 ]; then
     execute_SQL_from_file "${SQLS}"/bookmarks_query_name_value.sql | createAsciidocTable
 fi
 
-printSection "Main Packages installed in the Engine system"
-rpm_version | createAsciidocTable noheader
+pkgs_engine=$(rpm_version)
+if [ ${#pkgs_engine} -gt 0 ]; then
+    printSection "Main Packages installed in the Engine system"
+    echo "${pkgs_engine}" | createAsciidocTable noheader
+fi
 
 display_host_config
 
