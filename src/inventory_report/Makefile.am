@@ -79,6 +79,8 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/storage_domains_lun_data.sql \
 	produceReport/sqls/lun_storage_server_connection_map_query_number_connection_map.sql \
 	produceReport/sqls/cluster_query_show_all_clusters.sql \
+	produceReport/sqls/bookmarks_query_name_value.sql \
+	produceReport/sqls/bookmarks_query_number_of_rows.sql \
 	$(NULL)
 
 install-data-hook:
