@@ -107,6 +107,8 @@ function projectionCountingRowsWithOrder() {
 
 function display_host_config() {
     configs=""
+    vdsm_settings=false
+    multipath_settings=false
     for dir in ${HOSTS_SOSREPORT_EXTRACTED_DIR}/*/
     do
         dir=${dir%*/}
@@ -115,19 +117,51 @@ function display_host_config() {
         do
             if [[ ! -z "${SOS_REPORT_DIR}/hostname" ]]; then
                 hostname_hypervisor=$(cat ${SOS_REPORT_DIR}/hostname 2> /dev/null)
+                configs+="${hostname_hypervisor}"
+
                 vdsm_config=$(${SCRIPT_DIR}/../vdsm-config-reader --sos-report-path ${SOS_REPORT_DIR})
                 if [ ${#vdsm_config} -gt 0 ]; then
-                    configs+="${hostname_hypervisor} | ${vdsm_config}\n"
+                    configs+="| ${vdsm_config}"
+                    vdsm_settings=true
+                fi
+
+                # Based on vdsm project:
+                # https://github.com/oVirt/vdsm/blob/3225f848dbc614694751af5fe16fa93be21c385b/lib/vdsm/tool/configurators/multipath.py#L161
+                if [[ $(grep -E '# (RHEV|VDSM) PRIVATE$' ${SOS_REPORT_DIR}/etc/multipath.conf) ]]; then
+                    configs+="| icon:exclamation-triangle[size=2x]"
+                    multipath_settings=true
                 fi
                 echo
+                configs+="\n"
             fi
         done
     done
-    if [ ${#configs} -gt 0 ]; then
-        printSection "VDSM"
-        echo -e ".Settings with non default value based per Hypervisor:\n"
-        echo -e "${configs}" | createAsciidocTable noheader
+
+    # Dynamic set the title
+    output=""
+    if [ ${multipath_settings} = true ] && [ ${vdsm_settings} = true ]; then
+        output="Hypervisor | vdsm.conf | multipath.conf\n"
+        output+="${configs}"
     fi
+
+    if [ ${multipath_settings} = true ] && [ ${vdsm_settings} = false ]; then
+        output="Hypervisor | multipath.conf\n"
+        output+="${configs}"
+    fi
+
+    if [ ${multipath_settings} = false ] && [ ${vdsm_settings} = true ]; then
+        output="Hypervisor | vdsm.conf\n"
+        output+="${configs}"
+    fi
+
+    if [ ${multipath_settings} = true ] || [ ${vdsm_settings} = true ]; then
+        printSection "Hypervisor(s) Settings"
+        echo -e "${output}" | createAsciidocTable
+        if [ ${multipath_settings} = true ]; then
+            echo -e "_Exclamation triangle in multipath.conf column means: Manual override for multipath.conf, it is recommended to inspect closely the current /etc/multipath.conf and possibly re-apply it if the hypervisor requires a fresh install_"
+        fi
+    fi
+    echo
 }
 
 function printSection() {
