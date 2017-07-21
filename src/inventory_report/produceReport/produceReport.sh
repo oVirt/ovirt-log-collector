@@ -12,6 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
+SCRIPT_DIR="$(dirname $(readlink -f $0))"
+. ${SCRIPT_DIR}/../inventory-profile
+
 DB_NAME="report";
 SOS_REPORT_UNPACK_DIR="${1}"
 DBDIR="${SOS_REPORT_UNPACK_DIR}"/postgresDb
@@ -100,7 +103,31 @@ function projectionCountingRowsWithOrder() {
         exit 1
     fi
     echo "row_number() OVER (ORDER BY $@ NULLs last) AS \"NO.\" "
+}
 
+function display_host_config() {
+    configs=""
+    for dir in ${HOSTS_SOSREPORT_EXTRACTED_DIR}/*/
+    do
+        dir=${dir%*/}
+        SOS_REPORT_DIRS=$(find "$dir" -maxdepth 2 -name sosreport* -type d 2> /dev/null)
+        for SOS_REPORT_DIR in $SOS_REPORT_DIRS
+        do
+            if [[ ! -z "${SOS_REPORT_DIR}/hostname" ]]; then
+                hostname_hypervisor=$(cat ${SOS_REPORT_DIR}/hostname 2> /dev/null)
+                vdsm_config=$(${SCRIPT_DIR}/../vdsm-config-reader --sos-report-path ${SOS_REPORT_DIR})
+                if [ ${#vdsm_config} -gt 0 ]; then
+                    configs+="${hostname_hypervisor} | ${vdsm_config}\n"
+                fi
+                echo
+            fi
+        done
+    done
+    if [ ${#configs} -gt 0 ]; then
+        printSection "VDSM"
+        echo -e ".Settings with non default value based per Hypervisor:\n"
+        echo -e "${configs}" | createAsciidocTable noheader
+    fi
 }
 
 function printSection() {
@@ -403,5 +430,7 @@ execute_SQL_from_file "${SQLS}"/users_query_system_users.sql | createAsciidocTab
 
 printSection "Main Packages installed in the Engine system"
 rpm_version | createAsciidocTable noheader
+
+display_host_config
 
 cleanup_db

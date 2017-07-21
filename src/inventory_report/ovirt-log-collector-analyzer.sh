@@ -12,6 +12,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
+SCRIPT_DIR="$(dirname $(readlink -f $0))"
+WORK_DIR="$(mktemp -d)"
+
+. ${SCRIPT_DIR}/inventory-profile
+mkdir -p ${HOSTS_SOSREPORT_EXTRACTED_DIR}
 
 function usage() {
 cat << __EOF__
@@ -58,14 +63,12 @@ done
 
 [ -z "${TAR_FILE}" ] && usage
 
-SCRIPT_DIR="$(dirname $(readlink -f $0))"
-WORK_DIR="$(mktemp -d)"
-
 echo "Preparing environment:"
 echo "======================"
 echo "Temporary working directory is ${WORK_DIR}"
 
 "$SCRIPT_DIR"/unpackAndPrepareDump.sh "$TAR_FILE" "$WORK_DIR"
+"$SCRIPT_DIR"/unpackHostsSosReports.sh "$WORK_DIR"
 "$SCRIPT_DIR"/importDumpIntoNewDb.sh "$WORK_DIR" "${HTML_OUT}" 0>/dev/null
 
 echo

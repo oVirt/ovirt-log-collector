@@ -23,6 +23,9 @@ SUFFIXES = .in
 dist_ovirtlogcollectoranalyzer_SCRIPTS = \
 	importDumpIntoNewDb.sh \
 	unpackAndPrepareDump.sh \
+	unpackHostsSosReports.sh \
+	vdsm-config-reader \
+	inventory-profile \
 	ovirt-log-collector-analyzer.sh \
 	$(NULL)
 
