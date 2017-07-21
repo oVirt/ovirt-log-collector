@@ -75,21 +75,13 @@ if __name__ == '__main__':
         vdsm_config_from_sosreport = configparser.ConfigParser()
         read_configs(vdsm_config_from_sosreport, args.path_sosreport)
 
-        try:
-            vars_ssl = vdsm_config_from_sosreport.get("vars", "ssl")
-        except configparser.NoOptionError:
-            vars_ssl = None
-
-        try:
-            addresses_port = vdsm_config_from_sosreport.get("addresses", "management_port")
-        except configparser.NoOptionError:
-            addresses_port = None
-
-        if vars_ssl and vars_ssl != "true":
-            output += "ssl=" + vars_ssl
-
-        if addresses_port and addresses_port != "54321":
-            output += " port=" + addresses_port
+        for section_name in vdsm_config_from_sosreport.sections():
+            for name, value in vdsm_config_from_sosreport.items(section_name):
+                if 'ssl' in name and value == 'true':
+                    continue
+                elif 'management_port' in name and value == '54321':
+                    continue
+                output+='%s=%s ' % (name, value)
 
         if output:
             print(output)
