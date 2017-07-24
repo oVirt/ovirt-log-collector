@@ -81,6 +81,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/cluster_query_show_all_clusters.sql \
 	produceReport/sqls/bookmarks_query_name_value.sql \
 	produceReport/sqls/bookmarks_query_number_of_rows.sql \
+	produceReport/sqls/mac_pools_query_show_data_based_on_datacenter_and_cluster.sql \
 	$(NULL)
 
 install-data-hook:
