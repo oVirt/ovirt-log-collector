@@ -459,6 +459,13 @@ if [ $(executeSQL "$tablesWithOverriddenCompatibilityVersionSQL" | wc -l) -gt 0 
   printTable "$tablesWithOverriddenCompatibilityVersionSQL"
 fi
 
+sql_query=$(execute_SQL_from_file "${SQLS}"/mac_pools_query_show_data_based_on_datacenter_and_cluster.sql)
+if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
+    printSection "MAC Pools"
+    echo "${sql_query}" | createAsciidocTable
+    echo "_Columns *Allow Duplicate MAC Addresses* and *Default Pool* are boolean_"
+fi
+
 printSection "System Users"
 execute_SQL_from_file "${SQLS}"/users_query_system_users.sql | createAsciidocTable
 
