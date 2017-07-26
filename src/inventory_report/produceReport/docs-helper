@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# This helper script is part of produceReport.sh
+
+function auxiliary_docs() {
+
+    echo -e "* **It's recommended** to use https://access.redhat.com/labs/rhevupgradehelper/[Upgrade Helper] to determine the best upgrade path to your environment\n"
+
+    echo -e "* If your environment is **lower** than 3.6, it's **required to upgrade to 3.6 before** upgrading to 4.0\n"
+
+    echo -e "* To upgrade to 4.1, it's **required** to upgrade the environment to **4.0 first**\n"
+
+    echo -e "* **Hypervisor(s)**: Upgrading to 4.0, requires all hypervisors be updated to the last 3.6 version available\n"
+
+    echo -e "* **Engine**: backup the current environment with https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.0/html/upgrade_guide/upgrading_to_red_hat_virtualization_manager_4.0[engine-backup tool] before any upgrade\n"
+
+    echo -e "* **Engine**: Make sure to always update to the https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.0/html/upgrade_guide/chap-updates_between_minor_releases[latest minor version before upgrade] to the next major version\n"
+
+    echo -e "* After updating Cluster Compatibility to a new version in the Cluster Edit dialog, **the user is requested** to shut down and restart all running or suspended VMs **as soon as possible**, see https://bugzilla.redhat.com/show_bug.cgi?id=1356027[bz#1356027]\n"
+
+    upgrade_guide="Upgrade guide
+    https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.1/html-single/upgrade_guide/[4.1 Official Upgrade guide]"
+
+    local_storage="Local Storage
+    https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.1/html/upgrade_guide/Upgrading_RHVH_Local_Storage/[Upgrading to RHVH While Preserving Local Storage]"
+
+    hosted_engine="Hosted Engine
+    https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.1/html/self-hosted_engine_guide/[Self Hosted Engine Guide]
+    https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.1/html/self-hosted_engine_guide/chap-migrating_from_bare_metal_to_a_rhel-based_self-hosted_environment/[Migrating from Bare Metal to a RHEL-Based Self-Hosted Environment]"
+
+    echo "${upgrade_guide}" | createAsciidocTable
+    echo "${local_storage}" | createAsciidocTable
+    echo "${hosted_engine}" | createAsciidocTable
+}

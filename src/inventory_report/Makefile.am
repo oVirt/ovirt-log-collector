@@ -33,6 +33,7 @@ produceReportdir=$(ovirtlogcollectoranalyzerdir)/produceReport
 dist_produceReport_SCRIPTS = \
 	produceReport/produceReport.sh \
 	produceReport/pre-upgrade-checks \
+	produceReport/docs-helper \
 	$(NULL)
 
 dist_ovirtlogcollectoranalyzer_DATA = \
