@@ -13,6 +13,7 @@
 #  limitations under the License.
 #
 SCRIPT_DIR="$(dirname $(readlink -f $0))"
+. ${SCRIPT_DIR}/docs-helper
 . ${SCRIPT_DIR}/../inventory-profile
 
 DB_NAME="report";
@@ -482,5 +483,8 @@ if [ ${#pkgs_engine} -gt 0 ]; then
 fi
 
 display_host_config
+
+printSection "Auxiliary documentation"
+auxiliary_docs
 
 cleanup_db
