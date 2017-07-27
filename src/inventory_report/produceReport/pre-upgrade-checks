@@ -229,3 +229,17 @@ function check_storage_domains_failing() {
         echo -e "{OK} No storage domain inactive\n"
     fi
 }
+
+function check_AAA_legacy() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/vdc_options_query_AAA_legacy.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo
+        echo "{WARNING} Legacy LDAP provider detected, **before upgrade** the environment use: " \
+             "https://github.com/oVirt/ovirt-engine-kerbldap-migration/[ovirt-engine-kerbldap-migration tool]" \
+             "to ease migrate into the new ovirt-engine-extension-aaa-ldap provider"
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    else
+        echo -e "{OK} No Legacy LDAP provider detected\n"
+    fi
+}

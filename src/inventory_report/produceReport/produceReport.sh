@@ -276,6 +276,7 @@ check_async_tasks
 check_runnning_commands
 check_compensation_tasks
 check_storage_domains_failing
+check_AAA_legacy
 
 printSection "Engine details"
 
