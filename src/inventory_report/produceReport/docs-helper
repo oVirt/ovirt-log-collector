@@ -26,7 +26,8 @@ function auxiliary_docs() {
 
     hosted_engine="Hosted Engine
     https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.1/html/self-hosted_engine_guide/[Self Hosted Engine Guide]
-    https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.1/html/self-hosted_engine_guide/chap-migrating_from_bare_metal_to_a_rhel-based_self-hosted_environment/[Migrating from Bare Metal to a RHEL-Based Self-Hosted Environment]"
+    https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.1/html/self-hosted_engine_guide/chap-migrating_from_bare_metal_to_a_rhel-based_self-hosted_environment/[Migrating from Bare Metal to a RHEL-Based Self-Hosted Environment]
+    https://access.redhat.com/solutions/2351141/[How to upgrade RHEV 3.5 Hosted-Engine environment with RHEL 6 hosts / hypervisors to RHEV 3.6]"
 
     echo "${upgrade_guide}" | createAsciidocTable
     echo "${local_storage}" | createAsciidocTable
