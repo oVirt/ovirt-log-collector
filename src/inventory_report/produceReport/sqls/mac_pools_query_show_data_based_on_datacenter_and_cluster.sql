@@ -1,5 +1,5 @@
 CREATE OR REPLACE FUNCTION __temp_mac_pools()
-  RETURNS TABLE(cluster_name VARCHAR(40),mac_name VARCHAR(255), mac_desc VARCHAR(4000), mac_dup boolean, mac_default_pool boolean) AS
+  RETURNS TABLE(cluster_name VARCHAR(40),mac_name VARCHAR(255), mac_desc VARCHAR(4000), mac_dup boolean, mac_default_pool boolean, range text) AS
 $PROCEDURE$
 BEGIN
     -- In the Engine db 3.6 (or higher), mac_pools has been added
@@ -15,7 +15,8 @@ BEGIN
                 mac_pools.name AS "Name",
                 mac_pools.description AS "Description",
                 mac_pools.allow_duplicate_mac_addresses AS "Allow Duplicate MAC Address",
-                mac_pools.default_pool AS "Default Pool"
+                mac_pools.default_pool AS "Default Pool",
+                (SELECT string_agg('('||mpr.from_mac||'—'||mpr.to_mac||')', ', ') FROM mac_pool_ranges mpr WHERE mpr.mac_pool_id=mac_pools.id) AS "MAC Pool Ranges"
             FROM
                 mac_pools
             -- In recent db, mac_pool_id is not a column in storage_pool
@@ -29,11 +30,13 @@ BEGIN
                 mac_pools.name AS "Name",
                 mac_pools.description AS "Description",
                 mac_pools.allow_duplicate_mac_addresses AS "Allow Duplicate MAC Address",
-                mac_pools.default_pool AS "Default Pool"
+                mac_pools.default_pool AS "Default Pool",
+                (SELECT string_agg('('||mpr.from_mac||'—'||mpr.to_mac||')', ', ') FROM mac_pool_ranges mpr WHERE mpr.mac_pool_id=mac_pools.id) AS "MAC Pool Ranges"
             FROM
                 mac_pools
             INNER JOIN storage_pool ON storage_pool.mac_pool_id=mac_pools.id
-            INNER JOIN vds_groups ON vds_groups.storage_pool_id=storage_pool.id ORDER BY vds_groups.name
+            INNER JOIN vds_groups ON vds_groups.storage_pool_id=storage_pool.id
+            INNER JOIN mac_pool_ranges ON mac_pool_ranges.mac_pool_id=mac_pools.id ORDER BY vds_groups.name
             );
 
         END IF;
@@ -48,7 +51,8 @@ COPY (
       mac_name AS "Name",
       mac_desc AS "Description",
       mac_dup AS "Allow Duplicate MAC Addresses",
-      mac_default_pool AS "Default Pool"
+      mac_default_pool AS "Default Pool",
+      range AS "MAC Pool Ranges"
   FROM
       __temp_mac_pools()
 ) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
