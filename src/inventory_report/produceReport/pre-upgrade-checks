@@ -256,3 +256,16 @@ function check_minimum_cluster_compat_version() {
         echo -e "{OK} Cluster(s) are 3.6 or higher in Compatibility Version\n"
     fi
 }
+
+function check_minimum_datacenter_compat_version() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/datacenter_query_minimum_3_6_compat_version.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo
+        echo "{WARNING} It's required to update the **DataCenter Compatibility Version to 3.6" \
+             " before** upgrading to 4.0 for the following DataCenter(s):"
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    else
+        echo -e "{OK} DataCenter(s) are 3.6 or higher in Compatibility Version\n"
+    fi
+}
