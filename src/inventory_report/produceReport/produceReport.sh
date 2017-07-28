@@ -219,6 +219,15 @@ function collect_rhn_data() {
     fi
 }
 
+function collect_ip_addr_engine() {
+    PATH_IP_ADDR=$(find "${SOS_REPORT_UNPACK_DIR}" -name ip_addr)
+    if [ ${#PATH_IP_ADDR} -gt 0 ]; then
+        echo ".Engine ip addr table"
+        echo "[source]"
+        cat ${PATH_IP_ADDR}
+    fi
+}
+
 function reportVirtualMachines() {
     printSection "Virtual Machines"
     TOTAL_NUMBER_OF_VMS=$(execute_SQL_from_file "${SQLS}/vms_query_total_number_of_virtual_machines_in_engine.sql")
@@ -317,6 +326,8 @@ DB_SIZE=$(execute_SQL_from_file "${SQLS}"/database_size.sql)
 echo ".Engine DB size"
 echo "${DB_SIZE}"
 echo
+
+collect_ip_addr_engine
 
 user_rhn=$(collect_rhn_data "username")
 id_rhn=$(collect_rhn_data "system_id")
