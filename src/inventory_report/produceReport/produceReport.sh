@@ -266,6 +266,7 @@ check_hosts_pretty_name
 check_vms_health
 check_cluster_no_dc
 check_third_party_certificate
+check_minimum_cluster_compat_version
 check_vms_running_obsolete_cluster
 check_vms_with_no_timezone_set
 check_mixedrhelversion
