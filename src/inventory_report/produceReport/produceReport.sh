@@ -444,7 +444,7 @@ if [ ${sql_query} -gt 0 ]; then
 fi
 
 sql_query=$(execute_SQL_from_file "${SQLS}"/luns_query_all_data.sql)
-if [ ${#sql_query} -gt 0 ]; then
+if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
     printSection "Luns"
     echo "${sql_query}" | createAsciidocTable
 fi
