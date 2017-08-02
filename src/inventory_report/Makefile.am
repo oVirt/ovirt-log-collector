@@ -85,6 +85,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/bookmarks_query_number_of_rows.sql \
 	produceReport/sqls/mac_pools_query_show_data_based_on_datacenter_and_cluster.sql \
 	produceReport/sqls/vdc_options_query_AAA_legacy.sql \
+	produceReport/sqls/datacenter_query_minimum_3_6_compat_version.sql \
 	$(NULL)
 
 install-data-hook:
