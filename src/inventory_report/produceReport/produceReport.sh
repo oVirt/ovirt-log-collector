@@ -413,26 +413,11 @@ if [ $(echo "${AGENT_PASSWORDS_AS_CSV}" | wc -l) -gt 1 ]; then
     echo "${AGENT_PASSWORDS_AS_CSV}" | createAsciidocTable
 fi
 
-printSection "Storage Domains"
-
-QUERY_STORAGE_DOMAIN="SELECT
-      $(projectionCountingRowsWithOrder sds.storage_name),
-      sds.storage_name AS \"Storage Domain\",
-      sds.storage_pool_name AS \"Data Center\",
-      stt.text AS \"Type\",
-      sdtt.text AS \"Storage Domain Type\",
-      sds.available_disk_size AS \"Available disk size (GB)\",
-      sds.used_disk_size AS \"Used disk size (GB)\",
-      sum(sds.available_disk_size + sds.used_disk_size) AS \"Total disk size (GB)\"
-    FROM storage_domains sds
-    JOIN storage_type_temp stt ON sds.storage_type=stt.id
-    JOIN storage_domain_type_temp sdtt ON sds.storage_domain_type=sdtt.id
-    GROUP BY sds.storage_name, sds.storage_pool_name, sds.available_disk_size, sds.used_disk_size, stt.text, sdtt.text
-    ORDER BY sds.storage_name"
-
-QUERY_STORAGE_DOMAIN_AS_CSV=$(createStatementExportingToCsvFromSelect "$QUERY_STORAGE_DOMAIN" )
-
-executeSQL "$CREATE_TEMP_TABLES_SQL $QUERY_STORAGE_DOMAIN_AS_CSV" | createAsciidocTable;
+sql_query=$(execute_SQL_from_file "${SQLS}"/storage_domains_query_data.sql)
+if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
+    printSection "Storage Domains"
+    echo "${sql_query}" | createAsciidocTable
+fi
 
 sql_query=$(execute_SQL_from_file "${SQLS}"/storage_domains_nfs_path.sql)
 if [ ${#sql_query} -gt 0 ]; then
