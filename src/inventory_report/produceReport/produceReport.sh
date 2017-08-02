@@ -359,8 +359,11 @@ printTable "${DC_QUERY}"
 printSection "Clusters"
 execute_SQL_from_file "${SQLS}"/cluster_query_show_all_clusters.sql | createAsciidocTable
 
-echo ".Cluster Migration Policies"
-execute_SQL_from_file "${SQLS}"/cluster_query_migration_policies.sql | createAsciidocTable
+sql_query=$(execute_SQL_from_file "${SQLS}"/cluster_query_migration_policies.sql)
+if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
+    echo ".Cluster Migration Policies"
+    echo "${sql_query}" | createAsciidocTable
+fi
 
 reportVirtualMachines
 
