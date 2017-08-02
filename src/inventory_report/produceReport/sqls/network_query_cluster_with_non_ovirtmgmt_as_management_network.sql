@@ -14,7 +14,7 @@ BEGIN
         FROM
             network
         INNER JOIN network_cluster ON network_cluster.network_id=network.id
-        INNER JOIN vds_groups ON network_cluster.cluster_id=cluster.cluster_id
+        INNER JOIN cluster ON network_cluster.cluster_id=cluster.cluster_id
         AND network_cluster.management='t'
         AND network.name!='ovirtmgmt'
         );
