@@ -235,7 +235,10 @@ function reportVirtualMachines() {
     TOTAL_LINUX_OR_OTHER_OS=$(execute_SQL_from_file "${SQLS}/vms_query_total_number_of_virtual_machines_linux_other_OS.sql")
 
     echo -e ".Number of Virtual Machine(s) per Cluster:\n"
-    execute_SQL_from_file "${SQLS}"/cluster_query_vms_per_cluster.sql | createAsciidocTable
+    sql_query=$(execute_SQL_from_file "${SQLS}"/cluster_query_vms_per_cluster.sql)
+    if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
+        echo "${sql_query}" | createAsciidocTable
+    fi
 
     echo -e ".Number of Virtual Machine(s) per Operational System:\n"
     echo "[options=\"header\"]"
