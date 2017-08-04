@@ -484,6 +484,12 @@ if [ ${sql_query} -gt 0 ]; then
     execute_SQL_from_file "${SQLS}"/bookmarks_query_name_value.sql | createAsciidocTable
 fi
 
+sql_query=$(execute_SQL_from_file "${SQLS}"/providers_query_show_data.sql)
+if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
+    printSection "External Providers"
+    echo "${sql_query}" | createAsciidocTable
+fi
+
 pkgs_engine=$(rpm_version)
 if [ ${#pkgs_engine} -gt 0 ]; then
     printSection "Main Packages installed in the Engine system"
