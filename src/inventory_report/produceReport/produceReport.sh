@@ -171,8 +171,10 @@ function printSection() {
 }
 
 function printFileHeader() {
-echo '
-= Report
+    fqdn_engine=$(find "${SOS_REPORT_UNPACK_DIR}" -name hostname -exec cat '{}' \; 2>/dev/null | uniq 2>/dev/null)
+
+    echo '= Inventory Report'
+    echo ${fqdn_engine} $(date +"%m-%d-%Y %T")'
 :doctype: book
 :source-highlighter: coderay
 :listing-caption: Listing
@@ -183,7 +185,7 @@ echo '
 :WARNING: icon:exclamation-triangle[size=2x]
 :INFO: icon:info-circle[size=2x]
 :sectnums:
-';
+'
 }
 
 function initVariablesForVaryingNamesInSchema() {
