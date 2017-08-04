@@ -75,7 +75,6 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/vms_query_total_number_of_virtual_machines_in_engine.sql \
 	produceReport/sqls/vms_query_total_number_of_virtual_machines_linux_other_OS.sql \
 	produceReport/sqls/cluster_query_vms_per_cluster.sql \
-	produceReport/sqls/storage_domains_query_number_of_disks.sql \
 	produceReport/sqls/cluster_query_migration_policies.sql \
 	produceReport/sqls/users_query_system_users.sql \
 	produceReport/sqls/storage_domains_nfs_path.sql \
