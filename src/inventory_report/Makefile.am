@@ -53,6 +53,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/vms_query_health.sql \
 	produceReport/sqls/cluster_query_check_datacenter.sql \
 	produceReport/sqls/cluster_query_minimum_3_6_compat_version.sql \
+	produceReport/sqls/providers_query_show_data.sql \
 	produceReport/sqls/hosts_query_check_health.sql \
 	produceReport/sqls/storage_create_related_lookup_tables.sql \
 	produceReport/sqls/engine_versions_through_all_upgrades.sql \
