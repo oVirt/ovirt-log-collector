@@ -317,3 +317,16 @@ function check_non_ovirtmgmt_as_management_network() {
         echo -e "{OK} All management network are ovirtmgmt\n"
     fi
 }
+
+function check_pinned_virtual_machines() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_query_pinned_virtual_machines.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo
+        echo "{WARNING} There are virtual machine(s) pinned, it's not recommended upgrade" \
+             " the environment with virtual machines pinned to run in specific hypervisors"
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    else
+        echo -e "{OK} No virtual machines pinned to specific hypervisor\n"
+    fi
+}
