@@ -83,6 +83,39 @@ function check_third_party_certificate() {
     fi
 }
 
+function check_min_and_max_engine_heap() {
+    # Based on
+    # https://github.com/oVirt/ovirt-engine/blob/1e7d0dd7e11b1db035660491e37fbf0368614bd6/packaging/services/ovirt-engine/ovirt-engine.py#L311-L338
+    # https://github.com/oVirt/ovirt-engine/blob/1e7d0dd7e11b1db035660491e37fbf0368614bd6/packaging/pythonlib/ovirt_engine/mem.py#L29-L85
+    ENGINE_CONF_D_10_SETUP_JAVA=$(find "${SOS_REPORT_UNPACK_DIR}" -name 10-setup-java.conf | grep engine.conf.d | head -n 1)
+
+    . ${ENGINE_CONF_D_10_SETUP_JAVA}
+    ENGINE_HEAP_MIN="${ENGINE_HEAP_MIN//[!0-9]/}"
+    ENGINE_HEAP_MAX="${ENGINE_HEAP_MAX//[!0-9]/}"
+
+    MEMINFO_ENGINE=$(find "${SOS_REPORT_UNPACK_DIR}" -name meminfo)
+    TOTAL_MEM_MB=$(cat ${MEMINFO_ENGINE} | grep MemTotal | awk {'print int($2/1024)'})
+    if [ -z ${TOTAL_MEM_MB} ]; then
+        return
+    fi
+
+    ret=0
+    if [ -z "${ENFORCE_ENGINE_HEAP_PARAMS}" ]; then
+        if [ ! -z "${ENGINE_HEAP_MIN}" ] && [ ${ENGINE_HEAP_MIN} -gt ${TOTAL_MEM_MB} ]; then
+            echo -e "{WARNING} ENGINE_HEAP_MIN ${ENGINE_HEAP_MIN} MB is higher than total memory available ${TOTAL_MEM_MB} MB\n"
+            ret=-1
+        fi
+        if [ ! -z "${ENGINE_HEAP_MAX}" ] && [ ${ENGINE_HEAP_MAX} -gt ${TOTAL_MEM_MB} ]; then
+            echo -e "{WARNING} ENGINE_HEAP_MAX ${ENGINE_HEAP_MAX} MB is higher than total memory available ${TOTAL_MEM_MB} MB\n"
+            ret=-1
+        fi
+    fi
+
+    if [ ${ret} = 0 ]; then
+        echo -e "{OK} ENGINE_HEAP_MAX and ENGINE_HEAP_MIN are lower than total memory available\n"
+    fi
+}
+
 function check_vms_running_obsolete_cluster() {
     # In oVirt Engine 4.0, the minimum cluster level supported is 3.6.
     # So we must inform in case there is vm in 3.5 cluster level
