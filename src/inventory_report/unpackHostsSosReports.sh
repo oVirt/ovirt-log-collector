@@ -20,14 +20,14 @@ echo "Welcome to unpackHostsSosReports script!"
 
 UNPACKED_SOSREPORT=$1
 
-UNPACK_DIR=$(find "$UNPACKED_SOSREPORT" -name "unpacked_sosreport")
-LOG_COLLECTOR_DIR=$(find "$UNPACK_DIR" -name "sosreport-LogCollector*")
-LOG_COLLECTOR_DATA_DIR=$(find "$LOG_COLLECTOR_DIR" -name "log-collector-data")
+UNPACK_DIR=$(find "$UNPACKED_SOSREPORT" -name "unpacked_sosreport" 2> /dev/null)
+LOG_COLLECTOR_DIR=$(find "$UNPACK_DIR" -name "sosreport-LogCollector*" 2> /dev/null)
+LOG_COLLECTOR_DATA_DIR=$(find "$LOG_COLLECTOR_DIR" -name "log-collector-data" 2> /dev/null)
 
 for dir in $LOG_COLLECTOR_DATA_DIR/*/
 do
     dir=${dir%*/}
-    HOST_SOS_REPORT=$(find "$dir" -name "*.tar.xz")
+    HOST_SOS_REPORT=$(find "$dir" -name "*.tar.xz" 2> /dev/null)
     if [ -r "${HOST_SOS_REPORT}" ]; then
         dir_sosreport="${HOSTS_SOSREPORT_EXTRACTED_DIR}/${dir##*/}"
         $(mkdir -p ${dir_sosreport})
