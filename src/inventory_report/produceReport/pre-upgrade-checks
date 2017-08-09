@@ -87,7 +87,10 @@ function check_min_and_max_engine_heap() {
     # Based on
     # https://github.com/oVirt/ovirt-engine/blob/1e7d0dd7e11b1db035660491e37fbf0368614bd6/packaging/services/ovirt-engine/ovirt-engine.py#L311-L338
     # https://github.com/oVirt/ovirt-engine/blob/1e7d0dd7e11b1db035660491e37fbf0368614bd6/packaging/pythonlib/ovirt_engine/mem.py#L29-L85
-    ENGINE_CONF_D_10_SETUP_JAVA=$(find "${SOS_REPORT_UNPACK_DIR}" -name 10-setup-java.conf | grep engine.conf.d | head -n 1)
+    ENGINE_CONF_D_10_SETUP_JAVA=$(find "${SOS_REPORT_UNPACK_DIR}" -name 10-setup-java.conf | grep engine.conf.d | head -n 1 2> /dev/null)
+    if [ -z ${ENGINE_CONF_D_10_SETUP_JAVA} ]; then
+        return
+    fi
 
     . ${ENGINE_CONF_D_10_SETUP_JAVA}
     ENGINE_HEAP_MIN="${ENGINE_HEAP_MIN//[!0-9]/}"
