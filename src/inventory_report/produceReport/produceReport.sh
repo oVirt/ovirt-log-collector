@@ -418,7 +418,12 @@ if [ $(echo "${AGENT_PASSWORDS_AS_CSV}" | wc -l) -gt 1 ]; then
     echo "${AGENT_PASSWORDS_AS_CSV}" | createAsciidocTable
 fi
 
-sql_query=$(execute_SQL_from_file "${SQLS}"/storage_domains_query_data.sql)
+# Adding 2> /dev/null to avoid psql warning about global temporary table
+# This warning might show during import of old engine dbs which contain tt_TEMP22
+#
+# GLOBAL is deprecated in temporary table creation
+# LINE 1: CREATE GLOBAL TEMPORARY TABLE tt_TEMP22
+sql_query=$(execute_SQL_from_file "${SQLS}"/storage_domains_query_data.sql 2>/dev/null)
 if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
     printSection "Storage Domains"
     echo "${sql_query}" | createAsciidocTable
