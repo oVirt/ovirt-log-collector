@@ -43,6 +43,8 @@ mkdir -p $UNPACKED_SOSREPORT $PG_DUMP_DIR
 echo "Unpacking postgres data. This can take up to several minutes."
 
 tar -C "$UNPACKED_SOSREPORT" -xf "$SOS_REPORT"
+chmod -R a+rwx ${UNPACKED_SOSREPORT}
+
 TAR_WITH_POSTGRES_SOSREPORT=$(find "$UNPACKED_SOSREPORT" -name "*postgresql-sosreport*tar.xz")
 
 tar -C "$(dirname $TAR_WITH_POSTGRES_SOSREPORT)" -Jxf "$TAR_WITH_POSTGRES_SOSREPORT"
