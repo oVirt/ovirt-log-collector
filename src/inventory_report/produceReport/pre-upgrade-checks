@@ -333,3 +333,16 @@ function check_pinned_virtual_machines() {
         echo -e "{OK} No virtual machines pinned to specific hypervisor\n"
     fi
 }
+
+function check_images_locked_or_illegal() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/images_query_invalid_status.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo
+        echo "{WARNING} There are virtual machine(s) with invalid **image status** and" \
+             " might not start in the next shutdown/start cycle"
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    else
+        echo -e "{OK} No virtual machines with invalid image status\n"
+    fi
+}
