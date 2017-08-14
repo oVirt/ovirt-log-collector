@@ -242,10 +242,10 @@ function reportVirtualMachines() {
         echo "${sql_query}" | createAsciidocTable
     fi
 
-    echo -e ".Number of Virtual Machine(s) per Operational System:\n"
+    echo -e ".Number of Virtual Machine(s) per Operating System:\n"
     echo "[options=\"header\"]"
     echo "|===="
-    echo "| Operational System | Count"
+    echo "| Operating System | Count"
     echo "| Linux OS or Other OS | ${TOTAL_LINUX_OR_OTHER_OS}"
     echo "| Windows OS | ${TOTAL_WIN_VMS}"
     echo "| Total number of Virtual Machines in Engine | ${TOTAL_NUMBER_OF_VMS}"
