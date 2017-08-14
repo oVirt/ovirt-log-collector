@@ -296,6 +296,7 @@ check_min_and_max_engine_heap
 check_storage_domains_failing
 check_AAA_legacy
 check_non_ovirtmgmt_as_management_network
+check_images_locked_or_illegal
 
 printSection "Engine details"
 
