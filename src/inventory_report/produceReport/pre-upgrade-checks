@@ -125,8 +125,7 @@ function check_vms_running_obsolete_cluster() {
     vms_out_date=$(execute_SQL_from_file "${SQLS}"/vms_query_check_obsolete_cluster.sql)
     if [ ${vms_out_date} -gt 0 ]; then
         echo "{WARNING} There are ${vms_out_date} VMs in version 3.5 and prior clusters. These clusters need to be upgraded to version 3.6 prior upgrading to version 4.0."
-        echo "See 3.6 Upgrade Considerations:"
-        echo -e "https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Virtualization/3.6/html/Upgrade_Guide/Red_Hat_Enterprise_Virtualization_3.6_Upgrade_Considerations.html\n"
+        echo -e "https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Virtualization/3.6/html/Upgrade_Guide/Red_Hat_Enterprise_Virtualization_3.6_Upgrade_Considerations.html[See 3.6 Upgrade Considerations]\n"
     else
         echo -e "{OK} All virtual machines have cluster level >= 3.6\n"
     fi
@@ -137,8 +136,7 @@ function check_vms_with_no_timezone_set() {
     vms_no_timezone_set=$(executeSQL "${sql_cmd}")
     if [ ${#vms_no_timezone_set} -gt 0 ]; then
         echo -e "{WARNING} The following virtual machine(s) have no timezone set and might affect cluster upgrade."
-        echo "We recommend update it manually via Engine Web Admin, related bugzilla report:"
-        echo "https://bugzilla.redhat.com/show_bug.cgi?id=1386507"
+        echo "We recommend update it manually via Engine Web Admin, for more information https://bugzilla.redhat.com/show_bug.cgi?id=1386507[see bz#1386507]"
         printTable "${sql_cmd}"
         echo
     else
@@ -153,7 +151,7 @@ function check_mixedrhelversion() {
         echo -e "{WARNING} *After* upgrading all hosts to EL7 and *BEFORE* " \
                 "upgrading the Manager to >= 4.y make sure " \
                 "CheckMixedRhelVersions is true. More information about " \
-                "this topic check: [https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Virtualization/3.6/html/Upgrade_Guide/Upgrading_Hosts_in_a_Red_Hat_Enterprise_Linux_6_Cluster_to_Red_Hat_Enterprise_Linux_7.html]"
+                "this topic check https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Virtualization/3.6/html/Upgrade_Guide/Upgrading_Hosts_in_a_Red_Hat_Enterprise_Linux_6_Cluster_to_Red_Hat_Enterprise_Linux_7.html[upgrade guide]"
         printTable "${sql_cmd}"
         echo
     else
@@ -170,7 +168,7 @@ function check_vms_windows_with_incorrect_timezone() {
     if [ ${#sql_ret} -gt 0 ]; then
         echo -e "{WARNING} The following VMs with Windows OS contain incorrect" \
                 " timezone, please adjust the timezone via Web Admin. A list " \
-                "of possible values can be found via: [https://github.com/oVirt/ovirt-engine/blob/master/backend/manager/modules/compat/src/main/java/org/ovirt/engine/core/compat/WindowsJavaTimezoneMapping.java]"
+                "of possible values can be found in https://github.com/oVirt/ovirt-engine/blob/fa401fb9a841bf1704588ed2bc9f7f0fbbf0d008/backend/manager/modules/compat/src/main/java/org/ovirt/engine/core/compat/WindowsJavaTimezoneMapping.java#L10[WindowsJavaTimezoneMapping.java]"
         echo "${sql_ret}" | createAsciidocTable "noheader"
     else
         echo -e "{OK} All VMs with Windows OS have correct timezone\n"
@@ -183,7 +181,7 @@ function check_vms_linux_and_others_with_incorrect_timezone() {
         echo -e "{WARNING} The following VMs with Linux OS or marked as " \
                 "Other OS contain incorrect timezone, please adjust the " \
                 "timezone via Web Admin. A list of possible values can " \
-                "be found via: [https://github.com/oVirt/ovirt-engine/blob/5ec729e5f8b5504b5c166c6d4217267a9bda7728/backend/manager/modules/common/src/main/java/org/ovirt/engine/core/common/TimeZoneType.java#L20-L103]"
+                "be found in https://github.com/oVirt/ovirt-engine/blob/5ec729e5f8b5504b5c166c6d4217267a9bda7728/backend/manager/modules/common/src/main/java/org/ovirt/engine/core/common/TimeZoneType.java#L20-L103[TimeZoneType.java]"
         echo "${sql_ret}" | createAsciidocTable "noheader"
     else
         echo -e "{OK} All VMs with Linux or Other OS have correct timezone\n"
@@ -199,7 +197,7 @@ function check_vms_with_cluster_lower_3_6_with_virtio_serial_console() {
                 "and VM is terminated. You need to disable the VirtIO serial " \
                 "console feature while the VM is still in a 3.5 cluster. " \
                 "It can be re-enabled once the VM is in a 3.6 cluster." \
-                "Related bug report: [https://bugzilla.redhat.com/show_bug.cgi?id=1434401]"
+                "For more information, https://bugzilla.redhat.com/show_bug.cgi?id=1434401[see bz#1434401]"
         echo "${sql_ret}" | createAsciidocTable "noheader"
     else
         echo -e "{OK} No VMs with VirtIO serial console enabled in cluster" \
@@ -213,8 +211,8 @@ function check_async_tasks() {
         echo
         echo "{WARNING} The following async tasks are still running. " \
              "Please make sure that there are no running tasks before any " \
-             "engine upgrade. You might use taskcleaner.sh tool, see: " \
-             "https://github.com/oVirt/ovirt-engine/blob/bf3abca7848496f7cf60d44d9335e2ec0bd3f852/packaging/setup/dbutils/taskcleaner.sh"
+             "engine upgrade. You might use " \
+             "https://github.com/oVirt/ovirt-engine/blob/bf3abca7848496f7cf60d44d9335e2ec0bd3f852/packaging/setup/dbutils/taskcleaner.sh[taskcleaner.sh] tool to stop the tasks"
         echo "${sql_ret}" | createAsciidocTable "noheader"
         echo
     else
@@ -228,8 +226,8 @@ function check_runnning_commands() {
         echo
         echo "{WARNING} The following commands are still running. " \
              "Please make sure that there are no commands running before any " \
-             "engine upgrade. You might use taskcleaner.sh tool, see: " \
-             "https://github.com/oVirt/ovirt-engine/blob/bf3abca7848496f7cf60d44d9335e2ec0bd3f852/packaging/setup/dbutils/taskcleaner.sh"
+             "engine upgrade. You might use " \
+             "https://github.com/oVirt/ovirt-engine/blob/bf3abca7848496f7cf60d44d9335e2ec0bd3f852/packaging/setup/dbutils/taskcleaner.sh[taskcleaner.sh] tool to stop the commands"
         echo "${sql_ret}" | createAsciidocTable "noheader"
         echo
     else
@@ -243,8 +241,8 @@ function check_compensation_tasks() {
         echo
         echo "{WARNING} The following compensation tasks are still running. " \
              "Please make sure that there are no running tasks before any " \
-             "engine upgrade. You might use taskcleaner.sh tool, see: " \
-             "https://github.com/oVirt/ovirt-engine/blob/bf3abca7848496f7cf60d44d9335e2ec0bd3f852/packaging/setup/dbutils/taskcleaner.sh"
+             "engine upgrade. You might use " \
+             "https://github.com/oVirt/ovirt-engine/blob/bf3abca7848496f7cf60d44d9335e2ec0bd3f852/packaging/setup/dbutils/taskcleaner.sh[taskcleaner.sh] tool to stop the tasks"
         echo "${sql_ret}" | createAsciidocTable "noheader"
         echo
     else
