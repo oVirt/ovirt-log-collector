@@ -298,6 +298,7 @@ check_AAA_legacy
 check_non_ovirtmgmt_as_management_network
 check_images_locked_or_illegal
 check_vm_snapshot_id_zero
+check_legacy_apache_sso_config
 
 printSection "Engine details"
 
