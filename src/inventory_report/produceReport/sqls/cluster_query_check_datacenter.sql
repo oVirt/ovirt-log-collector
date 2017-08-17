@@ -28,5 +28,11 @@ BEGIN
     END IF;
 END; $PROCEDURE$
 LANGUAGE plpgsql;
-SELECT __temp_cluster_check_datacenter_assigned();
+COPY (
+    SELECT
+        row_number() OVER (ORDER BY name NULLs last) AS "NO.",
+        name AS "Cluster"
+    FROM
+        __temp_cluster_check_datacenter_assigned()
+) To STDOUT With CSV DELIMITER E'\|' HEADER;
 DROP FUNCTION __temp_cluster_check_datacenter_assigned();

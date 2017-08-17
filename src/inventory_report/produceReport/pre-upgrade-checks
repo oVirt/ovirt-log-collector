@@ -44,10 +44,10 @@ function check_vms_health() {
 function check_cluster_no_dc() {
     # Clusters without datacenter validation
     cluster_no_dc=$(execute_SQL_from_file "${SQLS}"/cluster_query_check_datacenter.sql)
-    if [ ${#cluster_no_dc} -gt 0 ]; then
+    if [ $(echo "${cluster_no_dc}" | wc -l) -gt 1 ]; then
         echo
         echo "{WARNING} The following cluster(s) have no datacenter assigned:"
-        echo "${cluster_no_dc}" | createAsciidocTable "noheader"
+        echo "${cluster_no_dc}" | createAsciidocTable
         echo
     else
         echo -e "{OK} All clusters contain datacenter assigned\n"
