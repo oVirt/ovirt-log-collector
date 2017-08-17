@@ -65,6 +65,7 @@ Summary:	Log Collector for oVirt Engine - Analysis tools
 Requires:	rubygem-asciidoctor
 Requires:	libxml2
 Requires:	postgresql-server
+Requires:	coreutils
 License:	ASL 2.0 and GPLv2+
 
 %description analyzer

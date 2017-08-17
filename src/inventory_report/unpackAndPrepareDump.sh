@@ -45,6 +45,12 @@ echo "Unpacking postgres data. This can take up to several minutes."
 tar -C "$UNPACKED_SOSREPORT" -xf "$SOS_REPORT"
 chmod -R a+rwx ${UNPACKED_SOSREPORT}
 
+SHA256=$(sha256sum ${1})
+LAST_SOSREPORT_EXTRACTED_SHA256SUM=$(echo ${SHA256} | cut -d ' ' -f 1)
+LAST_SOSREPORT_EXTRACTED=$(echo ${SHA256} | cut -d ' ' -f 2 | xargs basename)
+echo "LAST_SOSREPORT_EXTRACTED=${LAST_SOSREPORT_EXTRACTED}" > ${TMP_ROOT}/.metadata-inventory
+echo "LAST_SOSREPORT_EXTRACTED_SHA256SUM=${LAST_SOSREPORT_EXTRACTED_SHA256SUM}" >> ${TMP_ROOT}/.metadata-inventory
+
 TAR_WITH_POSTGRES_SOSREPORT=$(find "$UNPACKED_SOSREPORT" -name "*postgresql-sosreport*tar.xz")
 
 tar -C "$(dirname $TAR_WITH_POSTGRES_SOSREPORT)" -Jxf "$TAR_WITH_POSTGRES_SOSREPORT"

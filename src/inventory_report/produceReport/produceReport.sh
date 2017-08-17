@@ -12,12 +12,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
+SOS_REPORT_UNPACK_DIR="${1}"
 SCRIPT_DIR="$(dirname $(readlink -f $0))"
+
 . ${SCRIPT_DIR}/docs-helper
 . ${SCRIPT_DIR}/../inventory-profile
+. ${SOS_REPORT_UNPACK_DIR}/.metadata-inventory
 
 DB_NAME="report";
-SOS_REPORT_UNPACK_DIR="${1}"
 DBDIR="${SOS_REPORT_UNPACK_DIR}"/postgresDb
 PGDATA="${DBDIR}"/pgdata
 PGRUN="${DBDIR}"/pgrun
@@ -271,6 +273,12 @@ execute_SQL_from_file "${SQLS}"/vms_create_related_lookup_tables.sql
 initVariablesForVaryingNamesInSchema
 
 printFileHeader
+
+if [[ ! -z "${LAST_SOSREPORT_EXTRACTED}" ]]; then
+    printSection "Sosreport"
+    echo -e "**Engine sosreport**: ${LAST_SOSREPORT_EXTRACTED}\n"
+    echo -e "**SHA256**: ${LAST_SOSREPORT_EXTRACTED_SHA256SUM}\n"
+fi
 
 printSection "Pre-upgrade checks"
 . $(dirname "${0}")/pre-upgrade-checks
