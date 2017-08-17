@@ -363,3 +363,21 @@ function check_vm_snapshot_id_zero() {
         echo -e "{OK} No images with zero vm_snapshot_id found\n"
     fi
 }
+
+function check_legacy_apache_sso_config() {
+    OVIRT_SSO_CONFIG=$(find "${SOS_REPORT_UNPACK_DIR}" -name ovirt-sso.conf 2> /dev/null)
+    if [ -z ${OVIRT_SSO_CONFIG} ]; then
+        echo -e "{OK} No Apache SSO config detected\n"
+        return
+    fi
+
+    if [[ $(grep "<LocationMatch ^(/ovirt-engine/(webadmin|userportal|api)|/api)>" ${OVIRT_SSO_CONFIG}) ]]; then
+        echo
+        echo "{WARNING} Legacy Apache SSO configuration detected! **After upgrading to 4.0** is required to " \
+             "replace the /etc/ovirt-engine/aaa/ovirt-sso.conf with https://github.com/oVirt/ovirt-engine-extension-aaa-ldap/blob/2db902ee5c9e392f97f7f4090d893b5eb6d29efb/README#L352-L374[this new configuration]," \
+             " install mod_auth_gssapi mod_session packages and restart Apache."
+        echo
+    else
+        echo -e "{OK} No legacy Apache SSO configuration found\n"
+    fi
+}
