@@ -22,20 +22,23 @@
 -- All values defined in ovirt-engine project:
 -- backend/manager/modules/common/src/main/java/org/ovirt/engine/core/common/businessentities/VMStatus.java
 
-WITH vms_unavailable AS (
+COPY (
+    WITH vms_unavailable AS (
+        SELECT
+            vm_name,
+            status
+        FROM
+            vms
+        WHERE
+            status=4 or
+            status=14 or
+            status=15
+    )
     SELECT
-        vm_name, status
+        vm_name AS "Virtual Machine",
+        vms_status_temp.text AS "Status"
     FROM
-        vms
-    WHERE
-        status=4 or
-        status=14 or
-        status=15
-)
-SELECT
-    vm_name, vms_status_temp.text
-FROM
-    vms_unavailable
-LEFT JOIN
-    vms_status_temp ON vms_unavailable.status = vms_status_temp.id;
-
+        vms_unavailable
+    LEFT JOIN
+        vms_status_temp ON vms_unavailable.status = vms_status_temp.id
+) TO STDOUT With CSV DELIMITER E'\|' HEADER;
