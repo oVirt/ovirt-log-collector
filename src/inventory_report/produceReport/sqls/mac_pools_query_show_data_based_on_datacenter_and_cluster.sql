@@ -50,8 +50,8 @@ COPY (
       cluster_name AS "Cluster",
       mac_name AS "Name",
       mac_desc AS "Description",
-      mac_dup AS "Allow Duplicate MAC Addresses",
-      mac_default_pool AS "Default Pool",
+      CASE WHEN mac_dup THEN 'Yes' ELSE 'No' END AS "Allow Duplicate MAC Addresses",
+      CASE WHEN mac_default_pool THEN 'Yes' ELSE 'No' END AS "Default Pool",
       range AS "MAC Pool Ranges"
   FROM
       __temp_mac_pools()

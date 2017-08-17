@@ -486,7 +486,6 @@ sql_query=$(execute_SQL_from_file "${SQLS}"/mac_pools_query_show_data_based_on_d
 if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
     printSection "MAC Pools"
     echo "${sql_query}" | createAsciidocTable
-    echo "_Columns *Allow Duplicate MAC Addresses* and *Default Pool* are boolean_"
 fi
 
 printSection "System Users"
