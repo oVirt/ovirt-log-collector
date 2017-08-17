@@ -506,7 +506,7 @@ fi
 
 pkgs_engine=$(rpm_version)
 if [ ${#pkgs_engine} -gt 0 ]; then
-    printSection "Main Packages installed in the Engine system"
+    printSection "Main Packages installed in Engine"
     echo "${pkgs_engine}" | createAsciidocTable noheader
 fi
 
