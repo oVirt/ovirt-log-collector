@@ -63,7 +63,7 @@ function createExecutableBashScript() {
 
 function createUserScripts() {
     createExecutableBashScript \
-        "$WORK_DIR/produceHtml.sh" "$(dirname $0)/produceReport/produceReport.sh \"$WORK_DIR\" | asciidoctor -a toc -o ${HTML_OUT} -;echo \"Generated ${HTML_OUT}\""
+        "$WORK_DIR/produceHtml.sh" "$(dirname $0)/produceReport/produceReport.sh \"$WORK_DIR\" | asciidoctor -a toc=left -o ${HTML_OUT} -;echo \"Generated ${HTML_OUT}\""
     createExecutableBashScript "$WORK_DIR/startDb.sh" "pg_ctl start -D $PGDATA -s -o \"-h '' -k $PGRUN\" -w"
     createExecutableBashScript "$WORK_DIR/stopDb.sh" "pg_ctl stop -D $PGDATA -s -m fast"
 
