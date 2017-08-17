@@ -35,7 +35,7 @@ function check_vms_health() {
     vms_health_check=$(execute_SQL_from_file "${SQLS}"/vms_query_health.sql)
     if [ ${#vms_health_check} -gt 0 ]; then
         echo "{WARNING} The following VMs are not ready for upgrade:"
-        echo "${vms_health_check}" | createAsciidocTable "noheader"
+        echo "${vms_health_check}" | createAsciidocTable
     else
         echo -e "{OK} No blocker status found in the VMs\n"
     fi
