@@ -33,7 +33,7 @@ function check_hosts_pretty_name() {
 function check_vms_health() {
     # Virtual Machines health validation
     vms_health_check=$(execute_SQL_from_file "${SQLS}"/vms_query_health.sql)
-    if [ ${#vms_health_check} -gt 0 ]; then
+    if [ $(echo "${vms_health_check}" | wc -l) -gt 1 ]; then
         echo "{WARNING} The following VMs are not ready for upgrade:"
         echo "${vms_health_check}" | createAsciidocTable
     else
