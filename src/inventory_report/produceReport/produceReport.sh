@@ -297,6 +297,7 @@ check_storage_domains_failing
 check_AAA_legacy
 check_non_ovirtmgmt_as_management_network
 check_images_locked_or_illegal
+check_vm_snapshot_id_zero
 
 printSection "Engine details"
 

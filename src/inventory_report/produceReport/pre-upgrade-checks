@@ -346,3 +346,20 @@ function check_images_locked_or_illegal() {
         echo -e "{OK} No virtual machines with invalid image status\n"
     fi
 }
+
+function check_vm_snapshot_id_zero() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/images_query_vm_snapshot_id_zero.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo
+        echo "{WARNING} There are image(s) with **vm_snapshot_id as zero**," \
+             " it's recommended to not use zeros in vm_snapshot_id uuid " \
+             "column to avoid potencial conflicts, you might use uuidgen" \
+             " command to generate a new UUID. For more information check" \
+             "https://access.redhat.com/solutions/130323[this article] " \
+             "and https://bugzilla.redhat.com/show_bug.cgi?id=843157[bz#843157]"
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    else
+        echo -e "{OK} No images with zero vm_snapshot_id found\n"
+    fi
+}
