@@ -10,7 +10,7 @@ BEGIN
         RETURN QUERY (
         SELECT
             cluster.name AS "Cluster",
-            count(vm_static.vm_name) AS "Number of VMs"
+            count(vm_static.vm_name) AS "Number of Virtual Machine(s)"
         FROM
             cluster
         INNER JOIN vm_static ON cluster.cluster_id=vm_static.cluster_id
@@ -23,7 +23,7 @@ BEGIN
         RETURN QUERY (
         SELECT
              vds_groups.name AS "Cluster",
-            count(vm_static.vm_name) AS "Number of VMs"
+            count(vm_static.vm_name) AS "Number of Virtual Machine(s)"
         FROM
             vds_groups
         INNER JOIN vm_static ON vds_groups.vds_group_id=vm_static.vds_group_id
@@ -39,7 +39,7 @@ Copy (
   SELECT
     row_number() OVER (ORDER BY name NULLs last) AS "NO.",
     name AS "Cluster",
-    vms_count AS "Number of VMs"
+    vms_count AS "Number of Virtual Machine(s)"
   FROM
     __temp_vms_per_cluster()
   ORDER BY
