@@ -32,6 +32,10 @@ do
         dir_sosreport="${HOSTS_SOSREPORT_EXTRACTED_DIR}/${dir##*/}"
         $(mkdir -p ${dir_sosreport})
         echo "Extracting sosreport from hypervisor ${dir##*/} in ${dir_sosreport}"
+        SHA256=$(sha256sum ${HOST_SOS_REPORT})
+        SOSREPORT_EXTRACTED_HOST_SHA256SUM=$(echo ${SHA256} | cut -d ' ' -f 1)
+        SOSREPORT_EXTRACTED_HOST=$(echo ${SHA256} | cut -d ' ' -f 2 | xargs basename)
+        echo -e "${SOSREPORT_EXTRACTED_HOST}\n ${SOSREPORT_EXTRACTED_HOST_SHA256SUM} (**SHA256**)\n" >> ${UNPACKED_SOSREPORT}/.metadata-hosts
         tar -C "${dir_sosreport}" -xf "$HOST_SOS_REPORT" &> /dev/null
         chmod -R a+rwx ${HOSTS_SOSREPORT_EXTRACTED_DIR}
         echo
