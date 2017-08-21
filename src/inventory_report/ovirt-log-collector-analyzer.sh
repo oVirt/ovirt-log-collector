@@ -23,6 +23,8 @@ cat << __EOF__
 Usage: $0 [options] <tar-file>
     --keep-working-dir
         Do not remove the temporary working directory in the end.
+    --summary
+        Executive summary, do not execute pre-upgrade validation
     --html=<file>
         Write html report to <file>. Defaults to ${HTML_OUT} .
 
@@ -33,8 +35,13 @@ exit 1;
 }
 
 KEEP_WORKING_DIR=
+REPORT_ONLY=
 TAR_FILE=
 HTML_OUT=analyzer_report.html
+
+# Use this variable foo=bar bar=foo to have muliple variables
+# exported to .metadata-inventory
+OPT_METADATA_INVENTORY=
 
 while [ -n "$1" ]; do
 	x="$1"
@@ -47,6 +54,9 @@ while [ -n "$1" ]; do
 		--keep-working-dir)
 			KEEP_WORKING_DIR=1
 		;;
+                --summary)
+                        OPT_METADATA_INVENTORY="SUMMARY_REPORT=true"
+                ;;
                 --html=*)
 			HTML_OUT="${v}"
 		;;
@@ -67,7 +77,7 @@ echo "Preparing environment:"
 echo "======================"
 echo "Temporary working directory is ${WORK_DIR}"
 
-"$SCRIPT_DIR"/unpackAndPrepareDump.sh "$TAR_FILE" "$WORK_DIR"
+"$SCRIPT_DIR"/unpackAndPrepareDump.sh "$TAR_FILE" "$WORK_DIR" "${OPT_METADATA_INVENTORY}"
 "$SCRIPT_DIR"/unpackHostsSosReports.sh "$WORK_DIR"
 "$SCRIPT_DIR"/importDumpIntoNewDb.sh "$WORK_DIR" "${HTML_OUT}" 0>/dev/null
 

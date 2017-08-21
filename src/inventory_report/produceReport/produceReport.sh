@@ -274,50 +274,54 @@ initVariablesForVaryingNamesInSchema
 
 printFileHeader
 
-if [[ ! -z "${LAST_SOSREPORT_EXTRACTED}" ]]; then
-    printSection "Sosreport"
-    echo -e "**Engine sosreport**:\n"
-    echo -e "${LAST_SOSREPORT_EXTRACTED}\n${LAST_SOSREPORT_EXTRACTED_SHA256SUM} (**SHA256**)\n"
+if [[ -z "${SUMMARY_REPORT}" ]]; then
+    if [[ ! -z "${LAST_SOSREPORT_EXTRACTED}" ]]; then
+        printSection "Sosreport"
+        echo -e "**Engine sosreport**:\n"
+        echo -e "${LAST_SOSREPORT_EXTRACTED}\n${LAST_SOSREPORT_EXTRACTED_SHA256SUM} (**SHA256**)\n"
 
-    if [[ -f ${SOS_REPORT_UNPACK_DIR}/.metadata-hosts && -s ${SOS_REPORT_UNPACK_DIR}/.metadata-hosts ]]; then
-        echo -e "**Hypervisor(s) sosreport**:\n"
-        cat ${SOS_REPORT_UNPACK_DIR}/.metadata-hosts
+        if [[ -f ${SOS_REPORT_UNPACK_DIR}/.metadata-hosts && -s ${SOS_REPORT_UNPACK_DIR}/.metadata-hosts ]]; then
+            echo -e "**Hypervisor(s) sosreport**:\n"
+            cat ${SOS_REPORT_UNPACK_DIR}/.metadata-hosts
+        fi
     fi
+
+    printSection "Pre-upgrade checks"
+    . $(dirname "${0}")/pre-upgrade-checks
+
+    check_hosts_health
+    check_hosts_pretty_name
+    check_vms_health
+    check_cluster_no_dc
+    check_third_party_certificate
+    check_minimum_datacenter_compat_version
+    check_minimum_cluster_compat_version
+    check_vms_running_obsolete_cluster
+    check_pinned_virtual_machines
+    check_vms_with_no_timezone_set
+    check_mixedrhelversion
+    check_vms_windows_with_incorrect_timezone
+    check_vms_linux_and_others_with_incorrect_timezone
+    check_vms_with_cluster_lower_3_6_with_virtio_serial_console
+    check_async_tasks
+    check_runnning_commands
+    check_compensation_tasks
+    check_min_and_max_engine_heap
+    check_storage_domains_failing
+    check_AAA_legacy
+    check_non_ovirtmgmt_as_management_network
+    check_images_locked_or_illegal
+    check_vm_snapshot_id_zero
+    check_legacy_apache_sso_config
 fi
-
-printSection "Pre-upgrade checks"
-. $(dirname "${0}")/pre-upgrade-checks
-
-check_hosts_health
-check_hosts_pretty_name
-check_vms_health
-check_cluster_no_dc
-check_third_party_certificate
-check_minimum_datacenter_compat_version
-check_minimum_cluster_compat_version
-check_vms_running_obsolete_cluster
-check_pinned_virtual_machines
-check_vms_with_no_timezone_set
-check_mixedrhelversion
-check_vms_windows_with_incorrect_timezone
-check_vms_linux_and_others_with_incorrect_timezone
-check_vms_with_cluster_lower_3_6_with_virtio_serial_console
-check_async_tasks
-check_runnning_commands
-check_compensation_tasks
-check_min_and_max_engine_heap
-check_storage_domains_failing
-check_AAA_legacy
-check_non_ovirtmgmt_as_management_network
-check_images_locked_or_illegal
-check_vm_snapshot_id_zero
-check_legacy_apache_sso_config
 
 printSection "Engine details"
 
-echo "{INFO} Before engine upgrades it is recommended to execute " \
-     "https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.1/html-single/upgrade_guide/#Upgrading_between_Minor_Releases[engine-upgrade-check]"
-echo
+if [[ -z ${SUMMARY_REPORT} ]]; then
+    echo "{INFO} Before engine upgrades it is recommended to execute " \
+         "https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.1/html-single/upgrade_guide/#Upgrading_between_Minor_Releases[engine-upgrade-check]"
+    echo
+fi
 
 ENGINE_VERSIONS=$(execute_SQL_from_file "${SQLS}"/engine_versions_through_all_upgrades.sql)
 
@@ -333,11 +337,17 @@ echo
 
 ENGINE_PAST_VERSIONS=$(echo "${ENGINE_VERSIONS}" | sort -u | sed -e s/"${ENGINE_CURRENT_VERSION}//")
 if [ ${#ENGINE_PAST_VERSIONS} -gt 0 ]; then
-    echo ".Probable past the engine versions as engine was upgraded in the past " \
-         "footnote:[<We group the upgrade scripts by the time when the script was fully applied. " \
-         "All scripts which finished in same 30 minutes span are considered to be " \
-         "related to same upgrade. The last script then determines the version " \
-         "of this 'upgrade'.>]"
+    if [[ -z ${SUMMARY_REPORT} ]]; then
+        echo ".Probable past the engine versions as engine was upgraded in the past " \
+             "footnote:[<We group the upgrade scripts by the time when the script was fully applied. " \
+             "All scripts which finished in same 30 minutes span are considered to be " \
+             "related to same upgrade. The last script then determines the version " \
+             "of this 'upgrade'.>]"
+    else
+        echo ".Probable past the engine versions"
+    fi
+
+    echo
     echo "${ENGINE_PAST_VERSIONS}" | bulletize
     echo
 fi
@@ -508,15 +518,17 @@ if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
     echo "${sql_query}" | createAsciidocTable
 fi
 
-pkgs_engine=$(rpm_version)
-if [ ${#pkgs_engine} -gt 0 ]; then
-    printSection "Main Packages installed in Engine"
-    echo "${pkgs_engine}" | createAsciidocTable noheader
+if [[ -z ${SUMMARY_REPORT} ]]; then
+    pkgs_engine=$(rpm_version)
+    if [ ${#pkgs_engine} -gt 0 ]; then
+        printSection "Main Packages installed in Engine"
+        echo "${pkgs_engine}" | createAsciidocTable noheader
+    fi
+
+    display_host_config
+
+    printSection "Auxiliary documentation"
+    auxiliary_docs
 fi
-
-display_host_config
-
-printSection "Auxiliary documentation"
-auxiliary_docs
 
 cleanup_db
