@@ -306,18 +306,26 @@ function check_minimum_datacenter_compat_version() {
     fi
 }
 
-function check_non_ovirtmgmt_as_management_network() {
-    sql_ret=$(execute_SQL_from_file "${SQLS}"/network_query_cluster_with_non_ovirtmgmt_as_management_network.sql)
+function check_hosted_engine_environment() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/vdc_options_query_detect_hosted_engine_env.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
-        echo
-        echo "{WARNING} There are cluster(s) with **NON ovirtmgmt as management network**." \
-             "Hosted Engine environments can be affected during upgrade. See " \
-             "https://bugzilla.redhat.com/show_bug.cgi?id=1449547[bz#1449547] and " \
-             "https://access.redhat.com/solutions/2292861[this knowledge article] for more information."
+        echo -e "{OK} Detected Hosted Engine (HE) Environment"
         echo "${sql_ret}" | createAsciidocTable
-        echo
-    else
-        echo -e "{OK} All management network are ovirtmgmt\n"
+
+        # Check for non ovirtmgmt as management network
+        sql_ret=$(execute_SQL_from_file "${SQLS}"/network_query_cluster_with_non_ovirtmgmt_as_management_network.sql)
+        if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+            echo
+            echo "{WARNING} There are cluster(s) with **NON ovirtmgmt as management network**." \
+                 "Hosted Engine environments can be affected during upgrade. See " \
+                 "https://bugzilla.redhat.com/show_bug.cgi?id=1449547[bz#1449547] and " \
+                 "https://access.redhat.com/solutions/2292861[this knowledge article] for more information."
+            echo "${sql_ret}" | createAsciidocTable
+            echo
+        else
+            echo -e "{OK} All management network are ovirtmgmt\n"
+        fi
+
     fi
 }
 
