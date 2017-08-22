@@ -19,7 +19,7 @@ BEGIN
     IF EXISTS (SELECT column_name
                FROM information_schema.columns
                WHERE table_name='async_tasks' and column_name='storage_pool_id') THEN
-        RETURN QUERY EXECUTE format('
+        RETURN QUERY (
         SELECT
             async_tasks.action_type,
             async_tasks.task_id,
@@ -27,10 +27,19 @@ BEGIN
         FROM
             async_tasks, storage_pool
         WHERE
-            async_tasks.storage_pool_id = storage_pool.id
-       ');
+            async_tasks.storage_pool_id=storage_pool.id
+        );
    END IF;
 END; $PROCEDURE$
 LANGUAGE plpgsql;
-SELECT __temp_query_async_tasks_running();
+
+COPY (
+    SELECT
+        action_type AS "Action Type",
+        task_id AS "Task UUID",
+        storagepool_name AS "Data Center"
+    FROM
+        __temp_query_async_tasks_running()
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
+
 DROP FUNCTION __temp_query_async_tasks_running();
