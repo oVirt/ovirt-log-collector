@@ -10,4 +10,10 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --
-SELECT GetFailingStorage_domains();
+COPY (
+    SELECT
+        storage_pool_name AS "Data Center",
+        storage_name AS "Storage Name"
+    FROM
+        GetFailingStorage_domains()
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
