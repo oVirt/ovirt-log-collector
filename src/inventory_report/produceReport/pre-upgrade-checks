@@ -312,6 +312,17 @@ function check_hosted_engine_environment() {
         echo -e "{OK} Detected Hosted Engine (HE) Environment"
         echo "${sql_ret}" | createAsciidocTable
 
+        # Check for HA Global Maintenance mode
+        sql_ret=$(execute_SQL_from_file "${SQLS}"/vds_statistics_query_ha_global_maintenance.sql)
+        if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+            echo
+            echo "{WARNING} Hosted Engine HA is in https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.1/html-single/self-hosted_engine_guide/#chap-Maintenance_and_Upgrading_Resources[Global Maintenance mode]"
+            echo "${sql_ret}" | createAsciidocTable
+            echo
+        else
+            echo -e "{OK} Hosted Engine HA is **not in** Global Maintenance mode\n"
+        fi
+
         # Check for non ovirtmgmt as management network
         sql_ret=$(execute_SQL_from_file "${SQLS}"/network_query_cluster_with_non_ovirtmgmt_as_management_network.sql)
         if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
