@@ -8,7 +8,7 @@ BEGIN
                WHERE table_name='mac_pools') THEN
         IF EXISTS (SELECT column_name
                    FROM information_schema.columns
-                   WHERE table_name='cluster') THEN
+                   WHERE table_name='cluster' AND column_name='mac_pool_id') THEN
             RETURN QUERY (
             SELECT
                 cluster.name AS "Cluster",
