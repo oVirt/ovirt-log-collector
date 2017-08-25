@@ -10,6 +10,9 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --
+--  Find virtual machines with compatibility version <= 3.5 and virtio
+--  serial console. More info bz#1434401
+--
 CREATE OR REPLACE FUNCTION __temp_vms_lower_3_6_cluster_with_virtio_serial_console()
   RETURNS TABLE(name VARCHAR(255)) AS
 $PROCEDURE$
@@ -19,46 +22,55 @@ BEGIN
     IF EXISTS (SELECT column_name
                FROM information_schema.columns
                WHERE table_name='cluster') THEN
-        RETURN QUERY EXECUTE format('
+        RETURN QUERY (
         SELECT
-            DISTINCT vm_name
+            DISTINCT vm_static.vm_name
         FROM
             vm_static,
             vm_device
         WHERE
-            vm_device.type=''console'' AND
-            vm_device.device=''console'' AND
+            vm_device.type='console' AND
+            vm_device.device='console' AND
+            vm_static.entity_type='VM' AND
             vm_static.cluster_id IN (
                 SELECT
                     cluster_id
                 FROM
                     cluster
                 WHERE
-                    compatibility_version <= ''3.5''
-            )
-        ');
+                    compatibility_version<='3.5'
+            ) ORDER BY vm_static.vm_name
+        );
     ELSE
         -- Compat mode, engine database < 4.0
-        RETURN QUERY EXECUTE format('
+        RETURN QUERY (
         SELECT
-            DISTINCT vm_name
+            DISTINCT vm_static.vm_name
         FROM
             vm_static,
             vm_device
         WHERE
-            vm_device.type=''console'' AND
-            vm_device.device=''console'' AND
+            vm_device.type='console' AND
+            vm_device.device='console' AND
+            vm_static.entity_type='VM' AND
             vm_static.vds_group_id IN (
                 SELECT
                     vds_group_id
                 FROM
                     vds_groups
                 WHERE
-                    compatibility_version <= ''3.5''
-            )
-        ');
+                    compatibility_version<='3.5'
+            ) ORDER BY vm_static.vm_name
+        );
     END IF;
 END; $PROCEDURE$
 LANGUAGE plpgsql;
-SELECT __temp_vms_lower_3_6_cluster_with_virtio_serial_console();
+
+COPY (
+    SELECT
+        name AS "Virtual Machine(s)"
+    FROM
+        __temp_vms_lower_3_6_cluster_with_virtio_serial_console()
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
+
 DROP FUNCTION __temp_vms_lower_3_6_cluster_with_virtio_serial_console();
