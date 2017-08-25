@@ -56,6 +56,6 @@ COPY (
         __temp_non_ovirtmgmt_as_management_network()
     ORDER BY
        cluster_name
-) TO STDOUT With CSV DELIMITER E'\|' HEADER;
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
 
 DROP FUNCTION __temp_non_ovirtmgmt_as_management_network();

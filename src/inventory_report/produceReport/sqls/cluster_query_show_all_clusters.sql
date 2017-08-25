@@ -58,6 +58,6 @@ COPY (
       __temp_cluster_show_all()
   ORDER BY
       clustername
-) To STDOUT With CSV DELIMITER E'\|' HEADER;
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
 
 DROP FUNCTION __temp_cluster_show_all();

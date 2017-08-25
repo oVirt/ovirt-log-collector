@@ -56,6 +56,6 @@ Copy (
     __temp_vms_per_cluster()
   ORDER BY
     name
-) To STDOUT With CSV DELIMITER E'\|' HEADER;
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
 
 DROP FUNCTION __temp_vms_per_cluster();

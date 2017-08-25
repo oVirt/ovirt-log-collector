@@ -20,4 +20,4 @@ COPY (
     WHERE
         compatibility_version <> '' AND
         compatibility_version < '3.6'
-) To STDOUT With CSV DELIMITER E'\|' HEADER;
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;

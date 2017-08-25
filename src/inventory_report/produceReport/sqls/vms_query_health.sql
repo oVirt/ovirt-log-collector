@@ -53,4 +53,4 @@ COPY (
         vms_unavailable
     LEFT JOIN
         vms_status_temp ON vms_unavailable.status = vms_status_temp.id
-) TO STDOUT With CSV DELIMITER E'\|' HEADER;
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;

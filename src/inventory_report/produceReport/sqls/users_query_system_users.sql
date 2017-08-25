@@ -20,4 +20,4 @@ COPY (
     FROM
         users
     ORDER BY surname, name
-) TO STDOUT With CSV DELIMITER E'\|' HEADER;
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;

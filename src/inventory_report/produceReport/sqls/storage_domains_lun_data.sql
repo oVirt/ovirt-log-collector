@@ -27,4 +27,4 @@ COPY (
         luns_view lv
     ON
         lun_storage_server_connection_map.lun_id=lv.lun_id
-) TO STDOUT With CSV DELIMITER E'\|' HEADER;
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;

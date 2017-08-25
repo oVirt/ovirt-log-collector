@@ -46,5 +46,5 @@ COPY (
         name AS "Cluster"
     FROM
         __temp_cluster_check_datacenter_assigned()
-) To STDOUT With CSV DELIMITER E'\|' HEADER;
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
 DROP FUNCTION __temp_cluster_check_datacenter_assigned();
