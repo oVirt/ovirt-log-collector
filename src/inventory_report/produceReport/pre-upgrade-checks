@@ -167,11 +167,11 @@ function rpm_version() {
 
 function check_vms_windows_with_incorrect_timezone() {
    sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_query_windows_vms_with_incorrect_timezone.sql)
-    if [ ${#sql_ret} -gt 0 ]; then
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
         echo -e "{WARNING} The following VMs with Windows OS contain incorrect" \
                 " timezone, please adjust the timezone via Web Admin. A list " \
                 "of possible values can be found in https://github.com/oVirt/ovirt-engine/blob/fa401fb9a841bf1704588ed2bc9f7f0fbbf0d008/backend/manager/modules/compat/src/main/java/org/ovirt/engine/core/compat/WindowsJavaTimezoneMapping.java#L10[WindowsJavaTimezoneMapping.java]"
-        echo "${sql_ret}" | createAsciidocTable "noheader"
+        echo "${sql_ret}" | createAsciidocTable
     else
         echo -e "{OK} All VMs with Windows OS have correct timezone\n"
     fi

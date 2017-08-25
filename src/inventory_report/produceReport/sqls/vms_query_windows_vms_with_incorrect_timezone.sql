@@ -134,40 +134,43 @@ INSERT INTO timezone_temp VALUES
 -- 27 - Windows10x64
 -- 29 - Windows2016x64
 
-WITH vms_win_with_timezone AS (
-    SELECT
-        vm_name, time_zone
-    FROM
-        vm_static
-    WHERE
-        os IN (
-            1,
-            3,
-            4,
-            10,
-            11,
-            12,
-            16,
-            17,
-            20,
-            21,
-            23,
-            25,
-            26,
-            27,
-            29
+COPY (
+    WITH vms_win_with_timezone AS (
+        SELECT
+            vm_name,
+            time_zone
+        FROM
+            vm_static
+        WHERE
+            os IN (
+                1,
+                3,
+                4,
+                10,
+                11,
+                12,
+                16,
+                17,
+                20,
+                21,
+                23,
+                25,
+                26,
+                27,
+                29
+        ) AND entity_type='VM'
     )
-)
 
-SELECT
-    vm_name AS "VM Name",
-    time_zone AS "Time Zone"
-FROM
-    vms_win_with_timezone
-WHERE
-    time_zone NOT IN
-    (
-    SELECT zone FROM timezone_temp
-    );
+    SELECT
+        vm_name AS "VM Name",
+        time_zone AS "Time Zone"
+    FROM
+        vms_win_with_timezone
+    WHERE
+        time_zone NOT IN
+        (
+            SELECT zone FROM timezone_temp
+        )
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
 
 DROP TABLE timezone_temp;
