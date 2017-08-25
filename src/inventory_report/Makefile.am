@@ -92,6 +92,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/images_query_vm_snapshot_id_zero.sql \
 	produceReport/sqls/vdc_options_query_detect_hosted_engine_env.sql \
 	produceReport/sqls/vds_statistics_query_ha_global_maintenance.sql \
+	produceReport/sqls/vds_statistics_query_hosted_engine_setup_with_hosts_non_up.sql \
 	$(NULL)
 
 install-data-hook:
