@@ -68,11 +68,16 @@ PG_DUMP_TAR=$(tar tf "$TAR_WITH_POSTGRES_SOSREPORT" | grep "sos_pgdump.tar")
 
 tar -Oxf "$TAR_WITH_POSTGRES_SOSREPORT" "$PG_DUMP_TAR" | tar -C "$PG_DUMP_DIR" -x
 
+if [ ! -f "${PG_DUMP_DIR}/restore.sql" ]; then
+    echo "Unable to detect restore.sql from ${PG_DUMP_TAR}, aborting.."
+    rm -rf "${UNPACKED_SOSREPORT} ${PG_DUMP_DIR}"
+    exit -1
+fi
+
 cd "$PG_DUMP_DIR"
 sed -i "s#\\\$\\\$PATH\\\$\\\$#$PWD#g" restore.sql
 chmod o+r *
 chmod o+rx ./
-
 
 echo "sos-report extracted into: $UNPACKED_SOSREPORT";
 echo "pgdump extracted into: $PG_DUMP_DIR";
