@@ -397,3 +397,18 @@ function check_legacy_apache_sso_config() {
         echo -e "{OK} No legacy Apache SSO configuration found\n"
     fi
 }
+
+function check_dirty_network() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/vds_dynamic_check_for_net_config_dirty.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo
+        echo "{WARNING} Network configuration is not persisted on the " \
+             "following hosts, which may lead to connectivity issues " \
+             "after reboot. Make sure to use the button **Save Network Configuration** " \
+             "on these host(s) to persist the network settings"
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    else
+        echo -e "{OK} No issues found in the hypervisor(s) network\n"
+    fi
+}

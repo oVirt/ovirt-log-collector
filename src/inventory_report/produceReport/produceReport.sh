@@ -313,6 +313,7 @@ if [[ -z "${SUMMARY_REPORT}" ]]; then
     check_images_locked_or_illegal
     check_vm_snapshot_id_zero
     check_legacy_apache_sso_config
+    check_dirty_network
 fi
 
 printSection "Engine Details"
