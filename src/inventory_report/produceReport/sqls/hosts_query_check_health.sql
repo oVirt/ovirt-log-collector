@@ -38,11 +38,7 @@ WITH hosts_unavailable AS (
         vds_name, status
     FROM
         vds
-    WHERE status=2 or
-          status=5 or
-          status=7 or
-          status=9 or
-          status=10
+    WHERE status <> 3
 )
 SELECT
     vds_name AS "Host",
