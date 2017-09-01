@@ -23,9 +23,8 @@ exit 1;
 
 }
 
-if [ $# -ne 2 ]; then
+if [[ $# -lt 2 ]]; then
     usage;
-
 fi
 
 SOS_REPORT=$1
@@ -50,6 +49,10 @@ LAST_SOSREPORT_EXTRACTED_SHA256SUM=$(echo ${SHA256} | cut -d ' ' -f 1)
 LAST_SOSREPORT_EXTRACTED=$(echo ${SHA256} | cut -d ' ' -f 2 | xargs basename)
 echo "LAST_SOSREPORT_EXTRACTED=${LAST_SOSREPORT_EXTRACTED}" > ${TMP_ROOT}/.metadata-inventory
 echo "LAST_SOSREPORT_EXTRACTED_SHA256SUM=${LAST_SOSREPORT_EXTRACTED_SHA256SUM}" >> ${TMP_ROOT}/.metadata-inventory
+
+if [[ ! -z ${3} ]]; then
+    echo ${3} >> ${TMP_ROOT}/.metadata-inventory
+fi
 
 TAR_WITH_POSTGRES_SOSREPORT=$(find "$UNPACKED_SOSREPORT" -name "*postgresql-sosreport*tar.xz")
 
