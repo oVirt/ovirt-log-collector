@@ -406,6 +406,7 @@ printSection "Hosts"
 QUERY_HOSTS="SELECT
      $(projectionCountingRowsWithOrder c.name, v.vds_name),
      v.vds_name AS \"Name of Host\",
+     CASE WHEN sp.spm_vds_id=v.vds_id THEN 'SPM' ELSE 'Normal' END AS \"SPM\",
      coalesce(htt.text, 'Unknown (id='||v.vds_type||')') AS \"Host Type\",
      c.name AS \"Cluster\",
      sp.name AS \"Data Center\",
