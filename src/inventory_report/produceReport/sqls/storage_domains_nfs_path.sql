@@ -31,4 +31,4 @@ COPY (
     INNER JOIN storage_server_connections ON storage_domain_static.storage=storage_server_connections.id AND
     storage_server_connections.storage_type=1
     ORDER BY storage_domain_static.storage_name, storage_server_connections.connection
-) TO STDOUT With CSV DELIMITER E'\|' HEADER;
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;

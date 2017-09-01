@@ -48,6 +48,6 @@ COPY (
     FROM
         __temp_providers()
     ORDER BY provider_name
-) TO STDOUT With CSV DELIMITER E'\|' HEADER;
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
 
 DROP FUNCTION __temp_providers();

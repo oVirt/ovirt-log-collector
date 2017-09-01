@@ -22,4 +22,4 @@ COPY (
         physical_volume_id AS "Physical Volume ID"
     FROM
         luns_view
-) TO STDOUT With CSV DELIMITER E'\|' HEADER;
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;

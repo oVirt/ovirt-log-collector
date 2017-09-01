@@ -54,6 +54,6 @@ Copy (
     __temp_minimum_cluster_compat_level()
   ORDER BY
     cluster_name
-) To STDOUT With CSV DELIMITER E'\|' HEADER;
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
 
 DROP FUNCTION __temp_minimum_cluster_compat_level();
