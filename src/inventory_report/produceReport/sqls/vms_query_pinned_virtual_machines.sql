@@ -21,7 +21,7 @@ COPY (
     WITH vms_pinned AS (
         SELECT
             vm_name,
-            unnest(string_to_array(dedicated_vm_for_vds,',')) AS dedicated_vds
+            unnest(string_to_array(dedicated_vm_for_vds::text,',')) AS dedicated_vds
         FROM
             vm_static
         WHERE
