@@ -276,8 +276,13 @@ printFileHeader
 
 if [[ ! -z "${LAST_SOSREPORT_EXTRACTED}" ]]; then
     printSection "Sosreport"
-    echo -e "**Engine sosreport**: ${LAST_SOSREPORT_EXTRACTED}\n"
-    echo -e "**SHA256**: ${LAST_SOSREPORT_EXTRACTED_SHA256SUM}\n"
+    echo -e "**Engine sosreport**:\n"
+    echo -e "${LAST_SOSREPORT_EXTRACTED}\n${LAST_SOSREPORT_EXTRACTED_SHA256SUM} (**SHA256**)\n"
+
+    if [[ -f ${SOS_REPORT_UNPACK_DIR}/.metadata-hosts && -s ${SOS_REPORT_UNPACK_DIR}/.metadata-hosts ]]; then
+        echo -e "**Hypervisor(s) sosreport**:\n"
+        cat ${SOS_REPORT_UNPACK_DIR}/.metadata-hosts
+    fi
 fi
 
 printSection "Pre-upgrade checks"
