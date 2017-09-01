@@ -10,11 +10,28 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --
+--  Return the virtual machines pinned to run in a specific host.
+--
+--  The column dedicated_vm_for_vd from vm_static can contain a single
+--  hypervisor entry or multiple hypervisors (using delimiter comma).
+--  Based on that, we are extacting the hypervisors in the WITH statement
+--  and using it in the INNER JOIN.
+--
 COPY (
+    WITH vms_pinned AS (
+        SELECT
+            vm_name,
+            unnest(string_to_array(dedicated_vm_for_vds,',')) AS dedicated_vds
+        FROM
+            vm_static
+        WHERE
+            vm_static.dedicated_vm_for_vds IS NOT NULL
+        AND vm_static.entity_type='VM'
+    )
     SELECT
-        vm_static.vm_name AS "Virtual Machine",
+        vms_pinned.vm_name AS "Virtual Machine",
         vds.vds_name AS "Hypervisor"
     FROM
-        vm_static
-    INNER JOIN vds ON vm_static.dedicated_vm_for_vds::uuid=vds.vds_id
+        vds
+    INNER JOIN vms_pinned ON vds.vds_id::text=vms_pinned.dedicated_vds ORDER BY vms_pinned.vm_name
 ) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
