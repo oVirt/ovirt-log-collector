@@ -457,7 +457,7 @@ if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
 fi
 
 sql_query=$(execute_SQL_from_file "${SQLS}"/storage_domains_nfs_path.sql)
-if [ ${#sql_query} -gt 0 ]; then
+if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
     printSection "Storage Domain: NFS"
     echo "${sql_query}" | createAsciidocTable
 fi
