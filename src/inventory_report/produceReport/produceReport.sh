@@ -520,10 +520,12 @@ if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
 fi
 
 if [[ -z ${SUMMARY_REPORT} ]]; then
-    pkgs_engine=$(rpm_version)
+    pkgs_engine="Packages list\n"
+    pkgs_engine+=$(rpm_version)
     if [ ${#pkgs_engine} -gt 0 ]; then
-        printSection "Main Packages installed in Engine"
-        echo "${pkgs_engine}" | createAsciidocTable noheader
+        printSection "Engine components"
+        echo ".Main components installed in Engine"
+        echo -e "${pkgs_engine}" | createAsciidocTable
     fi
 
     display_host_config
