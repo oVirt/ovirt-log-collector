@@ -56,6 +56,12 @@ fi
 
 TAR_WITH_POSTGRES_SOSREPORT=$(find "$UNPACKED_SOSREPORT" -name "*postgresql-sosreport*tar.xz")
 
+if [ -z "${TAR_WITH_POSTGRES_SOSREPORT}" ]; then
+    echo "Unable to detect postgresql data from sosreport ${1}, aborting.."
+    rm -rf "${UNPACKED_SOSREPORT} ${PG_DUMP_DIR}"
+    exit -1
+fi
+
 tar -C "$(dirname $TAR_WITH_POSTGRES_SOSREPORT)" -Jxf "$TAR_WITH_POSTGRES_SOSREPORT"
 
 PG_DUMP_TAR=$(tar tf "$TAR_WITH_POSTGRES_SOSREPORT" | grep "sos_pgdump.tar")
