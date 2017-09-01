@@ -507,10 +507,10 @@ fi
 printSection "System Users"
 execute_SQL_from_file "${SQLS}"/users_query_system_users.sql | createAsciidocTable
 
-sql_query=$(execute_SQL_from_file "${SQLS}"/bookmarks_query_number_of_rows.sql)
-if [ ${sql_query} -gt 0 ]; then
+sql_query=$(execute_SQL_from_file "${SQLS}"/bookmarks_query_name_value.sql)
+if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
     printSection "Bookmarks"
-    execute_SQL_from_file "${SQLS}"/bookmarks_query_name_value.sql | createAsciidocTable
+    echo "${sql_query}" | createAsciidocTable
 fi
 
 sql_query=$(execute_SQL_from_file "${SQLS}"/providers_query_show_data.sql)
