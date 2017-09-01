@@ -254,12 +254,12 @@ function check_compensation_tasks() {
 
 function check_storage_domains_failing() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/storage_domains_query_get_failing_domains.sql)
-    if [ ${#sql_ret} -gt 0 ]; then
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
         echo
         echo "{WARNING} The following storage domains are inactive. " \
              "Please make sure all storage domains required for the system " \
              "are available and active before upgrading the environment"
-        echo "${sql_ret}" | createAsciidocTable "noheader"
+        echo "${sql_ret}" | createAsciidocTable
         echo
     else
         echo -e "{OK} No storage domain inactive\n"
