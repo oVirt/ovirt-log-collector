@@ -159,6 +159,7 @@ function display_host_config() {
 
     if [ ${multipath_settings} = true ] || [ ${vdsm_settings} = true ]; then
         printSection "Hypervisor(s) Settings"
+        echo ".Configurations with non default value:"
         echo -e "${output}" | createAsciidocTable
         if [ ${multipath_settings} = true ]; then
             echo -e "_Exclamation triangle in multipath.conf column means: Manual override for multipath.conf, it is recommended to inspect closely the current /etc/multipath.conf and possibly re-apply it if the hypervisor requires a fresh install_"
