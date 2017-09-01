@@ -192,7 +192,7 @@ function check_vms_linux_and_others_with_incorrect_timezone() {
 
 function check_vms_with_cluster_lower_3_6_with_virtio_serial_console() {
    sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_with_cluster_lower_3_6_with_virtio_serial_console.sql)
-    if [ ${#sql_ret} -gt 0 ]; then
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
         echo -e "{WARNING} The following VMs with VirtIO serial console " \
                 "enabled in cluster levels 3.5 and below cannot be later " \
                 "live migrated to 3.6 hosts (on RHEL7). Such attempt fails " \
@@ -200,7 +200,7 @@ function check_vms_with_cluster_lower_3_6_with_virtio_serial_console() {
                 "console feature while the VM is still in a 3.5 cluster. " \
                 "It can be re-enabled once the VM is in a 3.6 cluster." \
                 "For more information, https://bugzilla.redhat.com/show_bug.cgi?id=1434401[see bz#1434401]"
-        echo "${sql_ret}" | createAsciidocTable "noheader"
+        echo "${sql_ret}" | createAsciidocTable
     else
         echo -e "{OK} No VMs with VirtIO serial console enabled in cluster" \
                 " levels 3.5 and below\n"
