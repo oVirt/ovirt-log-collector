@@ -299,7 +299,6 @@ if [[ -z "${SUMMARY_REPORT}" ]]; then
     check_minimum_cluster_compat_version
     check_vms_running_obsolete_cluster
     check_pinned_virtual_machines
-    check_vms_with_no_timezone_set
     check_mixedrhelversion
     check_vms_windows_with_incorrect_timezone
     check_vms_linux_and_others_with_incorrect_timezone

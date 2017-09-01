@@ -61,7 +61,6 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/vms_create_related_lookup_tables.sql \
 	produceReport/sqls/vms_query_check_obsolete_cluster.sql \
 	produceReport/sqls/dws_query_check_if_its_running.sql \
-	produceReport/sqls/vms_check_no_timezone_set.sql \
 	produceReport/sqls/vms_query_pinned_virtual_machines.sql \
 	produceReport/sqls/hosts_query_check_pretty_name.sql \
 	produceReport/sqls/database_size.sql \
