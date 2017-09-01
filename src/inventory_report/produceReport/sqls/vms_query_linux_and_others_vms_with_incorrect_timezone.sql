@@ -128,52 +128,54 @@ INSERT INTO timezone_temp VALUES
 -- 1005 - Ubuntu Trusty Tahr LTS PPC64
 -- 1006 - Red Hat Enterprise Linux 7.x PPC64
 
-WITH vms_linux_and_other_timezone AS (
-    SELECT
-        vm_name, time_zone
-    FROM
-        vm_static
-    WHERE
-        os IN (
-            0,
-            5,
-            7,
-            8,
-            9,
-           13,
-           14,
-           15,
-           18,
-           19,
-           24,
-           28,
-           1193,
-           1252,
-           1253,
-           1254,
-           1255,
-           1256,
-           1300,
-           1500,
-           1501,
-           1001,
-           1002,
-           1003,
-           1004,
-           1005,
-           1006
+COPY (
+    WITH vms_linux_and_other_timezone AS (
+        SELECT
+            vm_name,
+            time_zone
+        FROM
+            vm_static
+        WHERE
+            os IN (
+                0,
+                5,
+                7,
+                8,
+                9,
+               13,
+               14,
+               15,
+               18,
+               19,
+               24,
+               28,
+               1193,
+               1252,
+               1253,
+               1254,
+               1255,
+               1256,
+               1300,
+               1500,
+               1501,
+               1001,
+               1002,
+               1003,
+               1004,
+               1005,
+               1006
+        ) AND entity_type='VM'
     )
-)
 
-SELECT
-    vm_name AS "VM Name",
-    time_zone AS "Time Zone"
-FROM
-    vms_linux_and_other_timezone
-WHERE
-    time_zone NOT IN
-    (
-    SELECT area FROM timezone_temp
-    );
+    SELECT
+        vm_name AS "Virtual Machine",
+        time_zone AS "Time Zone"
+    FROM
+        vms_linux_and_other_timezone
+    WHERE
+        time_zone NOT IN (
+            SELECT area FROM timezone_temp
+        )
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
 
 DROP TABLE timezone_temp;
