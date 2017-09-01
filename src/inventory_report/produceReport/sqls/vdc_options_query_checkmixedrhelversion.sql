@@ -10,11 +10,15 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --
+--  Query to verify if option CheckMixedRhelVersions is different from true
+--
 SELECT
-    option_id, option_name, option_value, version
+    option_name AS "Option Name",
+    option_value AS "Value",
+    version AS "Version"
 FROM
     vdc_options
 WHERE
-    option_name ilike 'CheckMixedRhelVersions' AND
+    option_name ILIKE 'CheckMixedRhelVersions' AND
     option_value != 'true' AND
     version != 'general'
