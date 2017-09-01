@@ -7,9 +7,8 @@ function check_hosts_health() {
     sql_cmd=$(cat "${SQLS}"/hosts_query_check_health.sql)
     hosts_health_check=$(executeSQL "${sql_cmd}")
     if [ ${#hosts_health_check} -gt 0 ]; then
-        echo -e "{WARNING} The following host(s) are not ready for upgrade as" \
-                "we cannot collect data and perform analysis with host(s)" \
-                "in error, failed, maintenance, or non-operational states:"
+        echo -e "{WARNING} The following host(s) are not in UP state, please" \
+                " verify:"
         printTable "${sql_cmd}"
         echo
     else
