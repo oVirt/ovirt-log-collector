@@ -20,7 +20,7 @@ BEGIN
     IF EXISTS (SELECT column_name
                FROM information_schema.columns
                WHERE table_name='command_entities') THEN
-        RETURN QUERY EXECUTE format('
+        RETURN QUERY (
         SELECT
                 command_entities.command_type,
                 command_entities.command_id,
@@ -29,11 +29,19 @@ BEGIN
         FROM
                 command_entities
         WHERE
-                command_entities.callback_enabled = ''true'' AND
-                command_entities.callback_notified = ''false''
-       ');
+                command_entities.callback_enabled='true' AND
+                command_entities.callback_notified='false'
+       );
    END IF;
 END; $PROCEDURE$
 LANGUAGE plpgsql;
-SELECT __temp_query_get_running_commands();
+
+COPY (
+    SELECT
+        command_id AS "Command ID",
+        status AS "Status"
+    FROM
+        __temp_query_get_running_commands()
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
+
 DROP FUNCTION __temp_query_get_running_commands();
