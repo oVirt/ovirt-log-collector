@@ -1,0 +1,4 @@
+[gerrit]
+host=gerrit.ovirt.org
+port=29418
+project=ovirt-log-collector
