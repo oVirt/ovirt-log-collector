@@ -420,7 +420,7 @@ QUERY_HOSTS="SELECT
      hst.text AS \"Status\",
      v.host_os AS \"Operating System\",
      v.vm_count AS \"VM Count\",
-     v.mem_available AS \"Available memory\",
+     v.mem_available AS \"Available memory (MB)\",
      v.usage_mem_percent AS \"Used memory %\",
      v.usage_cpu_percent AS \"CPU load %\"
    FROM
