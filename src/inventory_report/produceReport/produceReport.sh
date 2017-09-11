@@ -314,6 +314,7 @@ if [[ -z "${SUMMARY_REPORT}" ]]; then
     check_vm_snapshot_id_zero
     check_legacy_apache_sso_config
     check_dirty_network
+    check_ip_not_null_and_pm_user_null
 fi
 
 printSection "Engine Details"

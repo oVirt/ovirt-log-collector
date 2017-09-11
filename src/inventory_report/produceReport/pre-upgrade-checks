@@ -411,3 +411,18 @@ function check_dirty_network() {
         echo -e "{OK} No issues found in the hypervisor(s) network\n"
     fi
 }
+
+function check_ip_not_null_and_pm_user_null() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_query_ip_set_power_management_null.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo
+        echo "{WARNING} The following hypervisor(s) have Power Manager disabled " \
+             "but the address is still set with no username. This scenario might cause an upgrade " \
+             "issue from 3.5 to 3.6 version. For more information see the https://access.redhat.com/solutions/3178621[solution]" \
+             " and https://bugzilla.redhat.com/show_bug.cgi?id=1488630[bz#1488630]"
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    else
+        echo -e "{OK} No issues found in the Hypervisor(s) Power Management settings\n"
+    fi
+}
