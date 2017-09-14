@@ -12,3 +12,5 @@
 #  limitations under the License.
 
 HOSTS_SOSREPORT_EXTRACTED_DIR="/tmp/ovirt-log-collector-analyzer-hosts"
+ANALYZER_VERSION="@PACKAGE_RPM_VERSION@"
+ANALYZER_RELEASE="@PACKAGE_RPM_RELEASE@"

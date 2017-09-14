@@ -537,3 +537,5 @@ if [[ -z ${SUMMARY_REPORT} ]]; then
 fi
 
 cleanup_db
+
+echo "Powered by https://access.redhat.com/node/3049721[ovirt-log-collector-analyzer] ${ANALYZER_VERSION}-${ANALYZER_RELEASE}"

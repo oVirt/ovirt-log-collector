@@ -96,6 +96,13 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/vms_query_ip_set_power_management_null.sql \
 	$(NULL)
 
+EXTRA_DIST = \
+	inventory-profile.in \
+	$(NULL)
+
+clean-local:
+	rm -f inventory-profile
+
 install-data-hook:
 	$(MKDIR_P) "$(DESTDIR)$(bindir)"
 	$(LN_S) "$(ovirtlogcollectoranalyzerdir)/ovirt-log-collector-analyzer.sh" "$(DESTDIR)$(bindir)/ovirt-log-collector-analyzer"

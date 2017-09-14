@@ -80,6 +80,7 @@ AC_CONFIG_FILES([
 	src/Makefile
 	src/helper/Makefile
 	src/inventory_report/Makefile
+	src/inventory_report/inventory-profile
 	src/logrotate.d/Makefile
 	po/Makefile.in
 ])

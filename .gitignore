@@ -21,6 +21,7 @@ src/logrotate.d/ovirt-log-collector
 src/config.py
 src/config.py.in
 src/ovirt-log-collector
+src/inventory_report/inventory-profile
 .idea
 .gitreview
 intl
