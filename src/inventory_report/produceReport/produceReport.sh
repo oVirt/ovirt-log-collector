@@ -115,7 +115,7 @@ function display_host_config() {
     for dir in ${HOSTS_SOSREPORT_EXTRACTED_DIR}/*/
     do
         dir=${dir%*/}
-        SOS_REPORT_DIRS=$(find "$dir" -maxdepth 2 -name sosreport* -type d 2> /dev/null)
+        SOS_REPORT_DIRS=$(find "$dir" -maxdepth 2 -name 'sosreport*' -type d 2> /dev/null)
         for SOS_REPORT_DIR in $SOS_REPORT_DIRS
         do
             if [[ ! -z "${SOS_REPORT_DIR}/hostname" ]]; then
