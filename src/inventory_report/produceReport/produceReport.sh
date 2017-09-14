@@ -15,11 +15,31 @@
 SOS_REPORT_UNPACK_DIR="${1}"
 SCRIPT_DIR="$(dirname $(readlink -f $0))"
 
-. ${SCRIPT_DIR}/docs-helper
-. ${SCRIPT_DIR}/../inventory-profile
-. ${SOS_REPORT_UNPACK_DIR}/.metadata-inventory
+if [[ -f ${SCRIPT_DIR}/docs-helper ]]; then
+    . ${SCRIPT_DIR}/docs-helper
+else
+    echo "Unable to load docs-helper"
+    exit -1
+fi
 
-. ${ENGINE_UNPACKED_SOSREPORT}/etc/ovirt-engine/engine.conf.d/10-setup-protocols.conf
+if [[ -f ${SCRIPT_DIR}/../inventory-profile ]]; then
+    . ${SCRIPT_DIR}/../inventory-profile
+else
+    echo "Unable to load inventory-profile"
+    exit -1
+fi
+
+if [[ -f ${SOS_REPORT_UNPACK_DIR}/.metadata-inventory ]]; then
+    . ${SOS_REPORT_UNPACK_DIR}/.metadata-inventory
+else
+    echo "Unable to load .metadata-inventory"
+    exit -1
+fi
+
+# Load some Engine vars, like FQDN and others
+if [[ -f ${ENGINE_UNPACKED_SOSREPORT}/etc/ovirt-engine/engine.conf.d/10-setup-protocols.conf ]]; then
+    . ${ENGINE_UNPACKED_SOSREPORT}/etc/ovirt-engine/engine.conf.d/10-setup-protocols.conf
+fi
 
 DB_NAME="report";
 DBDIR="${SOS_REPORT_UNPACK_DIR}"/postgresDb
