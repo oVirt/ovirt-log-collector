@@ -19,6 +19,8 @@ SCRIPT_DIR="$(dirname $(readlink -f $0))"
 . ${SCRIPT_DIR}/../inventory-profile
 . ${SOS_REPORT_UNPACK_DIR}/.metadata-inventory
 
+. ${ENGINE_UNPACKED_SOSREPORT}/etc/ovirt-engine/engine.conf.d/10-setup-protocols.conf
+
 DB_NAME="report";
 DBDIR="${SOS_REPORT_UNPACK_DIR}"/postgresDb
 PGDATA="${DBDIR}"/pgdata
@@ -174,10 +176,8 @@ function printSection() {
 }
 
 function printFileHeader() {
-    fqdn_engine=$(find "${SOS_REPORT_UNPACK_DIR}" -name hostname -exec cat '{}' \; 2>/dev/null | uniq 2>/dev/null)
-
     echo '= Inventory Report'
-    echo ${fqdn_engine} $(date +"%m-%d-%Y %T")'
+    echo ${ENGINE_FQDN} $(date +"%m-%d-%Y %T")'
 :doctype: book
 :source-highlighter: coderay
 :listing-caption: Listing
@@ -355,7 +355,7 @@ if [ ${#ENGINE_PAST_VERSIONS} -gt 0 ]; then
 fi
 
 echo ".Engine FQDN";
-find "${SOS_REPORT_UNPACK_DIR}" -name "10-setup-protocols.conf" -exec grep "ENGINE_FQDN" '{}' \; | sed "s/^.*=//"
+echo "${ENGINE_FQDN}"
 echo
 
 DB_SIZE=$(execute_SQL_from_file "${SQLS}"/database_size.sql)

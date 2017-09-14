@@ -23,6 +23,18 @@ exit 1;
 
 }
 
+function find_engine_sosreport_dir() {
+    for dirname in $(ls -d ${UNPACKED_SOSREPORT}/*/*/)
+    do
+        # log-collector-data dir keep the hypervisors .tar.xz and pg dump
+        if [[ "${dirname}" == *'log-collector-data'* ]]; then
+            echo "HYPERVISORS_TARXZ_AND_POSTGRESQL_DATA=${dirname}" >> ${TMP_ROOT}/.metadata-inventory
+        else
+            echo "ENGINE_UNPACKED_SOSREPORT=${dirname}" >> ${TMP_ROOT}/.metadata-inventory
+        fi
+    done
+}
+
 if [[ $# -lt 2 ]]; then
     usage;
 fi
@@ -49,6 +61,8 @@ LAST_SOSREPORT_EXTRACTED_SHA256SUM=$(echo ${SHA256} | cut -d ' ' -f 1)
 LAST_SOSREPORT_EXTRACTED=$(echo ${SHA256} | cut -d ' ' -f 2 | xargs basename)
 echo "LAST_SOSREPORT_EXTRACTED=${LAST_SOSREPORT_EXTRACTED}" > ${TMP_ROOT}/.metadata-inventory
 echo "LAST_SOSREPORT_EXTRACTED_SHA256SUM=${LAST_SOSREPORT_EXTRACTED_SHA256SUM}" >> ${TMP_ROOT}/.metadata-inventory
+
+find_engine_sosreport_dir
 
 if [[ ! -z ${3} ]]; then
     echo ${3} >> ${TMP_ROOT}/.metadata-inventory
