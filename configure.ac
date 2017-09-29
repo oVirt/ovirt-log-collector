@@ -34,6 +34,9 @@ AM_GNU_GETTEXT_VERSION([0.17])
 AM_INIT_AUTOMAKE([1.9 tar-pax])
 AM_PO_SUBDIRS
 
+GITHEAD=`git rev-parse --short HEAD`
+AC_SUBST([GITHEAD])
+
 AC_ARG_ENABLE(
 	[python-syntax-check],
 	[AS_HELP_STRING([--disable-python-syntax-check], [disable python syntax check @<:@default=enabled@:>@])],
