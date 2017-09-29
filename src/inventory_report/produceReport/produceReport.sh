@@ -134,6 +134,12 @@ function display_host_config() {
     configs=""
     vdsm_settings=false
     multipath_settings=false
+
+    # Skip if dir is empty
+    if [ ! "$(ls -A ${HOSTS_SOSREPORT_EXTRACTED_DIR})" ]; then
+        return
+    fi
+
     for dir in ${HOSTS_SOSREPORT_EXTRACTED_DIR}/*/
     do
         dir=${dir%*/}
