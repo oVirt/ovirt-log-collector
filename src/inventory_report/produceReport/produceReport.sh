@@ -509,12 +509,11 @@ echo "${sql_query}" | createAsciidocTable
 printSection "Networks"
 
 if [ "$NETWORK_ATTACHMENTS_TABLE_EXISTS" = "exists" ]; then
-    NETWORKS_TABLE_QUERY=$(cat "${SQLS}"/networks_table_using_network_attachments.sql)
+    sql_query=$(execute_SQL_from_file "${SQLS}"/networks_table_using_network_attachments.sql)
 else
-    NETWORKS_TABLE_QUERY=$(cat "${SQLS}"/networks_table_not_using_network_attachments.sql)
+    sql_query=$(execute_SQL_from_file "${SQLS}"/networks_table_not_using_network_attachments.sql)
 fi
-
-printTable "$NETWORKS_TABLE_QUERY";
+echo "${sql_query}" | createAsciidocTable
 
 tablesWithOverriddenCompatibilityVersionSQL="SELECT
 v.vm_name, v.$VMS_CLUSTER_COMPATIBILITY_VERSION_COLUMN
