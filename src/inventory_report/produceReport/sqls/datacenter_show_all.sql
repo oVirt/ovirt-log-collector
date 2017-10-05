@@ -10,10 +10,12 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --
-SELECT
-    row_number() OVER (ORDER BY name NULLs last) AS "NO.",
-    name AS "Data Center",
-    compatibility_version AS "Compatibility version"
-FROM
-    storage_pool
-ORDER BY name
+COPY (
+    SELECT
+        row_number() OVER (ORDER BY name NULLs last) AS "NO.",
+        name AS "Data Center",
+        compatibility_version AS "Compatibility version"
+    FROM
+        storage_pool
+    ORDER BY name
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;

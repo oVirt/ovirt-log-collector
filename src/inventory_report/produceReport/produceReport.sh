@@ -414,9 +414,9 @@ if [[ ${#rhn_channels} -gt 0 && ${#user_rhn} -gt 0 ]]; then
 fi
 echo
 
+sql_query=$(execute_SQL_from_file "${SQLS}"/datacenter_show_all.sql)
 printSection "Data Centers"
-DC_QUERY=$(cat "${SQLS}"/datacenter_show_all.sql)
-printTable "${DC_QUERY}"
+echo "${sql_query}" | createAsciidocTable
 
 printSection "Clusters"
 execute_SQL_from_file "${SQLS}"/cluster_query_show_all_clusters.sql | createAsciidocTable
