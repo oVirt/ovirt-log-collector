@@ -10,20 +10,22 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --
-SELECT
-(
-    SELECT
-        replace(replace(var_value::varchar,'1','Yes'),'0','No')
-    FROM
-        dwh_history_timekeeping
-    WHERE
-        var_name = 'DwhCurrentlyRunning'
-) AS "DWH running",
-(
-    SELECT
-        var_value
-    FROM
-        dwh_history_timekeeping
-    WHERE
-        var_name = 'dwhHostname'
-) AS "Host Name"
+COPY (
+    SELECT COALESCE((
+        SELECT
+            replace(replace(var_value::varchar,'1','Yes'),'0','No')
+        FROM
+            dwh_history_timekeeping
+        WHERE
+            var_name = 'DwhCurrentlyRunning'
+        ), 'No'
+    ) AS "DWH running",
+    (
+        SELECT
+            var_value
+        FROM
+            dwh_history_timekeeping
+        WHERE
+            var_name = 'dwhHostname'
+    ) AS "Host Name"
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;

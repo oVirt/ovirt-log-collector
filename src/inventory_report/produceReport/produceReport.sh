@@ -502,9 +502,9 @@ if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
     echo "${sql_query}" | createAsciidocTable
 fi
 
+sql_query=$(execute_SQL_from_file "${SQLS}"/dws_query_check_if_its_running.sql)
 printSection "Data Warehouse (DWH)"
-DWS_CHECK_RUUNING_QUERY=$(cat "${SQLS}"/dws_query_check_if_its_running.sql)
-printTable "${DWS_CHECK_RUUNING_QUERY}"
+echo "${sql_query}" | createAsciidocTable
 
 printSection "Networks"
 
