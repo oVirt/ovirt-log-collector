@@ -433,9 +433,9 @@ if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
     echo "${sql_query}" | createAsciidocTable
 fi
 
+# Fence
 execute_SQL_from_file "${SQLS}/prepare_procedures_for_reporting_agent_passwords_as_csv.sql"
-AGENT_PASSWORDS_QUERY=$(cat "${SQLS}"/agent_passwords.sql)
-AGENT_PASSWORDS_AS_CSV=$(executeSQL "$(createStatementExportingToCsvFromSelect "$AGENT_PASSWORDS_QUERY")")
+AGENT_PASSWORDS_AS_CSV=$(execute_SQL_from_file "${SQLS}"/agent_passwords.sql)
 execute_SQL_from_file "${SQLS}/cleanup_procedures_for_reporting_agent_passwords_as_csv.sql"
 
 #note gt 1, ie >1. It's because csv contains header, thus 0 records = 1 line.
