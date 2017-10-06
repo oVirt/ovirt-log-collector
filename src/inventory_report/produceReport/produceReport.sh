@@ -221,10 +221,8 @@ function initVariablesForVaryingNamesInSchema() {
     CLUSTER_TABLE=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM   information_schema.tables WHERE  table_name = 'vds_groups')) WHEN TRUE then 'vds_groups' else 'cluster' END AS name;" )
     NETWORK_ATTACHMENTS_TABLE_EXISTS=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM   information_schema.tables WHERE  table_name = 'network_attachments')) WHEN TRUE then 'exists' else 'does not exist' END AS name;")
     CLUSTER_PK_COLUMN=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'vds_groups' AND column_name='vds_group_id')) WHEN TRUE then 'vds_group_id' else 'cluster_id' END AS name;" )
-    VDS_CLUSTER_FK_COLUMN=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'vds' AND column_name='vds_group_id')) WHEN TRUE THEN 'vds_group_id' else 'cluster_id' END AS name;" )
     VMS_CLUSTER_FK_COLUMN=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'vms' AND column_name='vds_group_id')) WHEN TRUE THEN 'vds_group_id' else 'cluster_id' END AS name;" )
     VMS_CLUSTER_COMPATIBILITY_VERSION_COLUMN=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'vms' AND column_name='vds_group_compatibility_version')) WHEN TRUE THEN 'vds_group_compatibility_version' else 'cluster_compatibility_version' END AS name;" )
-    VDS_AGENT_IP_COLUMN=$(executeSQL "SELECT CASE (SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'vds' AND column_name='agent_ip')) WHEN TRUE THEN 'agent_ip' else 'ip' END AS name;" )
 }
 
 function list_rhn_channels() {
@@ -429,38 +427,11 @@ fi
 
 reportVirtualMachines
 
-printSection "Hosts"
-QUERY_HOSTS="SELECT
-     $(projectionCountingRowsWithOrder c.name, v.vds_name),
-     v.vds_name AS \"Name of Host\",
-     CASE WHEN sp.spm_vds_id=v.vds_id THEN 'SPM' ELSE 'Normal' END AS \"SPM\",
-     coalesce(htt.text, 'Unknown (id='||v.vds_type||')') AS \"Host Type\",
-     c.name AS \"Cluster\",
-     sp.name AS \"Data Center\",
-     v.$VDS_AGENT_IP_COLUMN AS \"Agent IP\",
-     v.host_name AS \"FQDN or IP\",
-     regexp_replace(v.rpm_version, '[a-z]+.', '') AS \"vdsm\",
-     v.kvm_version AS \"qemu-kvm\",
-     regexp_replace(v.libvirt_version, '[a-z]+.', '') AS \"libvirt\",
-     v.spice_version AS \"spice\",
-     v.kernel_version AS \"kernel\",
-     hst.text AS \"Status\",
-     v.host_os AS \"Operating System\",
-     v.vm_count AS \"VM Count\",
-     v.mem_available AS \"Available memory (MB)\",
-     v.usage_mem_percent AS \"Used memory %\",
-     v.usage_cpu_percent AS \"CPU load %\"
-   FROM
-     vds v
-     JOIN $CLUSTER_TABLE c ON c.$CLUSTER_PK_COLUMN=v.$VDS_CLUSTER_FK_COLUMN
-     LEFT OUTER JOIN storage_pool sp ON c.storage_pool_id = sp.id
-     LEFT OUTER JOIN host_status_temp hst ON hst.id = v.status
-     LEFT OUTER JOIN host_type_temp htt ON htt.id = v.vds_type
-   ORDER BY
-     c.name, v.vds_name";
-QUERY_HOSTS_AS_CSV=$(createStatementExportingToCsvFromSelect "$QUERY_HOSTS")
-
-executeSQL "$QUERY_HOSTS_AS_CSV" | createAsciidocTable;
+sql_query=$(execute_SQL_from_file "${SQLS}"/hosts_query_all.sql)
+if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
+    printSection "Hosts"
+    echo "${sql_query}" | createAsciidocTable
+fi
 
 execute_SQL_from_file "${SQLS}/prepare_procedures_for_reporting_agent_passwords_as_csv.sql"
 AGENT_PASSWORDS_QUERY=$(cat "${SQLS}"/agent_passwords.sql)
