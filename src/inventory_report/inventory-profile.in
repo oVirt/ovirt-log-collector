@@ -15,3 +15,14 @@ HOSTS_SOSREPORT_EXTRACTED_DIR="/tmp/ovirt-log-collector-analyzer-hosts"
 ANALYZER_VERSION="@PACKAGE_RPM_VERSION@"
 ANALYZER_RELEASE="@PACKAGE_RPM_RELEASE@"
 ANALYZER_GITHEAD="@GITHEAD@"
+
+# Detect if we should enable software collection
+if rpm -q rh-postgresql95-postgresql-server &> /dev/null; then
+    INITDB_CMD="scl enable rh-postgresql95 -- initdb"
+    PSQL_CMD="scl enable rh-postgresql95 -- psql"
+    PG_CTL_CMD="scl enable rh-postgresql95 -- pg_ctl"
+else
+    INITDB_CMD="initdb"
+    PSQL_CMD="psql"
+    PG_CTL_CMD="pg_ctl"
+fi

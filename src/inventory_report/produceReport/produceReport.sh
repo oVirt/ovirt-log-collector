@@ -46,7 +46,7 @@ DBDIR="${SOS_REPORT_UNPACK_DIR}"/postgresDb
 PGDATA="${DBDIR}"/pgdata
 PGRUN="${DBDIR}"/pgrun
 SQLS=$(dirname "${0}")/sqls
-PSQL="psql --quiet --tuples-only --no-align --dbname $DB_NAME --username engine --host $PGRUN"
+PSQL="${PSQL_CMD} --quiet --tuples-only --no-align --dbname $DB_NAME --username engine --host $PGRUN"
 
 # PKI
 ENGINE_PKI_CONF_DIR="/etc/ovirt-engine/engine.conf.d"

@@ -33,7 +33,7 @@ function initDbVariables() {
 }
 
 function executeSql() {
-    psql -h "$PGRUN" "$@"
+    ${PSQL_CMD} -h "$PGRUN" "$@"
 }
 
 function executeSqlUsingPostgresDb() {
@@ -44,7 +44,8 @@ function initAndStartDb() {
     mkdir -p "$PGDATA" "$PGRUN";
     local initdblog="${WORK_DIR}/initdb.log"
     echo "Creating a temporary database in $PGDATA. Log of initdb is in ${initdblog}"
-    initdb "$PGDATA" > "${initdblog}"
+
+    ${INITDB_CMD} "${PGDATA}" > "${initdblog}"
 
     $WORK_DIR/startDb.sh
 }
@@ -64,8 +65,8 @@ function createExecutableBashScript() {
 function createUserScripts() {
     createExecutableBashScript \
         "$WORK_DIR/produceHtml.sh" "$(dirname $0)/produceReport/produceReport.sh \"$WORK_DIR\" | asciidoctor -a toc=left -o ${HTML_OUT} -;echo \"Generated ${HTML_OUT}\""
-    createExecutableBashScript "$WORK_DIR/startDb.sh" "pg_ctl start -D $PGDATA -s -o \"-h '' -k $PGRUN\" -w"
-    createExecutableBashScript "$WORK_DIR/stopDb.sh" "pg_ctl stop -D $PGDATA -s -m fast"
+    createExecutableBashScript "$WORK_DIR/startDb.sh" "${PG_CTL_CMD} start -D $PGDATA -s -o \"-h '' -k $PGRUN\" -w"
+    createExecutableBashScript "$WORK_DIR/stopDb.sh" "${PG_CTL_CMD} stop -D $PGDATA -s -m fast"
 
     createExecutableBashScript \
         "$WORK_DIR/cleanup.sh" \
@@ -88,7 +89,7 @@ Some commands you can use:
 ==========================
 ${WORK_DIR}/help
 ${WORK_DIR}/startDb.sh
-psql -h ${WORK_DIR}/postgresDb/pgrun ${DB_NAME}
+${PSQL_CMD} -h ${WORK_DIR}/postgresDb/pgrun ${DB_NAME}
 ${WORK_DIR}/produceHtml.sh
 ${WORK_DIR}/stopDb.sh
 

@@ -21,6 +21,12 @@
 %global		__python_sitelib %{python2_sitelib}
 %endif
 
+%if 0%{?fedora}
+%global ovirt_rh_postgresql95 0
+%else
+%global ovirt_rh_postgresql95 1
+%endif
+
 %global		package_version @PACKAGE_VERSION@
 %global		package_name @PACKAGE_NAME@
 
@@ -64,7 +70,13 @@ Log Collector tool for oVirt Engine
 Summary:	Log Collector for oVirt Engine - Analysis tools
 Requires:	rubygem-asciidoctor
 Requires:	libxml2
-Requires:	postgresql-server
+
+%if %{ovirt_rh_postgresql95}
+Requires:       rh-postgresql95-postgresql-server
+%else
+Requires:       postgresql-server
+%endif
+
 Requires:	coreutils
 License:	ASL 2.0 and GPLv2+
 
