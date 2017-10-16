@@ -64,8 +64,11 @@ echo "LAST_SOSREPORT_EXTRACTED_SHA256SUM=${LAST_SOSREPORT_EXTRACTED_SHA256SUM}" 
 
 find_engine_sosreport_dir
 
-if [[ ! -z ${3} ]]; then
-    echo ${3} >> ${TMP_ROOT}/.metadata-inventory
+# Parse extra arguments to attach into .metadata-inventory
+if [[ ! -z "${3}" ]]; then
+    for opt in ${3}; do # Do not use quote here
+        echo -e "${opt}" >> "${TMP_ROOT}"/.metadata-inventory
+    done
 fi
 
 TAR_WITH_POSTGRES_SOSREPORT=$(find "$UNPACKED_SOSREPORT" -name "*postgresql-sosreport*tar.xz")

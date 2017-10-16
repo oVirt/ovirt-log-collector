@@ -23,6 +23,8 @@ cat << __EOF__
 Usage: $0 [options] <tar-file>
     --keep-working-dir
         Do not remove the temporary working directory in the end.
+    --show-fence-agent-passwords
+        Show fence agent encrypted passwords per host
     --summary
         Executive summary, do not execute pre-upgrade validation
     --html=<file>
@@ -39,10 +41,6 @@ REPORT_ONLY=
 TAR_FILE=
 HTML_OUT=analyzer_report.html
 
-# Use this variable foo=bar bar=foo to have muliple variables
-# exported to .metadata-inventory
-OPT_METADATA_INVENTORY=
-
 while [ -n "$1" ]; do
 	x="$1"
 	v="${x#*=}"
@@ -55,7 +53,10 @@ while [ -n "$1" ]; do
 			KEEP_WORKING_DIR=1
 		;;
                 --summary)
-                        OPT_METADATA_INVENTORY="SUMMARY_REPORT=true"
+                        SUMMARY_REPORT+="SUMMARY_REPORT=true"
+                ;;
+                --show-fence-agent-passwords)
+                        SHOW_FENCE_AGENT_PASSWORDS+="SHOW_FENCE_AGENT_PASSWORDS=true"
                 ;;
                 --html=*)
 			HTML_OUT="${v}"
@@ -70,6 +71,8 @@ while [ -n "$1" ]; do
 		;;
 	esac
 done
+# Setting all options here to be available in .metadata-inventory
+OPT_METADATA_INVENTORY="${SUMMARY_REPORT} ${SHOW_FENCE_AGENT_PASSWORDS}"
 
 [ -z "${TAR_FILE}" ] && usage
 
