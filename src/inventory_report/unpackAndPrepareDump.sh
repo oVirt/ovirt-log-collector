@@ -82,6 +82,7 @@ fi
 tar -C "$(dirname $TAR_WITH_POSTGRES_SOSREPORT)" -Jxf "$TAR_WITH_POSTGRES_SOSREPORT"
 
 PG_DUMP_TAR=$(tar tf "$TAR_WITH_POSTGRES_SOSREPORT" | grep "sos_pgdump.tar")
+echo "PG_DUMP_TAR=${UNPACKED_SOSREPORT}/*/log-collector-data/${PG_DUMP_TAR}" >> ${TMP_ROOT}/.metadata-inventory
 
 tar -Oxf "$TAR_WITH_POSTGRES_SOSREPORT" "$PG_DUMP_TAR" | tar -C "$PG_DUMP_DIR" -x
 

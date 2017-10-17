@@ -33,7 +33,12 @@ function initDbVariables() {
 }
 
 function executeSql() {
-    ${PSQL_CMD} -h "$PGRUN" "$@"
+    # If engine_address is not set it's local env
+    if [ -z "${PG_DB_ADDRESS}" ]; then
+        ${PSQL_CMD} -h "$PGRUN" "$@"
+    else
+        PGPASSWORD=${PG_DB_PASSWORD} ${PSQL_CMD} -h ${PG_DB_ADDRESS} -U ${PG_DB_USER} "$@"
+    fi
 }
 
 function executeSqlUsingPostgresDb() {
@@ -65,8 +70,6 @@ function createExecutableBashScript() {
 function createUserScripts() {
     createExecutableBashScript \
         "$WORK_DIR/produceHtml.sh" "$(dirname $0)/produceReport/produceReport.sh \"$WORK_DIR\" | asciidoctor -a toc=left -o ${HTML_OUT} -;echo \"Generated ${HTML_OUT}\""
-    createExecutableBashScript "$WORK_DIR/startDb.sh" "${PG_CTL_CMD} start -D $PGDATA -s -o \"-h '' -k $PGRUN\" -w"
-    createExecutableBashScript "$WORK_DIR/stopDb.sh" "${PG_CTL_CMD} stop -D $PGDATA -s -m fast"
 
     createExecutableBashScript \
         "$WORK_DIR/cleanup.sh" \
@@ -80,16 +83,20 @@ echo \"Removing temporary directory \"$WORK_DIR\"\"
 rm -rf \"$WORK_DIR\"
 rm -rf \"${HOSTS_SOSREPORT_EXTRACTED_DIR}\"
 "
+    # If engine_address is not set it's local env
+    if [ -z "${PG_DB_ADDRESS}" ]; then
+        createExecutableBashScript "$WORK_DIR/startDb.sh" "${PG_CTL_CMD} start -D $PGDATA -s -o \"-h '' -k $PGRUN\" -w"
+        createExecutableBashScript "$WORK_DIR/stopDb.sh" "${PG_CTL_CMD} stop -D $PGDATA -s -m fast"
 
-    createExecutableBashScript \
-        "$WORK_DIR/help" \
+        createExecutableBashScript \
+            "$WORK_DIR/help" \
             "cat << __EOF__
 
 Some commands you can use:
 ==========================
 ${WORK_DIR}/help
 ${WORK_DIR}/startDb.sh
-${PSQL_CMD} -h ${WORK_DIR}/postgresDb/pgrun ${DB_NAME}
+${PSQL_CMD} -h ${WORK_DIR}/postgresDb/pgrun ${TEMPORARY_DB_NAME}
 ${WORK_DIR}/produceHtml.sh
 ${WORK_DIR}/stopDb.sh
 
@@ -98,47 +105,81 @@ When done, to clean up, do:
 ${WORK_DIR}/cleanup.sh
 __EOF__
 "
+    else
+        # REMOTE DB
+        createExecutableBashScript "$WORK_DIR/stopDb.sh" "PGPASSWORD=${PG_DB_PASSWORD} ${PSQL_CMD} -h ${PG_DB_ADDRESS} -U ${PG_DB_USER} -c \"DROP DATABASE ${TEMPORARY_DB_NAME}\" &> /dev/null"
+        createExecutableBashScript \
+            "$WORK_DIR/help" \
+            "cat << __EOF__
+
+Some commands you can use:
+==========================
+${WORK_DIR}/help
+${WORK_DIR}/produceHtml.sh
+
+When done, to clean up, do:
+===========================
+${WORK_DIR}/cleanup.sh
+__EOF__
+"
+    fi
 }
 #-----------------------------------------------------------------------------------------------------------------------
 
-DB_NAME="report"
 WORK_DIR=$1
 HTML_OUT="$2"
-initDbVariables
+# If engine_address is not set it's local env
+if [ -z "${PG_DB_ADDRESS}" ]; then
+    initDbVariables
+fi
 PG_DUMP_DIR=$WORK_DIR/pg_dump_dir
 SOS_REPORT_DIR=$WORK_DIR/unpacked_sosreport
 
+. "${WORK_DIR}"/.metadata-inventory
+
 createUserScripts
 
-if [ ! -d "$PGDATA" -o ! -d "$PGRUN" ]; then
-    initAndStartDb
-else
-    #try to connect to existing db
+# If engine_address is not set it's local env
+if [ -z "${PG_DB_ADDRESS}" ]; then
+    if [ ! -d "$PGDATA" -o ! -d "$PGRUN" ]; then
+        initAndStartDb
+    else
+        #try to connect to existing db
 
-    if [ $(executeSqlUsingPostgresDb -c '\l' 1>/dev/null 2>/dev/null; echo $?) -ne 0 ]; then
-    cat << __EOF__
+        if [ $(executeSqlUsingPostgresDb -c '\l' 1>/dev/null 2>/dev/null; echo $?) -ne 0 ]; then
+            cat << __EOF__
 It seems, that db directories $PGDATA and $PGRUN exist, but we cannot connect to that db.
 Please enter inexisting different directory in which we will create new DB,\
 or make sure we can connect to db in this one.
 __EOF__
+            exit 1;
+        fi
+    fi
+
+    COUNT_OF_DBS_HAVING_THIS_NAME=$(executeSqlUsingPostgresDb -A -t -c "SELECT count(datname) FROM pg_database where datname='${TEMPORARY_DB_NAME}';")
+
+    if [ $COUNT_OF_DBS_HAVING_THIS_NAME -ne 0 ]; then
+        echo "It seems, that db named ${TEMPORARY_DB_NAME} already exist. Please enter inexisting db name";
         exit 1;
     fi
 fi
 
-COUNT_OF_DBS_HAVING_THIS_NAME=$(executeSqlUsingPostgresDb -A -t -c "SELECT count(datname) FROM pg_database where datname='$DB_NAME';")
-
-if [ $COUNT_OF_DBS_HAVING_THIS_NAME -ne 0 ]; then
-    echo "It seems, that db named $DB_NAME already exist. Please enter inexisting db name";
-    exit 1;
-fi
-
-createRoleIfItDoesNotExist engine
+createRoleIfItDoesNotExist "${ENGINE_DB_USER}"
 createRoleIfItDoesNotExist postgres
 
-executeSqlUsingPostgresDb -c "create database \"$DB_NAME\" owner \"engine\" template template0 encoding
+executeSqlUsingPostgresDb -c "create database \"${TEMPORARY_DB_NAME}\" owner \"${ENGINE_DB_USER}\" template template0 encoding
 'UTF8' lc_collate 'en_US.UTF-8' lc_ctype 'en_US.UTF-8';" >> "${WORK_DIR}/sql-log-postgres.log"
 
-cd $PG_DUMP_DIR
-restore_log="$WORK_DIR/db-restore.log"
-echo "Importing the dump into a temporary database. Log of the restore process is in ${restore_log}"
-executeSql -d "$DB_NAME" < $PWD/restore.sql > "${restore_log}" 2>&1
+# If engine_address is not set it's local env
+if [ -z "${PG_DB_ADDRESS}" ]; then
+    cd $PG_DUMP_DIR
+    restore_log="$WORK_DIR/db-restore.log"
+    echo "Importing the dump into a temporary database. Log of the restore process is in ${restore_log}"
+    executeSql -d "${TEMPORARY_DB_NAME}" < $PWD/restore.sql > "${restore_log}" 2>&1
+else
+    # Remote DB
+    echo "Importing the dump into a temporary database in ${PG_DB_ADDRESS} as ${PG_DB_USER}. Log of the restore process is in ${restore_log}"
+
+    # Using the || exit 0 as pg_restore is exiting the script if there is an error, like "plpgsql" already exists
+    PGPASSWORD=${PG_DB_PASSWORD} pg_restore -h ${PG_DB_ADDRESS} -U ${PG_DB_USER} -d ${TEMPORARY_DB_NAME} -F t ${PG_DUMP_TAR} 2> /dev/null || true
+fi

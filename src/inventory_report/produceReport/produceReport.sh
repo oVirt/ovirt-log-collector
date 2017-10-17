@@ -46,7 +46,13 @@ DBDIR="${SOS_REPORT_UNPACK_DIR}"/postgresDb
 PGDATA="${DBDIR}"/pgdata
 PGRUN="${DBDIR}"/pgrun
 SQLS=$(dirname "${0}")/sqls
-PSQL="${PSQL_CMD} --quiet --tuples-only --no-align --dbname $DB_NAME --username engine --host $PGRUN"
+
+# If engine_address is not set it's local env
+if [ -z "${PG_DB_ADDRESS}" ]; then
+    PSQL="${PSQL_CMD} --quiet --tuples-only --no-align --dbname ${TEMPORARY_DB_NAME} --username ${ENGINE_DB_USER} --host $PGRUN"
+else
+    PSQL="${PSQL_CMD} --quiet --tuples-only --no-align --dbname ${TEMPORARY_DB_NAME} --username ${PG_DB_USER} --host ${PG_DB_ADDRESS}"
+fi
 
 # PKI
 ENGINE_PKI_CONF_DIR="/etc/ovirt-engine/engine.conf.d"
@@ -64,11 +70,11 @@ __EOF__
 }
 
 function execute_SQL_from_file() {
-    ${PSQL} --file "$1";
+    PGPASSWORD=${PG_DB_PASSWORD} ${PSQL} --file "$1";
 }
 
 function executeSQL() {
-    ${PSQL} --command "$1";
+    PGPASSWORD=${PG_DB_PASSWORD} ${PSQL} --command "$1";
 }
 
 function cleanup_db() {
@@ -382,7 +388,9 @@ echo ".Engine FQDN";
 echo "${ENGINE_FQDN}"
 echo
 
-DB_SIZE=$(execute_SQL_from_file "${SQLS}"/database_size.sql)
+sql_query="SELECT pg_size_pretty(pg_database_size(pg_database.datname)) AS size FROM pg_database where pg_database.datname='${TEMPORARY_DB_NAME}'"
+DB_SIZE=$(executeSQL "${sql_query}")
+
 echo ".Engine DB size"
 echo "${DB_SIZE}"
 echo
