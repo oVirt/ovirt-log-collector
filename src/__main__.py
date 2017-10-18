@@ -1170,7 +1170,7 @@ class LogCollector(object):
                 if fnmatch.fnmatch(dc, pattern)
             ])
 
-    def set_hosts(self):
+    def set_hosts(self, hypervisor_per_cluster=False):
         """
         Fetches the hostnames for the supplied cluster or datacenter.
         Filtering is applied if patterns are found in the --hosts, --cluster
@@ -1265,6 +1265,35 @@ class LogCollector(object):
             for pattern in cluster_patterns:
                 cluster_filtered |= self._filter_hosts('cluster', pattern)
             self.conf['hosts'] &= cluster_filtered
+
+        # If hypervisor_per_cluster is set, collect data only from a single
+        # hypervisor per cluster; if the Spm found, collect data from it.
+        if hypervisor_per_cluster:
+            selected_hosts = dict()
+            for dc, cluster, host, is_spm, is_up in self.conf['hosts']:
+                # Always add the SPM
+                if is_spm:
+                    selected_hosts[cluster.name] = (dc, cluster, host, is_spm,
+                                                    is_up)
+                # For the given cluster, if no host added yet, add it
+                elif cluster.name not in selected_hosts:
+                    selected_hosts[cluster.name] = (dc, cluster, host, is_spm,
+                                                    is_up)
+                # If a host is up and the SPM isn't added yet, add this host
+                elif is_up and not selected_hosts[cluster.name][3]:
+                    selected_hosts[cluster.name] = (dc, cluster, host, is_spm,
+                                                    is_up)
+            self.conf['hosts'] &= set(selected_hosts.values())
+
+        # warn users if they are going to collect logs from all hosts.
+        if orig_hosts and self.conf['hosts'] == orig_hosts:
+            logging.warning(
+                _(
+                    'This ovirt-log-collector call will collect logs from '
+                    'all available hosts. This may take long time, '
+                    'depending on the size of your deployment'
+                )
+            )
 
         return bool(self.conf.get('hosts'))
 
@@ -1572,6 +1601,17 @@ option is specified, data is not collected from any hypervisor."""
     )
 
     engine_group.add_option(
+        "", "--hypervisor-per-cluster",
+        help=(
+            "Collect data only from a hypervisor per cluster; choose the SPM "
+            "if found in a cluster."
+        ),
+        dest="hypervisor_per_cluster",
+        action="store_true",
+        default=False
+    )
+
+    engine_group.add_option(
         "-u", "--user", dest="user",
         help="username to use with the REST API. \
 This should be in UPN format.",
@@ -1801,7 +1841,9 @@ The directory is: %s'""" % (conf["local_scratch_dir"]))
             hosts_present = None
             e = None
             try:
-                if not conf.get("no_hypervisor"):
+                if conf.get("hypervisor_per_cluster"):
+                    hosts_present = collector.set_hosts(True)
+                elif not conf.get("no_hypervisor"):
                     hosts_present = collector.set_hosts()
             except Exception as e:
                 pass
