@@ -1469,6 +1469,7 @@ def parse_password(option, opt_str, value, parser):
     value = getpass.getpass("Please enter %s: " % (option.help))
     setattr(parser.values, option.dest, value)
 
+
 if __name__ == '__main__':
 
     DEFAULT_SCRATCH_DIR = tempfile.mkdtemp(prefix='logcollector-')
