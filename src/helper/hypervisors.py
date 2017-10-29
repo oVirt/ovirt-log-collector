@@ -44,10 +44,11 @@ class ENGINETree(object):
 
     class Host(object):
 
-        def __init__(self, address, name=None, is_spm=False):
+        def __init__(self, address, name=None, is_spm=False, is_up=False):
             self.address = address
             self.name = name
             self.is_spm = is_spm
+            self.is_up = is_up
 
         def __str__(self):
             return self.address
@@ -85,7 +86,8 @@ class ENGINETree(object):
 
     def add_host(self, host):
         is_spm = host.spm.status == ovirtsdk4.types.SpmStatus.SPM
-        host_obj = self.Host(host.address, host.name, is_spm)
+        is_up = host.status == ovirtsdk4.types.HostStatus.UP
+        host_obj = self.Host(host.address, host.name, is_spm, is_up)
         self.hosts.add(host_obj)
         if host.get_cluster() is not None:
             for cluster in self.clusters:
@@ -115,7 +117,7 @@ class ENGINETree(object):
 
     def get_sortable(self):
         return [
-            (dc.name, cluster, host.address, host.is_spm)
+            (dc.name, cluster, host.address, host.is_spm, host.is_up)
             for dc in self.datacenters
             for cluster in dc.clusters
             for host in cluster.hosts

@@ -1153,20 +1153,20 @@ class LogCollector(object):
 
         if which == "host":
             return set([
-                (dc, cl, h, is_spm) for
-                dc, cl, h, is_spm in self.conf.get("hosts")
+                (dc, cl, h, is_spm, is_up) for
+                dc, cl, h, is_spm, is_up in self.conf.get("hosts")
                 if fnmatch.fnmatch(h, pattern)
             ])
         elif which == "cluster":
             return set([
-                (dc, cl, h, is_spm) for
-                dc, cl, h, is_spm in self.conf.get("hosts")
+                (dc, cl, h, is_spm, is_up) for
+                dc, cl, h, is_spm, is_up in self.conf.get("hosts")
                 if fnmatch.fnmatch(cl.name, pattern)
             ])
         elif which == "datacenter":
             return set([
-                (dc, cl, h, is_spm) for
-                dc, cl, h, is_spm in self.conf.get("hosts")
+                (dc, cl, h, is_spm, is_up) for
+                dc, cl, h, is_spm, is_up in self.conf.get("hosts")
                 if fnmatch.fnmatch(dc, pattern)
             ])
 
@@ -1195,7 +1195,8 @@ class LogCollector(object):
         host_filtered = set()
         if host_others:
             host_filtered = set([
-                (dc, cl, h, is_spm) for dc, cl, h, is_spm in self.conf['hosts']
+                (dc, cl, h, is_spm, is_up)
+                for dc, cl, h, is_spm, is_up in self.conf['hosts']
                 if h in host_others
             ])
             not_found = host_others - set(host[2] for host in host_filtered)
@@ -1205,9 +1206,9 @@ class LogCollector(object):
                     try:
                         ipaddr = socket.gethostbyname(fqdn)
                         logging.debug('%s --> %s' % (fqdn, ipaddr))
-                        for (dc, cl, h, is_spm) in self.conf['hosts']:
+                        for (dc, cl, h, is_spm, is_up) in self.conf['hosts']:
                             if h == ipaddr:
-                                host_filtered.add((dc, cl, h, is_spm))
+                                host_filtered.add((dc, cl, h, is_spm, is_up))
                                 not_found.remove(fqdn)
                     except socket.error:
                         logging.warning(
@@ -1217,12 +1218,12 @@ class LogCollector(object):
                         )
             if not_found != set():
                 # try to resolve to ip known hypervisors
-                for (dc, cl, h, is_spm) in self.conf['hosts']:
+                for (dc, cl, h, is_spm, is_up) in self.conf['hosts']:
                     try:
                         ipaddr = socket.gethostbyname(h)
                         logging.debug('%s --> %s' % (h, ipaddr))
                         if ipaddr in host_others:
-                            host_filtered.add((dc, cl, h, is_spm))
+                            host_filtered.add((dc, cl, h, is_spm, is_up))
                             not_found.remove(ipaddr)
                     except socket.error:
                         logging.warning(
@@ -1280,8 +1281,8 @@ class LogCollector(object):
 host=%(host_pattern)s):" % self.conf)
         print(fmt % ("Data Center", "Cluster", "Hostname/IP Address"))
         print("\n".join(
-            fmt % (dc, cluster, host, is_spm) for
-            dc, cluster, host, is_spm in host_list
+            fmt % (dc, cluster, host, is_spm, is_up) for
+            dc, cluster, host, is_spm, is_up in host_list
         ))
 
     def get_hypervisor_data(self):
@@ -1334,7 +1335,7 @@ host=%(host_pattern)s):" % self.conf)
 
             threads = []
 
-            for datacenter, cluster, host, is_spm in hosts:
+            for datacenter, cluster, host, is_spm, is_up in hosts:
                 sem.acquire(True)
                 collector = HyperVisorData(
                     host.strip(),
