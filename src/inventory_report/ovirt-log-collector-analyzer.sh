@@ -53,7 +53,7 @@ HTML_OUT=analyzer_report.html
 ENGINE_DB_USER="ENGINE_DB_USER=engine"
 
 # Generate random 10 character alphanumeric string (lowercase)
-TEMPORARY_DB_NAME="TEMPORARY_DB_NAME=report$(openssl rand -hex 10)
+TEMPORARY_DB_NAME="TEMPORARY_DB_NAME=report$(openssl rand -hex 10)"
 
 while [ -n "$1" ]; do
     x="$1"
