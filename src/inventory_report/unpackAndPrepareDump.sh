@@ -81,7 +81,7 @@ fi
 
 tar -C "$(dirname $TAR_WITH_POSTGRES_SOSREPORT)" -Jxf "$TAR_WITH_POSTGRES_SOSREPORT"
 
-PG_DUMP_TAR=$(tar tf "$TAR_WITH_POSTGRES_SOSREPORT" | grep "sos_pgdump.tar")
+PG_DUMP_TAR=$(tar tf "$TAR_WITH_POSTGRES_SOSREPORT" | grep "sos_pgdump.tar") || :
 if [ ! "${PG_DUMP_TAR}" ]; then
     echo "Unable to detect sos_pgdump.tar from sosreport, aborting.."
     rm -rf "${UNPACKED_SOSREPORT} ${PG_DUMP_DIR}"
