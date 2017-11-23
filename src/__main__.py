@@ -656,7 +656,7 @@ class HyperVisorData(CollectorBase):
             "memory",
             "rpm",
         ))
-        self.configuration['reports3'] = ",".join((
+        reports3 = (
             "processor",
             "pci",
             "md",
@@ -669,8 +669,22 @@ class HyperVisorData(CollectorBase):
             "chrony",
             "systemd",
             "ipmitool",
-        ))
-
+        )
+        reports32 = reports3 + (
+            "firewalld",
+            "openvswitch",
+            "ovirt_hosted_engine",
+        )
+        reports34 = reports32 + (
+            "collectd",
+        )
+        reports35 = reports34 + (
+            "ovirt_imageio",
+        )
+        self.configuration['reports3'] = ",".join(reports3)
+        self.configuration['reports32'] = ",".join(reports32)
+        self.configuration['reports34'] = ",".join(reports34)
+        self.configuration['reports35'] = ",".join(reports35)
         # these are the reports that will work with rhev2.2 hosts
         self.configuration['bc_reports'] = \
             "vdsm,general,networking,hardware,process,yum,filesys"
@@ -717,9 +731,15 @@ class HyperVisorData(CollectorBase):
 
         cmd = """%(ssh_cmd)s "
 VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' sos | /bin/sed 's/\.//'`;
-if [ "$VERSION" -ge "32" ]; then
+if [ "$VERSION" -ge "35" ]; then
     /usr/sbin/sosreport {option} {log_size} --batch --all-logs \
-        -o logs,%(reports)s,%(reports3)s,ovirt_hosted_engine
+        -o logs,%(reports)s,%(reports35)s
+elif [ "$VERSION" -ge "34" ]; then
+    /usr/sbin/sosreport {option} {log_size} --batch --all-logs \
+        -o logs,%(reports)s,%(reports34)s
+elif [ "$VERSION" -ge "32" ]; then
+    /usr/sbin/sosreport {option} {log_size} --batch --all-logs \
+        -o logs,%(reports)s,%(reports32)s
 elif [ "$VERSION" -ge "30" ]; then
     /usr/sbin/sosreport {option} {log_size} --batch -k logs.all_logs=True \
         -o logs,%(reports)s,%(reports3)s
@@ -935,7 +955,7 @@ class ENGINEData(CollectorBase):
             "apache",
             "memory",
         ]
-        if self.sos_version > '30':
+        if self.sos_version >= '30':
             sos_plugins.extend([
                 "block",
                 "java",
@@ -946,6 +966,19 @@ class ENGINEData(CollectorBase):
                 "scsi",
                 "chrony",
                 "systemd",
+            ])
+        if self.sos_version >= '32':
+            sos_plugins.extend([
+                "firewalld",
+                "openvswitch",
+            ])
+        if self.sos_version >= '34':
+            sos_plugins.extend([
+                "collectd",
+            ])
+        if self.sos_version >= '35':
+            sos_plugins.extend([
+                "ovirt_imageio",
             ])
         self.configuration["sos_options"] = self.build_options()
         self.configuration["reports"] = ",".join(sos_plugins)
