@@ -106,6 +106,9 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %{_datadir}/%{name}/analyzer/
 
 %changelog
+* Fri Nov 24 2017 Sandro Bonazzola <sbonazzo@redhat.com> - 4.1.7-1
+- 4.1.7-1
+
 * Fri Sep 01 2017 Douglas Schilling Landgraf <dougsland@redhat.com> - 4.1.6-1
 - 4.1.6-1
 
