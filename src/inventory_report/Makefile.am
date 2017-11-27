@@ -95,6 +95,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/vds_statistics_query_hosted_engine_setup_with_hosts_non_up.sql \
 	produceReport/sqls/vms_query_ip_set_power_management_null.sql \
 	produceReport/sqls/hosts_query_all.sql \
+	produceReport/sqls/vms_query_snapshots_in_preview.sql \
 	$(NULL)
 
 EXTRA_DIST = \

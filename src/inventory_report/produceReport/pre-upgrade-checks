@@ -379,6 +379,19 @@ function check_vm_snapshot_id_zero() {
     fi
 }
 
+function check_in_preview_snapshots() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_query_snapshots_in_preview.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo
+        echo "{WARNING} There are virtual machine(s) with **IN PREVIEW** snapshots."
+        echo "Either commit or undo the snapshot in-preview before upgrading.."
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    else
+        echo -e "{OK} No virtual machines with IN PREVIEW snapshots\n"
+    fi
+}
+
 function check_legacy_apache_sso_config() {
     OVIRT_SSO_CONFIG=$(find "${SOS_REPORT_UNPACK_DIR}" -name ovirt-sso.conf 2> /dev/null)
     if [ -z ${OVIRT_SSO_CONFIG} ]; then
