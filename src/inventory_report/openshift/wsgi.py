@@ -133,6 +133,8 @@ def index():
          <input type=submit value=Upload>
     </form>
     <p>%s</p>
+    To report a bug or request improvements, <a href="https://bugzilla.redhat.com/enter_bug.cgi?product=ovirt-log-collector">please use this link</a>.<br>
+    For others topics, use <a href="mailto:devel@ovirt.org">devel@ovirt.org</a> or contact the <a href="mailto:dougsland@redhat.com">maintainer</a>.<br>
     """ % "<br>"
 
 
