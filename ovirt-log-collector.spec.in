@@ -36,9 +36,8 @@ Version:	@PACKAGE_RPM_VERSION@
 Release:	@PACKAGE_RPM_RELEASE@%{?release_suffix}%{?dist}
 License:	ASL 2.0
 URL:		http://www.ovirt.org
-Source0:	http://resources.ovirt.org/pub/ovirt-master-snapshot/src/%{package_name}/%{package_name}-%{package_version}.tar.gz
+Source0:	http://resources.ovirt.org/pub/src/%{package_name}/%{package_name}-%{package_version}.tar.gz
 
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}
 BuildArch:	noarch
 
 Requires:	logrotate
@@ -103,7 +102,7 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 
 %files
 %doc AUTHORS
-%doc COPYING
+%license COPYING
 %dir %{_localstatedir}/log/ovirt-engine/%{package_name}
 %dir %{_sysconfdir}/ovirt-engine/logcollector.conf.d
 %config(noreplace) %{_sysconfdir}/ovirt-engine/logcollector.conf
@@ -114,13 +113,16 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 
 %files analyzer
 %doc AUTHORS
-%doc COPYING
-%doc COPYING-GPL
+%license COPYING
+%license COPYING-GPL
 %{_bindir}/ovirt-log-collector-analyzer
 %dir %{_datadir}/%{name}/analyzer
 %{_datadir}/%{name}/analyzer/
 
 %changelog
+* Wed Nov 29 2017 Sandro Bonazzola <sbonazzo@redhat.com> - 4.2.0-1
+- 4.2.0-1
+
 * Thu May 25 2017 Sandro Bonazzola <sbonazzo@redhat.com> - 4.2.0-0.0.master
 - 4.2.0-0.0.master
 

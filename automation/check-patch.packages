@@ -1,9 +1,11 @@
 make
 autoconf
-gettext-devel
 automake
+gettext-devel
+git
 ovirt-engine-sdk-python
 python2-devel
 python-pep8
 pyflakes
 sos
+yum-utils
