@@ -74,7 +74,7 @@ fi
 TAR_WITH_POSTGRES_SOSREPORT=$(find "$UNPACKED_SOSREPORT" -name "*postgresql-sosreport*tar.xz")
 
 if [ -z "${TAR_WITH_POSTGRES_SOSREPORT}" ]; then
-    echo "Unable to detect postgresql data from sosreport ${1}, aborting.." >> /dev/stderr
+    echo "Unable to detect postgresql data from sosreport ${1}, aborting.." 1>&2
     rm -rf "${UNPACKED_SOSREPORT} ${PG_DUMP_DIR}"
     exit -1
 fi
@@ -83,7 +83,7 @@ tar -C "$(dirname $TAR_WITH_POSTGRES_SOSREPORT)" -Jxf "$TAR_WITH_POSTGRES_SOSREP
 
 PG_DUMP_TAR=$(tar tf "$TAR_WITH_POSTGRES_SOSREPORT" | grep "sos_pgdump.tar") || :
 if [ ! "${PG_DUMP_TAR}" ]; then
-    echo "Unable to detect sos_pgdump.tar from sosreport, aborting.." >> /dev/stderr
+    echo "Unable to detect sos_pgdump.tar from sosreport, aborting.." 1>&2
     rm -rf "${UNPACKED_SOSREPORT} ${PG_DUMP_DIR}"
     exit -1
 fi
@@ -93,7 +93,7 @@ echo "PG_DUMP_TAR=${UNPACKED_SOSREPORT}/*/log-collector-data/${PG_DUMP_TAR}" >> 
 tar -Oxf "$TAR_WITH_POSTGRES_SOSREPORT" "$PG_DUMP_TAR" | tar -C "$PG_DUMP_DIR" -x
 
 if [ ! -f "${PG_DUMP_DIR}/restore.sql" ]; then
-    echo "Unable to detect restore.sql from ${PG_DUMP_TAR}, aborting.." >> /dev/stderr
+    echo "Unable to detect restore.sql from ${PG_DUMP_TAR}, aborting.." 1>&2
     rm -rf "${UNPACKED_SOSREPORT} ${PG_DUMP_DIR}"
     exit -1
 fi
