@@ -53,7 +53,7 @@ mkdir -p $UNPACKED_SOSREPORT $PG_DUMP_DIR
 
 echo "Unpacking postgres data. This can take up to several minutes."
 
-tar -C "$UNPACKED_SOSREPORT" -xf "$SOS_REPORT"
+tar --exclude='sosreport*/proc' --exclude='sosreport*/dev' --exclude='sosreport*/sys' -C "$UNPACKED_SOSREPORT" -xf "$SOS_REPORT"
 chmod -R a+rwx ${UNPACKED_SOSREPORT}
 
 SHA256=$(sha256sum ${1})
