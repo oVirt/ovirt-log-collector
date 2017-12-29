@@ -98,6 +98,9 @@ function check_min_and_max_engine_heap() {
     ENGINE_HEAP_MAX="${ENGINE_HEAP_MAX//[!0-9]/}"
 
     MEMINFO_ENGINE=$(find "${SOS_REPORT_UNPACK_DIR}" -name meminfo)
+    if [ -z ${MEMINFO_ENGINE} ]; then
+        return
+    fi
     TOTAL_MEM_MB=$(cat ${MEMINFO_ENGINE} | grep MemTotal | awk {'print int($2/1024)'})
     if [ -z ${TOTAL_MEM_MB} ]; then
         return
