@@ -12,7 +12,7 @@
 --
 
 CREATE OR REPLACE FUNCTION __temp_network_using_network_attachments()
-    RETURNS TABLE(net_name VARCHAR(256),vds_name VARCHAR(255),vdsm_name unknown,sp_name VARCHAR(40),nic_name VARCHAR(50),
+    RETURNS TABLE(net_name VARCHAR(256),vds_name VARCHAR(255),vdsm_name VARCHAR(15),sp_name VARCHAR(40),nic_name VARCHAR(50),
                   attached_to_nic_type text,related_mac_addresses text,na_address VARCHAR(50),net_vlan_id integer,net_mtu integer,
                   net_description VARCHAR(4000),net_subnet VARCHAR(20),net_gateway VARCHAR(20)) AS
     $PROCEDURE$
@@ -61,7 +61,7 @@ CREATE OR REPLACE FUNCTION __temp_network_using_network_attachments()
                 SELECT
                     n.name,
                     vs.vds_name,
-                    'NA',
+                    CAST ('NA' AS VARCHAR),
                     sp.name,
                     nic.name,
                     CASE
