@@ -109,7 +109,7 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{package_name}
 %{__python_sitelib}/ovirt_log_collector/
 %{_bindir}/ovirt-log-collector
-%{_mandir}/man8/*
+%{_mandir}/man8/ovirt-log-collector.8*
 
 %files analyzer
 %doc AUTHORS
@@ -118,6 +118,7 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %{_bindir}/ovirt-log-collector-analyzer
 %dir %{_datadir}/%{name}/analyzer
 %{_datadir}/%{name}/analyzer/
+%{_mandir}/man8/ovirt-log-collector-analyzer.8*
 
 %changelog
 * Wed Nov 29 2017 Sandro Bonazzola <sbonazzo@redhat.com> - 4.2.0-1

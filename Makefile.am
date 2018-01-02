@@ -39,6 +39,7 @@ EXTRA_DIST = \
 SUBDIRS = \
 	po \
 	src \
+	src/inventory_report/man \
 	$(NULL)
 
 dist_noinst_DATA = \
