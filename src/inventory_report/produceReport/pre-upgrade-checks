@@ -442,3 +442,18 @@ function check_ip_not_null_and_pm_user_null() {
         echo -e "{OK} No issues found in the Hypervisor(s) Power Management settings\n"
     fi
 }
+
+function check_number_of_hosts() {
+    MAX_NUMBER_HOSTS=200
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/hosts_query_number_of_hosts.sql)
+    if [ "${sql_ret}" -gt ${MAX_NUMBER_HOSTS} ]; then
+        echo
+        echo "{WARNING} The maximum number of hosts per Manager is ${MAX_NUMBER_HOSTS}, currently hosts " \
+             " in the environment **${sql_ret}**. For more information about technical limitations, see " \
+             "https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.1/html-single/technical_reference/#chap-Minimum_Requirements_and_Technical_Limitations[here]. " \
+             "This value can be adjusted by: engine-config -s MaxNumberOfHostsInStoragePool=<MaxNumber>"
+        echo
+    else
+        echo -e "{OK} The number of hosts per Manager is ${sql_ret} and it is lower than maximum (${MAX_NUMBER_HOSTS})\n"
+    fi
+}
