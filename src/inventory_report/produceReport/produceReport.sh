@@ -346,6 +346,7 @@ if [[ -z "${SUMMARY_REPORT}" ]]; then
     check_legacy_apache_sso_config
     check_dirty_network
     check_ip_not_null_and_pm_user_null
+    check_number_of_hosts
 fi
 
 printSection "Engine Details"
