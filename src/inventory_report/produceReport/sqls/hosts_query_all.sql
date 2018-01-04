@@ -29,7 +29,9 @@ CREATE OR REPLACE FUNCTION __temp_hosts_show_all()
       vm_count integer,
       mem_available_mb bigint,
       mem_percent integer,
-      cpu_percent integer) AS
+      cpu_percent integer,
+      iscsi_initiator_name varchar(4000)
+) AS
 $PROCEDURE$
 BEGIN
 
@@ -68,7 +70,8 @@ BEGIN
             v.vm_count AS "VM Count",
             v.mem_available AS "Available memory (MB)",
             v.usage_mem_percent AS "Used memory %",
-            v.usage_cpu_percent AS "CPU load %"
+            v.usage_cpu_percent AS "CPU load %",
+            v.iscsi_initiator_name AS "ISCSI Initiator Name"
         FROM
             vds v
         JOIN cluster c ON c.cluster_id=v.cluster_id
@@ -98,7 +101,8 @@ BEGIN
                 v.vm_count AS "VM Count",
                 v.mem_available AS "Available memory (MB)",
                 v.usage_mem_percent AS "Used memory %",
-                v.usage_cpu_percent AS "CPU load %"
+                v.usage_cpu_percent AS "CPU load %",
+                v.iscsi_initiator_name AS "ISCSI Initiator Name"
             FROM
                 vds v
             JOIN vds_groups c ON c.vds_group_id=v.vds_group_id
@@ -130,7 +134,8 @@ COPY (
         vm_count AS "VM Count",
         mem_available_mb AS "Available memory (MB)",
         mem_percent AS "Used memory %",
-        cpu_percent AS "CPU load %"
+        cpu_percent AS "CPU load %",
+        iscsi_initiator_name AS "ISCSI Initiator Name"
     FROM
         __temp_hosts_show_all()
     ORDER BY name
