@@ -1098,7 +1098,7 @@ class LogCollector(object):
         Create a single tarball with collected data from engine, postgresql
         and all hypervisors.
         """
-        logging.info('Creating compressed archive...')
+        logging.info(_('Creating compressed archive...'))
 
         report_file_ext = 'bz2'
         compressor = 'bzip2'
