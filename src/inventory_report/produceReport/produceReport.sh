@@ -347,6 +347,7 @@ if [[ -z "${SUMMARY_REPORT}" ]]; then
     check_dirty_network
     check_ip_not_null_and_pm_user_null
     check_number_of_hosts
+    check_for_cpu_model_Conroe_and_Penryn
 fi
 
 printSection "Engine Details"

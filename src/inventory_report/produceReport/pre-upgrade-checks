@@ -457,3 +457,17 @@ function check_number_of_hosts() {
         echo -e "{OK} The number of hosts per Manager is ${sql_ret} and it is lower than maximum (${MAX_NUMBER_HOSTS})\n"
     fi
 }
+
+function check_for_cpu_model_Conroe_and_Penryn() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/hosts_cpu_Conroe_Penryn.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo
+        echo "{WARNING} The following hypervisor(s) have old CPU models like Conroe or Penryn." \
+             "The oldest recommended is Nehalem which support IBRS. For more information see " \
+             "https://access.redhat.com/solutions/3307851[solution]"
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    else
+        echo -e "{OK} No old CPU(s) detected (Conroe or Penryn) without https://access.redhat.com/solutions/3307851[IBRS] CPU for the guests.\n"
+    fi
+}
