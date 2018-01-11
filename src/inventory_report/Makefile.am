@@ -97,6 +97,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/hosts_query_all.sql \
 	produceReport/sqls/vms_query_snapshots_in_preview.sql \
 	produceReport/sqls/hosts_query_number_of_hosts.sql \
+	produceReport/sqls/hosts_cpu_Conroe_Penryn.sql \
 	$(NULL)
 
 EXTRA_DIST = \
