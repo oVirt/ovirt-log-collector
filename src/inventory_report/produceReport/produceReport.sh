@@ -348,6 +348,7 @@ if [[ -z "${SUMMARY_REPORT}" ]]; then
     check_ip_not_null_and_pm_user_null
     check_number_of_hosts
     check_for_cpu_model_Conroe_and_Penryn
+    check_vms_miminum_20_percent_memory_guaranteed
 fi
 
 printSection "Engine Details"

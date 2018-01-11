@@ -471,3 +471,15 @@ function check_for_cpu_model_Conroe_and_Penryn() {
         echo -e "{OK} No old CPU(s) detected (Conroe or Penryn) without https://access.redhat.com/solutions/3307851[IBRS] CPU for the guests.\n"
     fi
 }
+
+function check_vms_miminum_20_percent_memory_guaranteed() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_query_minimum_memory_guaranteed.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo
+        echo "{WARNING} The following Virtual Machines are setup with less than 20% of total memory" \
+             "as Physical Memory Guaranteed, it's recommended to review it via Admin Portal. " \
+             "For more info see the https://access.redhat.com/solutions/136303[solution]."
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    fi
+}
