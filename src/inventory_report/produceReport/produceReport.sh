@@ -208,7 +208,7 @@ function printSection() {
 }
 
 function printFileHeader() {
-    echo '= Inventory Report'
+    echo '= Log Collection Analysis'
     echo ${ENGINE_FQDN} $(date +"%m-%d-%Y %T")'
 :doctype: book
 :source-highlighter: coderay
