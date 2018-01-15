@@ -269,6 +269,20 @@ function check_AAA_legacy() {
     fi
 }
 
+function check_custom_ip_tables_config() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/vds_options_query_custom_ip_table_config.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 0 ]; then
+        echo
+        echo "{WARNING} Custom iptables configuration for hosts has been detected. " \
+             "Please be aware that iptables configuration for hosts has been deprecated in 4.2, " \
+             "and such configuration should be migrated to firewalld for cluster version >= 4.0."
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    else
+        echo -e "{OK} No custom iptables rules detected\n"
+    fi
+}
+
 function check_minimum_cluster_compat_version() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/cluster_query_minimum_3_6_compat_version.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
