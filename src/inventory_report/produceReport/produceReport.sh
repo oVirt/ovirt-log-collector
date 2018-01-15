@@ -357,6 +357,7 @@ if [[ -z "${SUMMARY_REPORT}" ]]; then
     check_for_cpu_model_Conroe_and_Penryn
     check_vms_miminum_20_percent_memory_guaranteed
     check_clusters_with_mixed_selinux_disabled
+    check_custom_ip_tables_config
 fi
 
 printSection "Engine Details"
