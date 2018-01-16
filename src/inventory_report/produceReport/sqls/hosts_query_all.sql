@@ -10,6 +10,27 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --
+
+CREATE OR REPLACE FUNCTION __temp_fence_agents_ip(uuid)
+  RETURNS TEXT AS
+  $PROCEDURE$
+  BEGIN
+        IF EXISTS (SELECT column_name
+                   FROM information_schema.columns
+                   WHERE table_name='fence_agents' and column_name='ip') THEN
+            RETURN (
+                SELECT STRING_AGG(fence_agents.ip, ', ')
+                FROM fence_agents
+                WHERE fence_agents.vds_id = $1
+            );
+        ELSE
+            RETURN (
+                'N/A'
+            );
+        END IF;
+END; $PROCEDURE$
+LANGUAGE plpgsql;
+
 CREATE OR REPLACE FUNCTION __temp_hosts_show_all()
   RETURNS TABLE(
       name VARCHAR(255),
@@ -17,7 +38,7 @@ CREATE OR REPLACE FUNCTION __temp_hosts_show_all()
       host_type varchar,
       cluster_name varchar(40),
       datacenter_name varchar(40),
-      agent_address varchar(256),
+      agent_address text,
       fqdn_ip varchar(256),
       vdsm text,
       kvm varchar(4000),
@@ -36,17 +57,6 @@ CREATE OR REPLACE FUNCTION __temp_hosts_show_all()
 $PROCEDURE$
 BEGIN
 
-    -- We might have cases where engine db's like 3.2, 3.3, 3.4, 3.5 have
-    -- vds table with column ip and 3.6 or later with column agent_ip.
-    --
-    -- To avoid a second SQL query when going to compat mode let's
-    -- change the column name in our own local temp. db.
-    IF EXISTS (SELECT column_name
-               FROM information_schema.columns
-               WHERE table_name='vds' and column_name='ip') THEN
-        ALTER TABLE vds RENAME COLUMN ip TO agent_ip;
-    END IF;
-
     -- In the Engine db 4.0, vds_groups has been renamed
     -- to cluster.
     IF EXISTS (SELECT column_name
@@ -59,7 +69,7 @@ BEGIN
             coalesce(htt.text, 'Unknown (id='||v.vds_type||')') AS "Host Type",
             c.name AS "Cluster",
             sp.name AS "Data Center",
-            v.agent_ip AS "Agent IP",
+            (SELECT * FROM __temp_fence_agents_ip(v.vds_id)) AS "Agent IP",
             v.host_name AS "FQDN or IP",
             regexp_replace(v.rpm_version, '[a-z]+.', '') AS "vdsm",
             v.kvm_version AS "qemu-kvm",
@@ -99,7 +109,7 @@ BEGIN
                 coalesce(htt.text, 'Unknown (id='||v.vds_type||')') AS "Host Type",
                 c.name AS "Cluster",
                 sp.name AS "Data Center",
-                v.agent_ip AS "Agent IP",
+                (SELECT * FROM __temp_fence_agents_ip(v.vds_id)) AS "Agent IP",
                 v.host_name AS "FQDN or IP",
                 regexp_replace(v.rpm_version, '[a-z]+.', '') AS "vdsm",
                 v.kvm_version AS "qemu-kvm",
