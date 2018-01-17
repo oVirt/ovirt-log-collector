@@ -502,14 +502,3 @@ function check_clusters_with_mixed_selinux_disabled() {
         fi
     fi
 }
-
-function check_cluster_with_non_IBRS_CPUS() {
-    sql_ret=$(execute_SQL_from_file "${SQLS}"/cluster_query_nonIBRS_CPUS.sql)
-    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
-        echo
-        echo "{WARNING} The following cluster(s) contain non IBRS CPUS. " \
-             "For more info see https://access.redhat.com/solutions/3317841[solution article]."
-        echo "${sql_ret}" | createAsciidocTable
-        echo
-    fi
-}
