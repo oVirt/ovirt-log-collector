@@ -483,3 +483,22 @@ function check_vms_miminum_20_percent_memory_guaranteed() {
         echo
     fi
 }
+
+function check_clusters_with_mixed_selinux_disabled() {
+    # Look for clusters with mixed selinux configuration, example:
+    # one host selinux is disabled and the others are enforcing.
+
+    # We must check if the engine_db is > 3.4, selinux_enforce_mode was
+    # was introduced in 3.5
+    if [[ ${ENGINE_CURRENT_VERSION} > 3.4 ]]; then
+        sql_ret=$(execute_SQL_from_file "${SQLS}"/cluster_query_check_mixed_selinux_configs.sql)
+        if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+            echo
+            echo "{WARNING} The following hosts are disabling selinux but the **cluster** contain" \
+                 "others hosts with selinux enforcing/permissive. Mixing such configuration will" \
+                 "cause Virtual Machine(s) migration fail!"
+            echo "${sql_ret}" | createAsciidocTable
+            echo
+        fi
+    fi
+}

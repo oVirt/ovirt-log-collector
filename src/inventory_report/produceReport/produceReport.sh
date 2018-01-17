@@ -303,6 +303,11 @@ execute_SQL_from_file "${SQLS}"/vms_create_related_lookup_tables.sql
 
 initVariablesForVaryingNamesInSchema
 
+ENGINE_VERSIONS=$(execute_SQL_from_file "${SQLS}"/engine_versions_through_all_upgrades.sql)
+ENGINE_FIRST_VERSION=$(echo "${ENGINE_VERSIONS}" | head -n 1)
+ENGINE_CURRENT_VERSION=$(echo "${ENGINE_VERSIONS}" | tail -n 1)
+ENGINE_PAST_VERSIONS=$(echo "${ENGINE_VERSIONS}" | sort -u | sed -e s/"${ENGINE_CURRENT_VERSION}//")
+
 printFileHeader
 
 if [[ -z "${SUMMARY_REPORT}" ]]; then
@@ -349,6 +354,7 @@ if [[ -z "${SUMMARY_REPORT}" ]]; then
     check_number_of_hosts
     check_for_cpu_model_Conroe_and_Penryn
     check_vms_miminum_20_percent_memory_guaranteed
+    check_clusters_with_mixed_selinux_disabled
 fi
 
 printSection "Engine Details"
@@ -359,19 +365,14 @@ if [[ -z ${SUMMARY_REPORT} ]]; then
     echo
 fi
 
-ENGINE_VERSIONS=$(execute_SQL_from_file "${SQLS}"/engine_versions_through_all_upgrades.sql)
-
 echo ".Approximate version of initially installed engine"
-ENGINE_FIRST_VERSION=$(echo "${ENGINE_VERSIONS}" | head -n 1)
 echo ${ENGINE_FIRST_VERSION}
 echo
 
 echo ".Approximate current engine version"
-ENGINE_CURRENT_VERSION=$(echo "${ENGINE_VERSIONS}" | tail -n 1)
 echo ${ENGINE_CURRENT_VERSION}
 echo
 
-ENGINE_PAST_VERSIONS=$(echo "${ENGINE_VERSIONS}" | sort -u | sed -e s/"${ENGINE_CURRENT_VERSION}//")
 if [ ${#ENGINE_PAST_VERSIONS} -gt 0 ]; then
     if [[ -z ${SUMMARY_REPORT} ]]; then
         echo ".Probable past the engine versions as engine was upgraded in the past " \
