@@ -537,6 +537,7 @@ fi
 printSection "Security"
 echo "=== Meltdown and Spectre"
 check_cluster_with_non_IBRS_CPUS
+check_vms_running_with_non_IBRS_CPUS
 
 if [[ -z ${SUMMARY_REPORT} ]]; then
     pkgs_engine="Packages list\n"
