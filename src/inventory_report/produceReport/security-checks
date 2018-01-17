@@ -27,3 +27,14 @@ function check_vms_running_with_non_IBRS_CPUS() {
         echo -e "{OK} All Virtual Machine(s) contain https://access.redhat.com/solutions/3317841[IRBS CPUs].\n"
     fi
 }
+
+function check_hosts_non_supporting_IBRS() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/hosts_not_supporting_IBRS_CPUS.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo
+        echo "{WARNING} Hosts not supporting IBRS CPUs. " \
+             "For more info see https://access.redhat.com/solutions/3317841[solution article]."
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    fi
+}
