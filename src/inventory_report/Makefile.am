@@ -66,6 +66,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/dwh_query_check_if_its_running.sql \
 	produceReport/sqls/vms_query_pinned_virtual_machines.sql \
 	produceReport/sqls/hosts_query_check_pretty_name.sql \
+	produceReport/sqls/hosts_not_supporting_IBRS_CPUS.sql \
 	produceReport/sqls/database_size.sql \
 	produceReport/sqls/vds_dynamic_check_for_net_config_dirty.sql \
 	produceReport/sqls/storage_domains_query_get_failing_domains.sql \
