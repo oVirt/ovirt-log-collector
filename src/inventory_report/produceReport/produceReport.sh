@@ -15,6 +15,8 @@
 SOS_REPORT_UNPACK_DIR="${1}"
 SCRIPT_DIR="$(dirname $(readlink -f $0))"
 
+. $(dirname "${0}")/security-checks
+
 if [[ -f ${SCRIPT_DIR}/docs-helper ]]; then
     . ${SCRIPT_DIR}/docs-helper
 else
@@ -531,6 +533,10 @@ if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
     printSection "External Providers"
     echo "${sql_query}" | createAsciidocTable
 fi
+
+printSection "Security"
+echo "=== Meltdown and Spectre"
+check_cluster_with_non_IBRS_CPUS
 
 if [[ -z ${SUMMARY_REPORT} ]]; then
     pkgs_engine="Packages list\n"

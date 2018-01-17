@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# This helper script is part of produceReport.sh
+
+function check_cluster_with_non_IBRS_CPUS() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/cluster_query_nonIBRS_CPUS.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo
+        echo "{WARNING} The following cluster(s) contain non IBRS CPUs. " \
+             "For more info see https://access.redhat.com/solutions/3317841[solution article]."
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    else
+        echo -e "{OK} All cluster(s) contain https://access.redhat.com/solutions/3317841[IRBS CPUs].\n"
+    fi
+}

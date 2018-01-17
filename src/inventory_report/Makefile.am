@@ -33,6 +33,7 @@ produceReportdir=$(ovirtlogcollectoranalyzerdir)/produceReport
 dist_produceReport_SCRIPTS = \
 	produceReport/produceReport.sh \
 	produceReport/pre-upgrade-checks \
+	produceReport/security-checks \
 	produceReport/docs-helper \
 	$(NULL)
 
@@ -54,6 +55,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/cluster_query_check_datacenter.sql \
 	produceReport/sqls/cluster_query_check_mixed_selinux_configs.sql \
 	produceReport/sqls/cluster_query_minimum_3_6_compat_version.sql \
+	produceReport/sqls/cluster_query_nonIBRS_CPUS.sql \
 	produceReport/sqls/providers_query_show_data.sql \
 	produceReport/sqls/hosts_query_check_health.sql \
 	produceReport/sqls/storage_create_related_lookup_tables.sql \
