@@ -10,8 +10,13 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --
+-- Possible values for selinux_enforce_mode:
+-- 0 Permissive
+-- 1 Enforcing
+-- -1 Disabled
+--
 CREATE OR REPLACE FUNCTION __temp_cluster_with_mixed_selinux_config()
-  RETURNS TABLE(name VARCHAR(255), cluster VARCHAR(40)) AS
+  RETURNS TABLE(name VARCHAR(255), cluster VARCHAR(40), selinux INTEGER) AS
 $PROCEDURE$
 BEGIN
     -- In the Engine db 4.0, vds_groups has been renamed
@@ -22,7 +27,8 @@ BEGIN
         RETURN QUERY (
         SELECT
             vds_name AS "Hostname",
-            cluster_name AS "Cluster"
+            cluster_name AS "Cluster",
+            selinux_enforce_mode AS "SELinux"
         FROM
             vds
         WHERE cluster_name IN (
@@ -38,7 +44,8 @@ BEGIN
         RETURN QUERY (
         SELECT
             vds_name AS "Hostname",
-            vds_group_name AS "Cluster"
+            vds_group_name AS "Cluster",
+            selinux_enforce_mode AS "SELinux"
         FROM
             vds
         WHERE vds_group_name IN (
@@ -57,7 +64,11 @@ COPY (
   SELECT
       row_number() OVER (ORDER BY name NULLs last) AS "NO.",
       name AS "Hostname",
-      cluster AS "Cluster"
+      cluster AS "Cluster",
+      CASE WHEN selinux=0 THEN 'Permissive'
+           WHEN selinux=1 THEN 'Enforcing'
+           WHEN selinux=-1 THEN 'Disabled'
+      END AS "SELinux"
   FROM
       __temp_cluster_with_mixed_selinux_config()
   ORDER BY
