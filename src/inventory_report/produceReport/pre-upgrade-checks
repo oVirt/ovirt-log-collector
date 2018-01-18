@@ -494,8 +494,8 @@ function check_clusters_with_mixed_selinux_disabled() {
         sql_ret=$(execute_SQL_from_file "${SQLS}"/cluster_query_check_mixed_selinux_configs.sql)
         if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
             echo
-            echo "{WARNING} The following hosts are disabling selinux but the **cluster** contain" \
-                 "others hosts with selinux enforcing/permissive. Mixing such configuration will" \
+            echo "{WARNING} The following Host(s) are disabling SELinux but the **Cluster** contain" \
+                 "others Host(s) with SELinux Enforcing/Permissive. Mixing such configuration will" \
                  "cause Virtual Machine(s) migration fail!"
             echo "${sql_ret}" | createAsciidocTable
             echo
