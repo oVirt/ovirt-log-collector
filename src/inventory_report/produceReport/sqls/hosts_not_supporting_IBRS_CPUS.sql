@@ -28,7 +28,7 @@ BEGIN
             s.vds_name AS hostname
         FROM vds_dynamic d
         INNER JOIN vds_static s ON d.vds_id = s.vds_id
-        INNER JOIN vds_groups c ON c.cluster_id = s.cluster_id
+        INNER JOIN cluster c ON c.cluster_id = s.cluster_id
         WHERE d.cpu_flags NOT ILIKE '%IBRS%'
         );
     ELSE

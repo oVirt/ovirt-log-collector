@@ -24,7 +24,7 @@ BEGIN
             name AS cluster,
             cpu_name AS detected_cpu
         FROM
-            vds_groups
+            cluster
         WHERE cpu_name NOT ILIKE '%IBRS%'
         );
     ELSE
