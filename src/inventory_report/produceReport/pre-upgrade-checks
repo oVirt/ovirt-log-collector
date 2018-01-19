@@ -271,7 +271,7 @@ function check_AAA_legacy() {
 
 function check_custom_ip_tables_config() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/vds_options_query_custom_ip_table_config.sql)
-    if [ $(echo "${sql_ret}" | wc -l) -gt 0 ]; then
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
         echo
         echo "{WARNING} Custom iptables configuration for hosts has been detected. " \
              "Please be aware that iptables configuration for hosts has been deprecated in 4.2, " \

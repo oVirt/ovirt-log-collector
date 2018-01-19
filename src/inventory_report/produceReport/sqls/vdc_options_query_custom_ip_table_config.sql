@@ -13,11 +13,11 @@
 --
 COPY (
     SELECT
-        option_name
+        option_value AS "Custom iptables"
     FROM
         vdc_options
     WHERE
         option_name = 'IPTablesConfigSiteCustom'
         AND
-        option_value IS NOT NULL
+        option_value <> ''
 ) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
