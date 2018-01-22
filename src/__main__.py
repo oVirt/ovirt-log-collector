@@ -35,6 +35,7 @@ import tempfile
 import textwrap
 import atexit
 import time
+import platform
 import socket
 import sos
 import stat
@@ -916,6 +917,16 @@ class ENGINEData(CollectorBase):
                     )
                 )
 
+        if self.configuration.get("package_manager_history"):
+            distro = platform.linux_distribution()[0].lower()
+            if "red hat" in distro:
+                opts.append('-k yum.yum-history-info=on')
+            elif "centos" in distro:
+                opts.append('-k yum.yum-history-info=on')
+            elif "fedora" in distro:
+                opts.append('-k dnf.history-info=on -k dnf.history=on')
+
+
         if self.configuration.get("ticket_number"):
             opts.append(
                 "--ticket-number=%s" % self.configuration.get("ticket_number")
@@ -1087,7 +1098,8 @@ class LogCollector(object):
         Create a single tarball with collected data from engine, postgresql
         and all hypervisors.
         """
-        print(_('Creating compressed archive...'))
+        logging.info(_('Creating compressed archive...'))
+
         report_file_ext = 'bz2'
         compressor = 'bzip2'
         caller = Caller({})
@@ -1543,21 +1555,22 @@ if __name__ == '__main__':
         print('This tool requires root permissions to run.')
         sys.exit(ExitCodes.CRITICAL)
     else:
-        for line in (
-            _(
-                'This command will collect system configuration and '
-                'diagnostic information from this system.'
-            ),
-            _(
-                'The generated archive may contain data considered sensitive '
-                'and its content should be reviewed by the originating '
-                'organization before being passed to any third party.'
-            ),
-            _(
-                'No changes will be made to system configuration.\n'
-            ),
-        ):
-            print('\n'.join(textwrap.wrap(line)))
+        if not '--quiet' in sys.argv:
+            for line in (
+                _(
+                    'This command will collect system configuration and '
+                    'diagnostic information from this system.'
+                ),
+                _(
+                    'The generated archive may contain data considered sensitive '
+                    'and its content should be reviewed by the originating '
+                    'organization before being passed to any third party.'
+                ),
+                _(
+                    'No changes will be made to system configuration.\n'
+                ),
+            ):
+                print('\n'.join(textwrap.wrap(line)))
 
         setup_pg_defaults()
 
@@ -1678,6 +1691,15 @@ to continue.
             "The generated archive will contain data considered sensitive "
             "and its content should be reviewed by the originating "
             "organization before being passed to any third party."
+        )
+    )
+
+    parser.add_option(
+        "", "--package-manager-history", dest="package_manager_history",
+        action="store_true", default=False,
+        help=(
+            "Includes the yum or dnf history data per transaction. "
+            "It might increase the time to collect the data."
         )
     )
 
