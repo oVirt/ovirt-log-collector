@@ -105,6 +105,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/hosts_cpu_Conroe_Penryn.sql \
 	produceReport/sqls/vms_query_minimum_memory_guaranteed.sql \
 	produceReport/sqls/vdc_options_query_custom_ip_table_config.sql \
+	produceReport/sqls/hosts_query_tls_disabled.sql \
 	$(NULL)
 
 EXTRA_DIST = \
