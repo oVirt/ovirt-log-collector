@@ -498,6 +498,18 @@ function check_vms_miminum_20_percent_memory_guaranteed() {
     fi
 }
 
+function check_hosts_with_tls_disabled() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/hosts_query_tls_disabled.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo
+        echo "{WARNING} The following Hosts are running with TLS protocol disabled " \
+             "It's recommended to enable the TLS protocol between Hosts and Engine." \
+             "For more info see the https://access.redhat.com/solutions/122403[solution]."
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    fi
+}
+
 function check_clusters_with_mixed_selinux_disabled() {
     # Look for clusters with mixed selinux configuration, example:
     # one host selinux is disabled and the others are enforcing.
