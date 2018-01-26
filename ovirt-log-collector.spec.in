@@ -41,7 +41,6 @@ Source0:	http://resources.ovirt.org/pub/src/%{package_name}/%{package_name}-%{pa
 BuildArch:	noarch
 
 Requires:	logrotate
-Requires:	openssl
 Requires:	openssh-clients
 Requires:	sos >= 3.3
 
@@ -70,6 +69,7 @@ Log Collector tool for oVirt Engine
 Summary:	Log Collector for oVirt Engine - Analysis tools
 Requires:	rubygem-asciidoctor
 Requires:	libxml2
+Requires:	openssl
 
 %if %{ovirt_rh_postgresql95}
 Requires:       rh-postgresql95-postgresql-server
