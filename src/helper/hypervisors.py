@@ -85,8 +85,8 @@ class ENGINETree(object):
                 self.datacenters.add(dc)
 
     def add_host(self, host):
-        is_spm = host.spm.status == ovirtsdk4.types.SpmStatus.SPM
-        is_up = host.status == ovirtsdk4.types.HostStatus.UP
+        is_spm = host.spm.status.state == 'spm'
+        is_up = host.status.state == 'up'
         host_obj = self.Host(host.address, host.name, is_spm, is_up)
         self.hosts.add(host_obj)
         if host.get_cluster() is not None:
