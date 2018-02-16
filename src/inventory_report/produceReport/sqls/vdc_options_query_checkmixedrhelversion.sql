@@ -12,13 +12,15 @@
 --
 --  Query to verify if option CheckMixedRhelVersions is different from true
 --
-SELECT
-    option_name AS "Option Name",
-    option_value AS "Value",
-    version AS "Version"
-FROM
-    vdc_options
-WHERE
-    option_name ILIKE 'CheckMixedRhelVersions' AND
-    option_value != 'true' AND
-    version != 'general'
+COPY (
+    SELECT
+        option_name AS "Option Name",
+        option_value AS "Value",
+        version AS "Version"
+    FROM
+        vdc_options
+    WHERE
+        option_name ILIKE 'CheckMixedRhelVersions' AND
+        option_value != 'true' AND
+        version != 'general'
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
