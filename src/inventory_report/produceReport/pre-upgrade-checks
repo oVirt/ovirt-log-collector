@@ -4,12 +4,11 @@
 
 function check_hosts_health() {
     # Hosts health validation
-    sql_cmd=$(cat "${SQLS}"/hosts_query_check_health.sql)
-    hosts_health_check=$(executeSQL "${sql_cmd}")
-    if [ ${#hosts_health_check} -gt 0 ]; then
+    hosts_health_check=$(execute_SQL_from_file "${SQLS}"/hosts_query_check_health.sql)
+    if [ $(echo "${hosts_health_check}" | wc -l) -gt 1 ]; then
         echo -e "{WARNING} The following host(s) are not in UP state, please" \
                 " verify:"
-        printTable "${sql_cmd}"
+        echo "${hosts_health_check}" | createAsciidocTable
         echo
     else
         echo -e "{OK} No blocker status found in the hosts\n"
