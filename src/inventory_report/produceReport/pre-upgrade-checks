@@ -135,14 +135,13 @@ function check_vms_running_obsolete_cluster() {
 }
 
 function check_mixedrhelversion() {
-    sql_cmd=$(cat "${SQLS}"/vdc_options_query_checkmixedrhelversion.sql)
-    sql_ret=$(executeSQL "${sql_cmd}")
-    if [ ${#sql_ret} -gt 0 ]; then
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/vdc_options_query_checkmixedrhelversion.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
         echo -e "{WARNING} *After* upgrading all hosts to EL7 and *BEFORE* " \
                 "upgrading the Manager to >= 4.y make sure " \
                 "CheckMixedRhelVersions is true. More information about " \
                 "this topic check https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Virtualization/3.6/html/Upgrade_Guide/Upgrading_Hosts_in_a_Red_Hat_Enterprise_Linux_6_Cluster_to_Red_Hat_Enterprise_Linux_7.html[upgrade guide]"
-        printTable "${sql_cmd}"
+        echo "${sql_ret}" | createAsciidocTable
         echo
     else
         echo -e "{OK} CheckMixedRhelVersions validation\n"
