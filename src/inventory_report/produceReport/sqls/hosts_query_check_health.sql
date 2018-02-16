@@ -33,17 +33,19 @@
 -- All values defined in ovirt-engine project:
 -- backend/manager/modules/common/src/main/java/org/ovirt/engine/core/common/businessentities/VDSStatus.java
 
-WITH hosts_unavailable AS (
+COPY (
+    WITH hosts_unavailable AS (
+        SELECT
+            vds_name, status
+        FROM
+            vds
+        WHERE status <> 3
+    )
     SELECT
-        vds_name, status
+        vds_name AS "Host",
+        host_status_temp.text AS "Status"
     FROM
-        vds
-    WHERE status <> 3
-)
-SELECT
-    vds_name AS "Host",
-    host_status_temp.text AS "Status"
-FROM
-    hosts_unavailable
-LEFT JOIN
-    host_status_temp ON hosts_unavailable.status = host_status_temp.id
+        hosts_unavailable
+    LEFT JOIN
+        host_status_temp ON hosts_unavailable.status = host_status_temp.id
+) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
