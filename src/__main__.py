@@ -1395,10 +1395,11 @@ class LogCollector(object):
         host_list = list(self.conf.get("hosts"))
         host_list.sort(key=get_host)
 
-        fmt = "%-20s | %-20s | %s"
+        fmt = "%-20s | %-20s | %-20s | %-7s | %s"
         print("Host list (datacenter=%(datacenter)s, cluster=%(cluster)s, \
 host=%(host_pattern)s):" % self.conf)
-        print(fmt % ("Data Center", "Cluster", "Hostname/IP Address"))
+        print(fmt % ("Data Center", "Cluster", "Hostname/IP Address",
+              "SPM", "Up"))
         print("\n".join(
             fmt % (dc, cluster, host, is_spm, is_up) for
             dc, cluster, host, is_spm, is_up in host_list
