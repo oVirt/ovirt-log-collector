@@ -404,6 +404,14 @@ echo ".Engine DB size"
 echo "${DB_SIZE}"
 echo
 
+if [[ ${ENGINE_CURRENT_VERSION} > 3.5 ]]; then
+    sql_query=$(execute_SQL_from_file "${SQLS}"/engine_backup_log_last_backup.sql)
+    if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
+        echo ".Last Engine backup"
+        echo "${sql_query}" | createAsciidocTable
+    fi
+fi
+
 collect_ip_addr_engine
 
 user_rhn=$(collect_rhn_data "username")
