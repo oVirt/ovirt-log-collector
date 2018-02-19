@@ -106,6 +106,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/vms_query_minimum_memory_guaranteed.sql \
 	produceReport/sqls/vdc_options_query_custom_ip_table_config.sql \
 	produceReport/sqls/hosts_query_tls_disabled.sql \
+	produceReport/sqls/engine_backup_log_last_backup.sql \
 	$(NULL)
 
 EXTRA_DIST = \
