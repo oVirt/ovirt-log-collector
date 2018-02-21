@@ -526,3 +526,26 @@ function check_clusters_with_mixed_selinux_disabled() {
         fi
     fi
 }
+
+function check_backup_engine() {
+    # The table engine_backup_log was introduced in 3.6, versions before 3.6
+    # we should always recommend a backup.
+    if [[ ${ENGINE_CURRENT_VERSION} < 3.6 ]]; then
+        echo
+        echo "{WARNING} It is recommended to have an updated engine https://access.redhat.com/solutions/797463[backup before upgrade]!"
+        echo
+    else
+        sql_ret=$(execute_SQL_from_file "${SQLS}"/engine_backup_log_check_2weeks_age.sql)
+        ret=$(echo "${sql_ret}" | wc -l)
+        if [ ${ret} = 1 ]; then
+                echo "{WARNING} We couldn't detect a recent backup (**at most 2 weeks old**), please make sure engine has " \
+                     "a fresh backup before upgrade. For more info see the https://access.redhat.com/solutions/797463[solution]."
+                echo
+        # in case we can find just one of the two entries (db + files)
+        elif [ ${ret} = 2 ]; then
+            echo
+            echo "{WARNING} The engine backup must include at least db and files in the scope , please follow the https://access.redhat.com/solutions/797463[solution]!"
+            echo
+        fi
+    fi
+}

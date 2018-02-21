@@ -327,6 +327,7 @@ if [[ -z "${SUMMARY_REPORT}" ]]; then
     printSection "Pre-upgrade checks"
     . $(dirname "${0}")/pre-upgrade-checks
 
+    check_backup_engine
     check_hosts_health
     check_hosts_pretty_name
     check_hosts_with_tls_disabled
