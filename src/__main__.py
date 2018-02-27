@@ -1285,16 +1285,6 @@ class LogCollector(object):
                                                     is_up)
             self.conf['hosts'] &= set(selected_hosts.values())
 
-        # warn users if they are going to collect logs from all hosts.
-        if orig_hosts and self.conf['hosts'] == orig_hosts:
-            logging.warning(
-                _(
-                    'This ovirt-log-collector call will collect logs from '
-                    'all available hosts. This may take long time, '
-                    'depending on the size of your deployment'
-                )
-            )
-
         return bool(self.conf.get('hosts'))
 
     def list_hosts(self):
