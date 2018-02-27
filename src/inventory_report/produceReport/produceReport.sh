@@ -380,13 +380,13 @@ echo
 
 if [ ${#ENGINE_PAST_VERSIONS} -gt 0 ]; then
     if [[ -z ${SUMMARY_REPORT} ]]; then
-        echo ".Probable past the engine versions as engine was upgraded in the past " \
+        echo ".Probable past Engine versions " \
              "footnote:[<We group the upgrade scripts by the time when the script was fully applied. " \
              "All scripts which finished in same 30 minutes span are considered to be " \
              "related to same upgrade. The last script then determines the version " \
              "of this 'upgrade'.>]"
     else
-        echo ".Probable past the engine versions"
+        echo ".Probable past Engine versions"
     fi
 
     echo
