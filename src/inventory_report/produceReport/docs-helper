@@ -4,11 +4,11 @@
 
 function auxiliary_docs() {
 
-    echo -e "* **It's recommended** to use https://access.redhat.com/labs/rhevupgradehelper/[Upgrade Helper] to determine the best upgrade path to your environment\n"
+    echo -e "* **It is recommended** to use https://access.redhat.com/labs/rhevupgradehelper/[Upgrade Helper] to determine the best upgrade path to your environment\n"
 
-    echo -e "* If your environment is **lower** than 3.6, it's **required to upgrade to 3.6 before** upgrading to 4.0\n"
+    echo -e "* If your environment is **lower** than 3.6, it is **required to upgrade to 3.6 before** upgrading to 4.0\n"
 
-    echo -e "* To upgrade to 4.1, it's **required** to upgrade the environment to **4.0 first**\n"
+    echo -e "* To upgrade to 4.1, it is **required** to upgrade the environment to **4.0 first**\n"
 
     echo -e "* **Hypervisor(s)**: Upgrading to 4.0, requires all hypervisors be updated to the last 3.6 version available\n"
 

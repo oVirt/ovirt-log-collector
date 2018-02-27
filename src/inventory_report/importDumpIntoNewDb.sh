@@ -33,7 +33,7 @@ function initDbVariables() {
 }
 
 function executeSql() {
-    # If engine_address is not set it's local env
+    # If engine_address is not set it is local env
     if [ -z "${PG_DB_ADDRESS}" ]; then
         ${PSQL_CMD} -h "$PGRUN" "$@"
     else
@@ -83,7 +83,7 @@ echo \"Removing temporary directory \"$WORK_DIR\"\"
 rm -rf \"$WORK_DIR\"
 rm -rf \"${HOSTS_SOSREPORT_EXTRACTED_DIR}\"
 "
-    # If engine_address is not set it's local env
+    # If engine_address is not set it is local env
     if [ -z "${PG_DB_ADDRESS}" ]; then
         createExecutableBashScript "$WORK_DIR/startDb.sh" "${PG_CTL_CMD} start -D $PGDATA -s -o \"-h '' -k $PGRUN\" -w"
         createExecutableBashScript "$WORK_DIR/stopDb.sh" "${PG_CTL_CMD} stop -D $PGDATA -s -m fast"
@@ -128,7 +128,7 @@ __EOF__
 
 WORK_DIR=$1
 HTML_OUT="$2"
-# If engine_address is not set it's local env
+# If engine_address is not set it is local env
 if [ -z "${PG_DB_ADDRESS}" ]; then
     initDbVariables
 fi
@@ -139,7 +139,7 @@ SOS_REPORT_DIR=$WORK_DIR/unpacked_sosreport
 
 createUserScripts
 
-# If engine_address is not set it's local env
+# If engine_address is not set it is local env
 if [ -z "${PG_DB_ADDRESS}" ]; then
     if [ ! -d "$PGDATA" -o ! -d "$PGRUN" ]; then
         initAndStartDb
@@ -170,7 +170,7 @@ createRoleIfItDoesNotExist postgres
 executeSqlUsingPostgresDb -c "create database \"${TEMPORARY_DB_NAME}\" owner \"${ENGINE_DB_USER}\" template template0 encoding
 'UTF8' lc_collate 'en_US.UTF-8' lc_ctype 'en_US.UTF-8';" >> "${WORK_DIR}/sql-log-postgres.log"
 
-# If engine_address is not set it's local env
+# If engine_address is not set it is local env
 if [ -z "${PG_DB_ADDRESS}" ]; then
     cd $PG_DUMP_DIR
     restore_log="$WORK_DIR/db-restore.log"

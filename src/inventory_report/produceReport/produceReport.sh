@@ -49,7 +49,7 @@ PGDATA="${DBDIR}"/pgdata
 PGRUN="${DBDIR}"/pgrun
 SQLS=$(dirname "${0}")/sqls
 
-# If engine_address is not set it's local env
+# If engine_address is not set it is local env
 if [ -z "${PG_DB_ADDRESS}" ]; then
     PSQL="${PSQL_CMD} --quiet --tuples-only --no-align --dbname ${TEMPORARY_DB_NAME} --username ${ENGINE_DB_USER} --host $PGRUN"
 else
@@ -465,7 +465,7 @@ if [[ "${SHOW_FENCE_AGENT_PASSWORDS}" = true ]]; then
     AGENT_PASSWORDS_AS_CSV=$(execute_SQL_from_file "${SQLS}"/agent_passwords.sql)
     execute_SQL_from_file "${SQLS}/cleanup_procedures_for_reporting_agent_passwords_as_csv.sql"
 
-    #note gt 1, ie >1. It's because csv contains header, thus 0 records = 1 line.
+    #note gt 1, ie >1. It is because csv contains header, thus 0 records = 1 line.
     if [ $(echo "${AGENT_PASSWORDS_AS_CSV}" | wc -l) -gt 1 ]; then
         printSection "Fence agent password per host"
         echo "${AGENT_PASSWORDS_AS_CSV}" | createAsciidocTable

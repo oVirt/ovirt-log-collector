@@ -285,7 +285,7 @@ function check_minimum_cluster_compat_version() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/cluster_query_minimum_3_6_compat_version.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
         echo
-        echo "{WARNING} It's required to update the **Cluster Compatibility Version to 3.6" \
+        echo "{WARNING} It is required to update the **Cluster Compatibility Version to 3.6" \
              " before** upgrading to 4.0 for the following cluster(s):"
         echo "${sql_ret}" | createAsciidocTable
         echo
@@ -298,7 +298,7 @@ function check_minimum_datacenter_compat_version() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/datacenter_query_minimum_3_6_compat_version.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
         echo
-        echo "{WARNING} It's required to update the **DataCenter Compatibility Version to 3.6" \
+        echo "{WARNING} It is required to update the **DataCenter Compatibility Version to 3.6" \
              " before** upgrading to 4.0 for the following DataCenter(s):"
         echo "${sql_ret}" | createAsciidocTable
         echo
@@ -355,7 +355,7 @@ function check_pinned_virtual_machines() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_query_pinned_virtual_machines.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
         echo
-        echo "{WARNING} There are virtual machine(s) pinned, it's not recommended upgrade" \
+        echo "{WARNING} There are virtual machine(s) pinned, it is not recommended upgrade" \
              " the environment with virtual machines pinned to run in specific hypervisors"
         echo "${sql_ret}" | createAsciidocTable
         echo
@@ -382,7 +382,7 @@ function check_vm_snapshot_id_zero() {
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
         echo
         echo "{WARNING} There are image(s) with **vm_snapshot_id as zero**," \
-             " it's recommended to not use zeros in vm_snapshot_id uuid " \
+             " it is recommended to not use zeros in vm_snapshot_id uuid " \
              "column to avoid potencial conflicts, you might use uuidgen" \
              " command to generate a new UUID. For more information check" \
              "https://access.redhat.com/solutions/130323[this article] " \
@@ -489,7 +489,7 @@ function check_vms_miminum_20_percent_memory_guaranteed() {
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
         echo
         echo "{WARNING} The following Virtual Machines are setup with less than 20% of total memory" \
-             "as Physical Memory Guaranteed, it's recommended to review it via Admin Portal. " \
+             "as Physical Memory Guaranteed, it is recommended to review it via Admin Portal. " \
              "For more info see the https://access.redhat.com/solutions/136303[solution]."
         echo "${sql_ret}" | createAsciidocTable
         echo
@@ -501,7 +501,7 @@ function check_hosts_with_tls_disabled() {
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
         echo
         echo "{WARNING} The following Hosts are running with TLS protocol disabled " \
-             "It's recommended to enable the TLS protocol between Hosts and Engine." \
+             "It is recommended to enable the TLS protocol between Hosts and Engine." \
              "For more info see the https://access.redhat.com/solutions/122403[solution]."
         echo "${sql_ret}" | createAsciidocTable
         echo

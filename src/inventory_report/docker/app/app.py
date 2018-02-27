@@ -34,7 +34,7 @@ app.config['UPLOAD_DIR'] = UPLOAD_DIR
 def preexec_fn():
     """
     Set postgresql userid before the child is executed as
-    it's required for the analyzer to have access to postgresql
+    it is required for the analyzer to have access to postgresql
     """
     os.setuid(POSTGRESQL_USER_UID)
 
