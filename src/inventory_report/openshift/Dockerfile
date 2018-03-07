@@ -11,11 +11,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-# build:
-# docker build -t inventory-build:latest .
-# docker tag inventory-build dougsland/inventory-build
-# docker push dougsland/inventory-build
-#
 # Sending file via curl
 # curl -H 'Expect:' -i -X POST -F "file=@sosreport.tar.xz" IP:8080 > report
 #
@@ -25,8 +20,21 @@ FROM centos/python-35-centos7
 USER root
 
 RUN yum install -y http://resources.ovirt.org/pub/yum-repo/ovirt-release-master.rpm
-RUN yum install -y python-flask python-gunicorn
-RUN yum install -y ovirt-log-collector-analyzer
+RUN yum install -y git \
+	rpm-build \
+	autoconf \
+	gettext-devel \
+	automake \
+	python-flask \
+	python2-devel \
+	python-gunicorn
+
+RUN git clone http://gerrit.ovirt.org/p/ovirt-log-collector && \
+	cd ovirt-log-collector && \
+	./autogen.sh && \
+	./configure && \
+	make rpm && \
+	yum install -y ./tmp.repos/RPMS/noarch/ovirt-log-collector-analyzer*
 
 # Return to pre-defined ordinary user
 USER 1001
