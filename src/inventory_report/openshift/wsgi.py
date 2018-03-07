@@ -62,6 +62,11 @@ def execute_cmd(command):
     return out
 
 
+def version():
+    return subprocess.Popen(
+                [ANALYZER_BIN, '--version'],
+                stdout=subprocess.PIPE).communicate()[0]
+
 @app.route("/", methods=['GET', 'POST'])
 def index():
     """
@@ -132,10 +137,11 @@ def index():
       <p><input type=file name=file>
          <input type=submit value=Upload>
     </form>
-    <p>%s</p>
+    <br>
     To report a bug or request improvements, <a href="https://bugzilla.redhat.com/enter_bug.cgi?product=ovirt-log-collector">please use this link</a>.<br>
     For others topics, use <a href="mailto:devel@ovirt.org">devel@ovirt.org</a> or contact the <a href="mailto:dougsland@redhat.com">maintainer</a>.<br>
-    """ % "<br>"
+    Version: <a href="https://github.com/oVirt/ovirt-log-collector">%s</a>
+    """ % version()
 
 
 @app.errorhandler(500)

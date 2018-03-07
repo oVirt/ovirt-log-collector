@@ -37,11 +37,18 @@ Usage: $0 [options] <tar-file>
         Executive summary, do not execute pre-upgrade validation
     --html=<file>
         Write html report to <file>. Defaults to ${HTML_OUT} .
+    --version
+        Report application version and exit
 
 Script unpacks sosreport, import it into db and generates html report into current directory.
 __EOF__
 exit 1;
 
+}
+
+function version() {
+    echo "$ANALYZER_VERSION-$ANALYZER_RELEASE (git $ANALYZER_GITHEAD)"
+    exit 0
 }
 
 KEEP_WORKING_DIR=
@@ -86,6 +93,9 @@ while [ -n "$1" ]; do
                 ;;
             --html=*)
                 HTML_OUT="${v}"
+                ;;
+            --version)
+                version
                 ;;
             *)
                 if [ -r "${x}" ]; then
