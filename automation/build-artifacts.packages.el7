@@ -8,4 +8,4 @@ python2-devel
 python-pep8
 pyflakes
 sos
-dnf-utils
+yum-utils
