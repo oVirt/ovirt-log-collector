@@ -1,11 +1,1 @@
-make
-autoconf
-automake
-gettext-devel
-git
-ovirt-engine-sdk-python
-python2-devel
-python-pep8
-pyflakes
-sos
-yum-utils
+build-artifacts.packages
