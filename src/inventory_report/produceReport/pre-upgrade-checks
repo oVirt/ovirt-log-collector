@@ -537,9 +537,11 @@ function check_backup_engine() {
     else
         sql_ret=$(execute_SQL_from_file "${SQLS}"/engine_backup_log_check_2weeks_age.sql)
         ret=$(echo "${sql_ret}" | wc -l)
+        curr_date=$(date +%F)
+
         if [ ${ret} = 1 ]; then
-                echo "{WARNING} We couldn't detect a recent backup (**at most 2 weeks old**), please make sure engine has " \
-                     "a fresh backup before upgrade. For more info see the https://access.redhat.com/solutions/797463[solution]."
+                echo "{WARNING} Based on the current date (${curr_date}), a **2 weeks old** or more recent backup could not be detected , please make sure engine has " \
+                     "a fresh backup before upgrade. See the last backups in the Engine details session. For more info, see the https://access.redhat.com/solutions/797463[solution]."
                 echo
         # in case we can find just one of the two entries (db + files)
         elif [ ${ret} = 2 ]; then
