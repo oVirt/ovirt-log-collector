@@ -71,6 +71,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/vds_dynamic_check_for_net_config_dirty.sql \
 	produceReport/sqls/storage_domains_query_get_failing_domains.sql \
 	produceReport/sqls/vdc_options_query_checkmixedrhelversion.sql \
+	produceReport/sqls/vdc_options_query_imageproxyaddress_as_localhost.sql \
 	produceReport/sqls/agent_passwords.sql \
 	produceReport/sqls/network_query_cluster_with_non_ovirtmgmt_as_management_network.sql \
 	produceReport/sqls/cleanup_procedures_for_reporting_agent_passwords_as_csv.sql \

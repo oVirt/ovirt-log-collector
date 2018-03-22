@@ -342,6 +342,7 @@ if [[ -z "${SUMMARY_REPORT}" ]]; then
     check_vms_windows_with_incorrect_timezone
     check_vms_linux_and_others_with_incorrect_timezone
     check_vms_with_cluster_lower_3_6_with_virtio_serial_console
+    check_imageproxyaddress_as_localhost
     check_async_tasks
     check_runnning_commands
     check_compensation_tasks

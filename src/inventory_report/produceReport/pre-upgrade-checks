@@ -440,6 +440,17 @@ function check_dirty_network() {
     fi
 }
 
+function check_imageproxyaddress_as_localhost() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/vdc_options_query_imageproxyaddress_as_localhost.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo
+        echo "{WARNING} ImageProxyAddress **contain localhost**, it's not recommended to use " \
+             "locahost or localdomain. For more information see the https://access.redhat.com/solutions/2730191[solution]"
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    fi
+}
+
 function check_ip_not_null_and_pm_user_null() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_query_ip_set_power_management_null.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
