@@ -324,7 +324,7 @@ if [[ -z "${SUMMARY_REPORT}" ]]; then
         fi
     fi
 
-    printSection "Pre-upgrade checks"
+    printSection "Health checks"
     . $(dirname "${0}")/pre-upgrade-checks
 
     check_backup_engine
