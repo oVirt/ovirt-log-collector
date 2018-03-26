@@ -327,42 +327,71 @@ if [[ -z "${SUMMARY_REPORT}" ]]; then
     printSection "Health checks"
     . $(dirname "${0}")/pre-upgrade-checks
 
+    # Backup check
     check_backup_engine
+
+    # Datacenter
+    check_minimum_datacenter_compat_version
+    check_mixedrhelversion
+
+    # Cluster Check
+    check_cluster_no_dc
+    check_minimum_cluster_compat_version
+    check_cluster_legacy_policy
+
+    # Hosts Check
     check_hosts_health
     check_hosts_pretty_name
     check_hosts_with_tls_disabled
+    check_number_of_hosts
+    check_clusters_with_mixed_selinux_disabled
+
+    # Storage domain
+    check_storage_domains_failing
+
+    # VMs Check
     check_vms_health
-    check_cluster_no_dc
-    check_third_party_certificate
-    check_minimum_datacenter_compat_version
-    check_minimum_cluster_compat_version
+    check_images_locked_or_illegal
     check_vms_running_obsolete_cluster
-    check_pinned_virtual_machines
-    check_mixedrhelversion
+    check_vm_snapshot_id_zero
     check_vms_windows_with_incorrect_timezone
     check_vms_linux_and_others_with_incorrect_timezone
     check_vms_with_cluster_lower_3_6_with_virtio_serial_console
-    check_imageproxyaddress_as_localhost
+    check_vms_miminum_20_percent_memory_guaranteed
+    check_in_preview_snapshots
+    check_pinned_virtual_machines
+    check_for_cpu_model_Conroe_and_Penryn
+
+    # Engine
     check_async_tasks
     check_runnning_commands
     check_compensation_tasks
     check_min_and_max_engine_heap
-    check_storage_domains_failing
-    check_AAA_legacy
+    check_third_party_certificate
+
+    # Hosted Engine
     check_hosted_engine_environment
-    check_images_locked_or_illegal
-    check_vm_snapshot_id_zero
-    check_in_preview_snapshots
+
+    # LDAP
+    check_AAA_legacy
+
+    # Imageproxy
+    check_imageproxyaddress_as_localhost
+
+    # Apache
     check_legacy_apache_sso_config
+
+    # Network
     check_dirty_network
+
+    # Power Management
     check_ip_not_null_and_pm_user_null
-    check_number_of_hosts
-    check_for_cpu_model_Conroe_and_Penryn
-    check_vms_miminum_20_percent_memory_guaranteed
-    check_clusters_with_mixed_selinux_disabled
+
+    # IPTables
     check_custom_ip_tables_config
+
+    # Audit Log
     check_audit_log
-    check_cluster_legacy_policy
 fi
 
 printSection "Engine Details"
@@ -373,16 +402,22 @@ if [[ -z ${SUMMARY_REPORT} ]]; then
     echo
 fi
 
+echo "=== First version deployed"
+echo
 echo ".Approximate version of initially installed engine"
 echo ${ENGINE_FIRST_VERSION}
 echo
 
+echo "=== Current version"
+echo
 echo ".Approximate current engine version"
 echo ${ENGINE_CURRENT_VERSION}
 echo
 
 if [ ${#ENGINE_PAST_VERSIONS} -gt 0 ]; then
     if [[ -z ${SUMMARY_REPORT} ]]; then
+        echo "=== Past version(s)"
+        echo
         echo ".Probable past Engine versions " \
              "footnote:[<We group the upgrade scripts by the time when the script was fully applied. " \
              "All scripts which finished in same 30 minutes span are considered to be " \
@@ -397,6 +432,8 @@ if [ ${#ENGINE_PAST_VERSIONS} -gt 0 ]; then
     echo
 fi
 
+echo "=== FQDN"
+echo
 echo ".Engine FQDN";
 echo "${ENGINE_FQDN}"
 echo
@@ -404,24 +441,22 @@ echo
 sql_query="SELECT pg_size_pretty(pg_database_size(pg_database.datname)) AS size FROM pg_database where pg_database.datname='${TEMPORARY_DB_NAME}'"
 DB_SIZE=$(executeSQL "${sql_query}")
 
+echo "=== DB Size"
+echo
 echo ".Engine DB size"
 echo "${DB_SIZE}"
 echo
 
-if [[ ${ENGINE_CURRENT_VERSION} > 3.5 ]]; then
-    sql_query=$(execute_SQL_from_file "${SQLS}"/engine_backup_log_last_backup.sql)
-    if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
-        echo ".Last Engine backup"
-        echo "${sql_query}" | createAsciidocTable
-    fi
-fi
-
+echo "=== Network"
+echo
 collect_ip_addr_engine
 
 user_rhn=$(collect_rhn_data "username")
 id_rhn=$(collect_rhn_data "system_id")
 
 if [ ${#user_rhn} -gt 0 ]; then
+    echo "=== RHN"
+    echo
     printSection "RHN data from Engine"
     echo "*RHN Username*:"
     echo "${user_rhn}"
@@ -439,6 +474,17 @@ if [[ ${#rhn_channels} -gt 0 && ${#user_rhn} -gt 0 ]]; then
     echo ".Engine subscribed channels"
     echo "${rhn_channels}"
 fi
+
+if [[ ${ENGINE_CURRENT_VERSION} > 3.5 ]]; then
+    sql_query=$(execute_SQL_from_file "${SQLS}"/engine_backup_log_last_backup.sql)
+    if [ $(echo "${sql_query}" | wc -l) -gt 1 ]; then
+        echo "=== Last Backup"
+        echo
+        echo ".Last Engine backup"
+        echo "${sql_query}" | createAsciidocTable
+    fi
+fi
+
 echo
 
 sql_query=$(execute_SQL_from_file "${SQLS}"/datacenter_show_all.sql)

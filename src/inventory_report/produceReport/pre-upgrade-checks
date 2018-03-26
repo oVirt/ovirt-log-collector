@@ -6,6 +6,8 @@ function check_hosts_health() {
     # Hosts health validation
     hosts_health_check=$(execute_SQL_from_file "${SQLS}"/hosts_query_check_health.sql)
     if [ $(echo "${hosts_health_check}" | wc -l) -gt 1 ]; then
+        echo "=== Host(s)"
+        echo
         echo -e "{WARNING} The following host(s) are not in UP state, please" \
                 " verify:"
         echo "${hosts_health_check}" | createAsciidocTable
@@ -19,6 +21,8 @@ function check_hosts_pretty_name() {
     # Hosts pretty name value validation
     hosts_pretty_name=$(execute_SQL_from_file "${SQLS}"/hosts_query_check_pretty_name.sql)
     if [ ${#hosts_pretty_name} -gt 0 ]; then
+        echo "=== Host(s) with empty OS description"
+        echo
         echo "{WARNING} List of hosts with empty OS description value which " \
              "may cause Host type not to be recognized correctly. Such hosts" \
              " will need to be reinstalled after upgrade to work properly."
@@ -32,6 +36,8 @@ function check_vms_health() {
     # Virtual Machines health validation
     vms_health_check=$(execute_SQL_from_file "${SQLS}"/vms_query_health.sql)
     if [ $(echo "${vms_health_check}" | wc -l) -gt 1 ]; then
+        echo "=== Virtual Machine(s)"
+        echo
         echo "{WARNING} The following VMs are not ready for upgrade:"
         echo "${vms_health_check}" | createAsciidocTable
     else
@@ -43,6 +49,7 @@ function check_cluster_no_dc() {
     # Clusters without datacenter validation
     cluster_no_dc=$(execute_SQL_from_file "${SQLS}"/cluster_query_check_datacenter.sql)
     if [ $(echo "${cluster_no_dc}" | wc -l) -gt 1 ]; then
+        echo "=== Cluster(s) with no Datacenter assigned"
         echo
         echo "{WARNING} The following cluster(s) have no datacenter assigned:"
         echo "${cluster_no_dc}" | createAsciidocTable
@@ -68,6 +75,7 @@ function check_third_party_certificate() {
     done
 
     if [ ! -z "${ENGINE_PKI_TRUST_STORE}" ] && [ "${ENGINE_PKI_TRUST_STORE}" != ${DEFAULT_PKI_TRUSTSTORE} ]; then
+        echo "=== Engine PKI has no default value"
         echo
         echo "- PKI Trust Store:"
         echo "{WARNING} ENGINE_PKI_TRUST_STORE has non-default value"
@@ -108,10 +116,14 @@ function check_min_and_max_engine_heap() {
     ret=0
     if [ -z "${ENFORCE_ENGINE_HEAP_PARAMS}" ]; then
         if [ ! -z "${ENGINE_HEAP_MIN}" ] && [ ${ENGINE_HEAP_MIN} -gt ${TOTAL_MEM_MB} ]; then
+            echo "=== ENGINE_HEAP_MIN is higher than total memory available"
+            echo
             echo -e "{WARNING} ENGINE_HEAP_MIN ${ENGINE_HEAP_MIN} MB is higher than total memory available ${TOTAL_MEM_MB} MB\n"
             ret=-1
         fi
         if [ ! -z "${ENGINE_HEAP_MAX}" ] && [ ${ENGINE_HEAP_MAX} -gt ${TOTAL_MEM_MB} ]; then
+            echo "=== ENGINE_HEAP_MAX is higher than total memory available"
+            echo
             echo -e "{WARNING} ENGINE_HEAP_MAX ${ENGINE_HEAP_MAX} MB is higher than total memory available ${TOTAL_MEM_MB} MB\n"
             ret=-1
         fi
@@ -127,6 +139,8 @@ function check_vms_running_obsolete_cluster() {
     # So we must inform in case there is vm in 3.5 cluster level
     vms_out_date=$(execute_SQL_from_file "${SQLS}"/vms_query_check_obsolete_cluster.sql)
     if [ ${vms_out_date} -gt 0 ]; then
+        echo "=== Virtual Machine(s) in Cluster level < 3.6"
+        echo
         echo "{WARNING} There are ${vms_out_date} VMs in version 3.5 and prior clusters. These clusters need to be upgraded to version 3.6 prior upgrading to version 4.0."
         echo -e "https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Virtualization/3.6/html/Upgrade_Guide/Red_Hat_Enterprise_Virtualization_3.6_Upgrade_Considerations.html[See 3.6 Upgrade Considerations]\n"
     else
@@ -137,6 +151,8 @@ function check_vms_running_obsolete_cluster() {
 function check_mixedrhelversion() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/vdc_options_query_checkmixedrhelversion.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Check Mixed RHEL versions"
+        echo
         echo -e "{WARNING} *After* upgrading all hosts to EL7 and *BEFORE* " \
                 "upgrading the Manager to >= 4.y make sure " \
                 "CheckMixedRhelVersions is true. More information about " \
@@ -155,6 +171,8 @@ function rpm_version() {
 function check_vms_windows_with_incorrect_timezone() {
    sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_query_windows_vms_with_incorrect_timezone.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Windows Virtual Machine(s) with incorrect timezone"
+        echo
         echo -e "{WARNING} The following VMs with **Windows OS** contain incorrect" \
                 " timezone, please adjust the timezone via Web Admin. A list " \
                 "of possible values can be found in https://github.com/oVirt/ovirt-engine/blob/fa401fb9a841bf1704588ed2bc9f7f0fbbf0d008/backend/manager/modules/compat/src/main/java/org/ovirt/engine/core/compat/WindowsJavaTimezoneMapping.java#L10[WindowsJavaTimezoneMapping.java], for more information https://bugzilla.redhat.com/show_bug.cgi?id=1386507[see bz#1386507]"
@@ -167,6 +185,8 @@ function check_vms_windows_with_incorrect_timezone() {
 function check_vms_linux_and_others_with_incorrect_timezone() {
    sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_query_linux_and_others_vms_with_incorrect_timezone.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Linux Virtual Machine(s) with incorrect timezone"
+        echo
         echo -e "{WARNING} The following VMs with **Linux OS or marked as " \
                 "Other OS** contain incorrect timezone, please adjust the " \
                 "timezone via Web Admin. A list of possible values can " \
@@ -180,6 +200,8 @@ function check_vms_linux_and_others_with_incorrect_timezone() {
 function check_vms_with_cluster_lower_3_6_with_virtio_serial_console() {
    sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_with_cluster_lower_3_6_with_virtio_serial_console.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Virtual Machine(s) with VirtIO serial console in Cluster < 3.6"
+        echo
         echo -e "{WARNING} The following VMs with VirtIO serial console " \
                 "enabled in cluster levels 3.5 and below cannot be later " \
                 "live migrated to 3.6 hosts (on RHEL7). Such attempt fails " \
@@ -197,6 +219,7 @@ function check_vms_with_cluster_lower_3_6_with_virtio_serial_console() {
 function check_async_tasks() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/async_tasks_query_running_tasks.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Pending async tasks in Engine"
         echo
         echo "{WARNING} The following async tasks are still running. " \
              "Please make sure that there are no running tasks before any " \
@@ -212,6 +235,7 @@ function check_async_tasks() {
 function check_runnning_commands() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/command_entities_query_get_running_commands.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Pending commands in Engine"
         echo
         echo "{WARNING} The following commands are still running. " \
              "Please make sure that there are no commands running before any " \
@@ -227,6 +251,7 @@ function check_runnning_commands() {
 function check_compensation_tasks() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/business_entity_snapshot_query_running_compensation_tasks.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Pending compensation tasks in Engine"
         echo
         echo "{WARNING} The following compensation tasks are still running. " \
              "Please make sure that there are no running tasks before any " \
@@ -242,6 +267,7 @@ function check_compensation_tasks() {
 function check_storage_domains_failing() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/storage_domains_query_get_failing_domains.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Storage domain(s) inactive"
         echo
         echo "{WARNING} The following storage domains are inactive. " \
              "Please make sure all storage domains required for the system " \
@@ -256,6 +282,7 @@ function check_storage_domains_failing() {
 function check_AAA_legacy() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/vdc_options_query_AAA_legacy.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Legacy LDAP provider"
         echo
         echo "{WARNING} Legacy LDAP provider detected, **before upgrade** the environment use: " \
              "https://github.com/oVirt/ovirt-engine-kerbldap-migration/[ovirt-engine-kerbldap-migration tool]" \
@@ -270,6 +297,7 @@ function check_AAA_legacy() {
 function check_custom_ip_tables_config() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/vdc_options_query_custom_ip_table_config.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Custom iptables configuration"
         echo
         echo "{WARNING} Custom iptables configuration for hosts has been detected. " \
              "Please be aware that iptables configuration for hosts has been deprecated in 4.2, " \
@@ -284,6 +312,7 @@ function check_custom_ip_tables_config() {
 function check_minimum_cluster_compat_version() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/cluster_query_minimum_3_6_compat_version.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Cluster compatibility version"
         echo
         echo "{WARNING} It is required to update the **Cluster Compatibility Version to 3.6" \
              " before** upgrading to 4.0 for the following cluster(s):"
@@ -297,6 +326,7 @@ function check_minimum_cluster_compat_version() {
 function check_minimum_datacenter_compat_version() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/datacenter_query_minimum_3_6_compat_version.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Datacenter compatibility version"
         echo
         echo "{WARNING} It is required to update the **DataCenter Compatibility Version to 3.6" \
              " before** upgrading to 4.0 for the following DataCenter(s):"
@@ -316,6 +346,7 @@ function check_hosted_engine_environment() {
         # Check for HA Global Maintenance mode
         sql_ret=$(execute_SQL_from_file "${SQLS}"/vds_statistics_query_ha_global_maintenance.sql)
         if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+            echo "=== Hosted Engine - Global Maintenance mode"
             echo
             echo "{WARNING} Hosted Engine HA is in https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.1/html-single/self-hosted_engine_guide/#chap-Maintenance_and_Upgrading_Resources[Global Maintenance mode]"
             echo "${sql_ret}" | createAsciidocTable
@@ -325,6 +356,7 @@ function check_hosted_engine_environment() {
             # Check for HA Global Maintenance mode
             sql_ret=$(execute_SQL_from_file "${SQLS}"/vds_statistics_query_hosted_engine_setup_with_hosts_non_up.sql)
             if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+                echo "=== Hosted Engine - Hosts not UP"
                 echo
                 echo "{WARNING} There are Hosted Engine hypervisor(s) **NOT in UP state**. However, the maintenance modes https://access.redhat.com/documentation/en-us/red_hat_virtualization/4.1/html-single/self-hosted_engine_guide/#chap-Maintenance_and_Upgrading_Resources[local or global] are not set, this might affect HA"
                 echo "${sql_ret}" | createAsciidocTable
@@ -337,6 +369,7 @@ function check_hosted_engine_environment() {
         # Check for non ovirtmgmt as management network
         sql_ret=$(execute_SQL_from_file "${SQLS}"/network_query_cluster_with_non_ovirtmgmt_as_management_network.sql)
         if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+            echo "=== Host(s) with NON ovirtmgmt"
             echo
             echo "{WARNING} There are cluster(s) with **NON ovirtmgmt as management network**." \
                  "Hosted Engine environments can be affected during upgrade. See " \
@@ -354,6 +387,7 @@ function check_hosted_engine_environment() {
 function check_pinned_virtual_machines() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_query_pinned_virtual_machines.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Virtual Machine(s) pinned"
         echo
         echo "{WARNING} There are virtual machine(s) pinned, it is not recommended upgrade" \
              " the environment with virtual machines pinned to run in specific hypervisors"
@@ -367,6 +401,7 @@ function check_pinned_virtual_machines() {
 function check_images_locked_or_illegal() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/images_query_invalid_status.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Virtual Machine(s) with invalid image status"
         echo
         echo "{WARNING} There are virtual machine(s) with invalid **image status** and" \
              " might not start in the next shutdown/start cycle"
@@ -380,6 +415,7 @@ function check_images_locked_or_illegal() {
 function check_vm_snapshot_id_zero() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/images_query_vm_snapshot_id_zero.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Virtual Machine(s) with vm_snapshot_id as zero"
         echo
         echo "{WARNING} There are image(s) with **vm_snapshot_id as zero**," \
              " it is recommended to not use zeros in vm_snapshot_id uuid " \
@@ -397,6 +433,7 @@ function check_vm_snapshot_id_zero() {
 function check_in_preview_snapshots() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_query_snapshots_in_preview.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Virtual Machine(s) with IN PREVIEW snapshots"
         echo
         echo "{WARNING} There are virtual machine(s) with **IN PREVIEW** snapshots."
         echo "Either commit or undo the snapshot in-preview before upgrading.."
@@ -415,6 +452,7 @@ function check_legacy_apache_sso_config() {
     fi
 
     if [[ $(grep "<LocationMatch ^(/ovirt-engine/(webadmin|userportal|api)|/api)>" ${OVIRT_SSO_CONFIG}) ]]; then
+        echo "=== Legacy Apache SSO"
         echo
         echo "{WARNING} Legacy Apache SSO configuration detected! **After upgrading to 4.0** is required to " \
              "replace the /etc/ovirt-engine/aaa/ovirt-sso.conf with https://github.com/oVirt/ovirt-engine-extension-aaa-ldap/blob/2db902ee5c9e392f97f7f4090d893b5eb6d29efb/README#L352-L374[this new configuration]," \
@@ -428,6 +466,7 @@ function check_legacy_apache_sso_config() {
 function check_dirty_network() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/vds_dynamic_check_for_net_config_dirty.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Network configuration not persisted"
         echo
         echo "{WARNING} Network configuration is not persisted on the " \
              "following hosts, which may lead to connectivity issues " \
@@ -443,6 +482,7 @@ function check_dirty_network() {
 function check_imageproxyaddress_as_localhost() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/vdc_options_query_imageproxyaddress_as_localhost.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== ImageProxyAddress contain localhost"
         echo
         echo "{WARNING} ImageProxyAddress **contain localhost**, it's not recommended to use " \
              "locahost or localdomain. For more information see the https://access.redhat.com/solutions/2730191[solution]"
@@ -454,6 +494,7 @@ function check_imageproxyaddress_as_localhost() {
 function check_ip_not_null_and_pm_user_null() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_query_ip_set_power_management_null.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Power Manager disabled but contain address"
         echo
         echo "{WARNING} The following hypervisor(s) have Power Manager disabled " \
              "but the address is still set with no username. This scenario might cause an upgrade " \
@@ -481,6 +522,7 @@ function check_number_of_hosts() {
     MAX_NUMBER_HOSTS=200
     sql_ret=$(execute_SQL_from_file "${SQLS}"/hosts_query_number_of_hosts.sql)
     if [ "${sql_ret}" -gt ${MAX_NUMBER_HOSTS} ]; then
+        echo "=== Reached maximum number of hosts"
         echo
         echo "{WARNING} The maximum number of hosts per Manager is ${MAX_NUMBER_HOSTS}, currently hosts " \
              " in the environment **${sql_ret}**. For more information about technical limitations, see " \
@@ -495,6 +537,7 @@ function check_number_of_hosts() {
 function check_for_cpu_model_Conroe_and_Penryn() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/hosts_cpu_Conroe_Penryn.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Hypervisor(s) with old CPU models"
         echo
         echo "{WARNING} The following hypervisor(s) have old CPU models like Conroe or Penryn." \
              "The oldest recommended is Nehalem which support IBRS. For more information see " \
@@ -509,6 +552,7 @@ function check_for_cpu_model_Conroe_and_Penryn() {
 function check_vms_miminum_20_percent_memory_guaranteed() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_query_minimum_memory_guaranteed.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Virtual Machine(s) and Physical Memory Guaranteeed"
         echo
         echo "{WARNING} The following Virtual Machines are setup with less than 20% of total memory" \
              "as Physical Memory Guaranteed, it is recommended to review it via Admin Portal. " \
@@ -521,6 +565,7 @@ function check_vms_miminum_20_percent_memory_guaranteed() {
 function check_hosts_with_tls_disabled() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/hosts_query_tls_disabled.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Host(s) with TLS disabled"
         echo
         echo "{WARNING} The following Hosts are running with TLS protocol disabled " \
              "It is recommended to enable the TLS protocol between Hosts and Engine." \
@@ -539,6 +584,7 @@ function check_clusters_with_mixed_selinux_disabled() {
     if [[ ${ENGINE_CURRENT_VERSION} > 3.4 ]]; then
         sql_ret=$(execute_SQL_from_file "${SQLS}"/cluster_query_check_mixed_selinux_configs.sql)
         if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+            echo "=== Host(s) with SELinux mixed"
             echo
             echo "{WARNING} The following Host(s) are disabling SELinux but the **Cluster** contain" \
                  "others Host(s) with SELinux Enforcing/Permissive. Mixing such configuration will" \
@@ -552,6 +598,7 @@ function check_clusters_with_mixed_selinux_disabled() {
 function check_cluster_legacy_policy() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/cluster_query_migration_policy_check_legacy.sql)
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Legacy Migration Policy"
         echo
         echo "{WARNING} The following Cluster(s) are using **Legacy Migration Policy**." \
              "It is recommended to update the Migration Policy." \
@@ -565,6 +612,7 @@ function check_backup_engine() {
     # The table engine_backup_log was introduced in 3.6, versions before 3.6
     # we should always recommend a backup.
     if [[ ${ENGINE_CURRENT_VERSION} < 3.6 ]]; then
+        echo "=== Backup Engine"
         echo
         echo "{WARNING} It is recommended to have an updated engine https://access.redhat.com/solutions/797463[backup before upgrade]!"
         echo
@@ -574,11 +622,13 @@ function check_backup_engine() {
         curr_date=$(date +%F)
 
         if [ ${ret} = 1 ]; then
+                echo "=== Backup Engine"
                 echo "{WARNING} Based on the current date (${curr_date}), a **2 weeks old** or more recent backup could not be detected , please make sure engine has " \
                      "a fresh backup before upgrade. See the last backups in the Engine details session. For more info, see the https://access.redhat.com/solutions/797463[solution]."
                 echo
         # in case we can find just one of the two entries (db + files)
         elif [ ${ret} = 2 ]; then
+            echo "=== Backup Engine"
             echo
             echo "{WARNING} The engine backup must include at least db and files in the scope , please follow the https://access.redhat.com/solutions/797463[solution]!"
             echo
