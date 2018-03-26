@@ -549,6 +549,18 @@ function check_clusters_with_mixed_selinux_disabled() {
     fi
 }
 
+function check_cluster_legacy_policy() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/cluster_query_migration_policy_check_legacy.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo
+        echo "{WARNING} The following Cluster(s) are using **Legacy Migration Policy**." \
+             "It is recommended to update the Migration Policy." \
+             "For more info see the https://access.redhat.com/solutions/3143541[solution]."
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    fi
+}
+
 function check_backup_engine() {
     # The table engine_backup_log was introduced in 3.6, versions before 3.6
     # we should always recommend a backup.

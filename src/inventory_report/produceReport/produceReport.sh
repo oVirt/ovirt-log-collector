@@ -362,6 +362,7 @@ if [[ -z "${SUMMARY_REPORT}" ]]; then
     check_clusters_with_mixed_selinux_disabled
     check_custom_ip_tables_config
     check_audit_log
+    check_cluster_legacy_policy
 fi
 
 printSection "Engine Details"

@@ -110,6 +110,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/engine_backup_log_last_backup.sql \
 	produceReport/sqls/engine_backup_log_check_2weeks_age.sql \
 	produceReport/sqls/audit_log_query_possible_failures.sql \
+	produceReport/sqls/cluster_query_migration_policy_check_legacy.sql \
 	$(NULL)
 
 EXTRA_DIST = \
