@@ -109,6 +109,7 @@ dist_sql_SCRIPTS = \
 	produceReport/sqls/hosts_query_tls_disabled.sql \
 	produceReport/sqls/engine_backup_log_last_backup.sql \
 	produceReport/sqls/engine_backup_log_check_2weeks_age.sql \
+	produceReport/sqls/audit_log_query_possible_failures.sql \
 	$(NULL)
 
 EXTRA_DIST = \

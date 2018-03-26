@@ -466,6 +466,17 @@ function check_ip_not_null_and_pm_user_null() {
     fi
 }
 
+function check_audit_log() {
+    sql_ret=$(execute_SQL_from_file "${SQLS}"/audit_log_query_possible_failures.sql)
+    if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
+        echo "=== Audit log"
+        echo
+        echo "{WARNING} Possible failures found in the audit_log in the past 15 days, please verify."
+        echo "${sql_ret}" | createAsciidocTable
+        echo
+    fi
+}
+
 function check_number_of_hosts() {
     MAX_NUMBER_HOSTS=200
     sql_ret=$(execute_SQL_from_file "${SQLS}"/hosts_query_number_of_hosts.sql)

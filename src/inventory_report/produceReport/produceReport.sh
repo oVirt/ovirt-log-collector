@@ -361,6 +361,7 @@ if [[ -z "${SUMMARY_REPORT}" ]]; then
     check_vms_miminum_20_percent_memory_guaranteed
     check_clusters_with_mixed_selinux_disabled
     check_custom_ip_tables_config
+    check_audit_log
 fi
 
 printSection "Engine Details"
