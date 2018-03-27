@@ -10,12 +10,34 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --
+CREATE OR REPLACE FUNCTION __temp_vms_non_IBRS_CPUS()
+  RETURNS TABLE(vmname VARCHAR(255), cpuname VARCHAR(255)) AS
+$PROCEDURE$
+BEGIN
+    -- cpu_name column is only available > 3.2 version
+    IF EXISTS (SELECT column_name
+               FROM information_schema.columns
+               WHERE table_name='vm_dynamic' AND column_name='cpu_name') THEN
+        RETURN QUERY (
+            SELECT
+                s.vm_name AS "Virtual Machine",
+                d.cpu_name AS "CPU Name"
+            FROM
+                vm_dynamic d
+            INNER JOIN vm_static s ON d.vm_guid = s.vm_guid
+            WHERE cpu_name NOT ILIKE '%-IBRS'
+        );
+    END IF;
+END; $PROCEDURE$
+LANGUAGE plpgsql;
+
+
 COPY (
     SELECT
-        s.vm_name AS "Virtual Machine",
-        d.cpu_name AS "CPU Name"
+        vmname AS "Virtual Machine",
+        cpuname AS "CPU Name"
     FROM
-        vm_dynamic d
-    INNER JOIN vm_static s ON d.vm_guid = s.vm_guid
-    WHERE cpu_name NOT ILIKE '%-IBRS'
+        __temp_vms_non_IBRS_CPUS()
 ) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
+
+DROP FUNCTION __temp_vms_non_IBRS_CPUS();
