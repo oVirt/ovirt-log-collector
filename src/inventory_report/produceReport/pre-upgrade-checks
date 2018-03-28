@@ -389,7 +389,7 @@ function check_pinned_virtual_machines() {
     if [ $(echo "${sql_ret}" | wc -l) -gt 1 ]; then
         echo "=== Virtual Machine(s) pinned"
         echo
-        echo "{WARNING} There are virtual machine(s) pinned, it is not recommended upgrade" \
+        echo "{WARNING} There are virtual machine(s) pinned, it is not recommended to upgrade" \
              " the environment with virtual machines pinned to run in specific hypervisors"
         echo "${sql_ret}" | createAsciidocTable
         echo
