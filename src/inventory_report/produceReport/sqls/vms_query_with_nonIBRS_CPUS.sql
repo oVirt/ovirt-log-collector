@@ -38,6 +38,7 @@ COPY (
         cpuname AS "CPU Name"
     FROM
         __temp_vms_non_IBRS_CPUS()
+    ORDER BY vmname
 ) TO STDOUT WITH CSV DELIMITER E'\|' HEADER;
 
 DROP FUNCTION __temp_vms_non_IBRS_CPUS();
