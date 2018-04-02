@@ -450,6 +450,7 @@ echo
 echo "=== Network"
 echo
 collect_ip_addr_engine
+echo
 
 user_rhn=$(collect_rhn_data "username")
 id_rhn=$(collect_rhn_data "system_id")
