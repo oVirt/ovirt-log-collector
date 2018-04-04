@@ -386,8 +386,10 @@ function check_hosted_engine_environment() {
 
 function check_pinned_virtual_machines() {
     sql_ret=$(execute_SQL_from_file "${SQLS}"/vms_query_pinned_virtual_machines.sql)
-    pinned_vms=$(expr $(echo "${sql_ret}" | wc -l) - 1)
-    if [ "$pinned_vms" -ge 1 ]; then
+    pinned_vms=$(echo "${sql_ret}" | wc -l)
+
+    # Decrease one to avoid count the SQL headers
+    if [ $((pinned_vms - 1)) -ge 1 ]; then
         echo "=== Virtual Machine(s) pinned"
         echo
         echo "{WARNING} There are $pinned_vms virtual machine(s) pinned, it is not recommended to upgrade" \
