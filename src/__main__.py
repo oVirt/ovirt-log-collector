@@ -980,6 +980,8 @@ class ENGINEData(CollectorBase):
             sos_plugins.extend([
                 "ovirt_imageio",
             ])
+        if 'ovirt_provider_ovn' in self._plugins:
+            sos_plugins.append('ovirt_provider_ovn')
         self.configuration["sos_options"] = self.build_options()
         self.configuration["reports"] = ",".join(sos_plugins)
         if (
