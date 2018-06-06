@@ -630,12 +630,14 @@ class HyperVisorData(CollectorBase):
                  queue=None,
                  gluster_enabled=False,
                  time_diff_only=False,
+                 dump_volume_chains=False,
                  **kwargs):
         super(HyperVisorData, self).__init__(hostname, configuration)
         self.semaphore = semaphore
         self.queue = queue
         self.gluster_enabled = gluster_enabled
         self.time_diff_only = time_diff_only
+        self.dump_volume_chains = dump_volume_chains
 
     def prep(self):
         self.configuration["hostname"] = self.hostname
@@ -736,8 +738,8 @@ class HyperVisorData(CollectorBase):
         cmd = """%(ssh_cmd)s "
 VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' sos | /bin/sed 's/\.//'`;
 if [ "$VERSION" -ge "35" ]; then
-    /usr/sbin/sosreport {option} {log_size} --batch --all-logs \
-        -o logs,%(reports)s,%(reports35)s
+    /usr/sbin/sosreport {option} {log_size} {dump_volume_chains} --batch \
+        --all-logs -o logs,%(reports)s,%(reports35)s
 elif [ "$VERSION" -ge "34" ]; then
     /usr/sbin/sosreport {option} {log_size} --batch --all-logs \
         -o logs,%(reports)s,%(reports34)s
@@ -769,6 +771,16 @@ fi
             ))
         else:
             cmd = partial(cmd.format, option='')
+
+        dump_chains_option = ""
+        if self.dump_volume_chains:
+            plugins = self.caller.call("%(ssh_cmd)s sosreport --list-plugins")
+            if 'vdsm.dump-volume-chains' in plugins:
+                dump_chains_option = '-k vdsm.dump-volume-chains'
+            else:
+                logging.warning("Host %r sosreport does not support option "
+                                "vdsm.dump-volume-chains", self.hostname)
+        cmd = partial(cmd, dump_volume_chains=dump_chains_option)
 
         if self.configuration.get('log_size'):
             cmd = cmd(log_size='-k logs.log_days=1 --log-size={size}'.format(
@@ -1451,6 +1463,8 @@ host=%(host_pattern)s):" % self.conf)
                         logging.info("Aborting hypervisor collection...")
                         return
 
+            dump_chains = self._get_dump_chains_hosts()
+
             logging.info("Gathering information from selected hypervisors...")
 
             max_connections = self.conf.get("max_connections", 10)
@@ -1472,6 +1486,7 @@ host=%(host_pattern)s):" % self.conf)
                     semaphore=sem,
                     queue=time_diff_queue,
                     gluster_enabled=cluster.gluster_enabled,
+                    dump_volume_chains=(dump_chains[datacenter] == host),
                     time_diff_only=self.conf.get("time_only")
                 )
                 thread = threading.Thread(target=collector.run)
@@ -1482,6 +1497,27 @@ host=%(host_pattern)s):" % self.conf)
                 thread.join()
 
             self.write_time_diff(time_diff_queue)
+
+    def _get_dump_chains_hosts(self):
+        """
+        Find hosts to run dump-volume-chains. Only hosts in UP state are
+        considered as we want all storage domains of the DC. SPM is preferred.
+        """
+        hosts = self.conf.get("hosts")
+        dump_chains = {}
+        for datacenter, cluster, host, is_spm, is_up in hosts:
+            if not is_up:
+                continue
+            if datacenter not in dump_chains:
+                dump_chains[datacenter] = host
+            elif is_spm:
+                dump_chains[datacenter] = host
+
+        for datacenter in dump_chains:
+            logging.info("Data center %r volume chains to be collected by %r",
+                         datacenter, dump_chains[datacenter])
+
+        return dump_chains
 
     def get_postgres_data(self):
         if self.conf.get("no_postgresql") is False:
