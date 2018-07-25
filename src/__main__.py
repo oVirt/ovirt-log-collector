@@ -675,7 +675,10 @@ class HyperVisorData(CollectorBase):
             "openvswitch",
             "ovirt_hosted_engine",
         )
-        reports34 = reports32 + (
+        reports33 = reports32 + (
+            "virsh",
+        )
+        reports34 = reports33 + (
             "collectd",
         )
         reports35 = reports34 + (
@@ -683,6 +686,7 @@ class HyperVisorData(CollectorBase):
         )
         self.configuration['reports3'] = ",".join(reports3)
         self.configuration['reports32'] = ",".join(reports32)
+        self.configuration['reports33'] = ",".join(reports33)
         self.configuration['reports34'] = ",".join(reports34)
         self.configuration['reports35'] = ",".join(reports35)
         # these are the reports that will work with rhev2.2 hosts
@@ -737,6 +741,9 @@ if [ "$VERSION" -ge "35" ]; then
 elif [ "$VERSION" -ge "34" ]; then
     /usr/sbin/sosreport {option} {log_size} --batch --all-logs \
         -o logs,%(reports)s,%(reports34)s
+elif [ "$VERSION" -ge "33" ]; then
+    /usr/sbin/sosreport {option} {log_size} --batch --all-logs \
+        -o logs,%(reports)s,%(reports33)s
 elif [ "$VERSION" -ge "32" ]; then
     /usr/sbin/sosreport {option} {log_size} --batch --all-logs \
         -o logs,%(reports)s,%(reports32)s
