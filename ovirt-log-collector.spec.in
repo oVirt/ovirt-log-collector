@@ -44,7 +44,7 @@ Requires:	logrotate
 Requires:	openssh-clients
 Requires:	sos >= 3.3
 
-Requires:	ovirt-engine-lib
+Requires:	python2-ovirt-engine-lib
 
 BuildRequires:	gettext
 
@@ -53,6 +53,7 @@ Requires:	python3
 Requires:	python3-dateutil
 Requires:	python3-lxml
 Requires:	python3-ovirt-engine-sdk4 >= 4.2.0
+Requires:	python%{python3_pkgversion}-ovirt-engine-lib
 BuildRequires:	python3-devel
 %else
 Requires:	python
