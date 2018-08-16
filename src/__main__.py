@@ -962,7 +962,6 @@ class ENGINEData(CollectorBase):
             self._engine_plugin,
             "rpm",
             "libvirt",
-            "general",
             "networking",
             "hardware",
             "process",
@@ -999,6 +998,20 @@ class ENGINEData(CollectorBase):
             sos_plugins.extend([
                 "ovirt_imageio",
             ])
+
+        # general plugin was removed and split (date and host) in sos 3.6.x
+        # sos commit: 971b9581779da20384f0a4d8de5177c0b87d6892
+        if self.sos_version < '36':
+            sos_plugins.extend([
+                "general",
+            ])
+
+        if self.sos_version >= '36':
+            sos_plugins.extend([
+                "date",
+                "host"
+            ])
+
         if 'ovirt_provider_ovn' in self._plugins:
             sos_plugins.append('ovirt_provider_ovn')
         self.configuration["sos_options"] = self.build_options()
