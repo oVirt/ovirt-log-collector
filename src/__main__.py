@@ -992,6 +992,11 @@ class ENGINEData(CollectorBase):
                 "date",
                 "host"
             ])
+            # rhv_analyzer plugin included in sos 3.6.5
+            if 'RhvLogCollectorAnalyzer' in self._plugins:
+                sos_plugins.extend([
+                    "rhv_analyzer",
+                ])
 
         if 'ovirt_provider_ovn' in self._plugins:
             sos_plugins.append('ovirt_provider_ovn')
