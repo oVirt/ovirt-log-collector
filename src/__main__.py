@@ -39,6 +39,7 @@ import socket
 import sos
 import stat
 
+from copy import copy
 from functools import partial
 
 
@@ -646,7 +647,6 @@ class HyperVisorData(CollectorBase):
         self.configuration['reports'] = ",".join((
             "libvirt",
             "vdsm",
-            "general",
             "networking",
             "hardware",
             "process",
@@ -658,11 +658,13 @@ class HyperVisorData(CollectorBase):
             "memory",
             "rpm",
         ))
-        reports3 = (
+
+        reports3 = [
             "processor",
             "pci",
             "md",
             "block",
+            "general",
             "scsi",
             "multipath",
             "systemd",
@@ -671,26 +673,40 @@ class HyperVisorData(CollectorBase):
             "chrony",
             "systemd",
             "ipmitool",
-        )
-        reports32 = reports3 + (
+        ]
+
+        reports32 = copy(reports3) + [
             "firewalld",
             "openvswitch",
             "ovirt_hosted_engine",
-        )
-        reports33 = reports32 + (
+        ]
+
+        reports33 = copy(reports32) + [
             "virsh",
-        )
-        reports34 = reports33 + (
+        ]
+
+        reports34 = copy(reports33) + [
             "collectd",
-        )
-        reports35 = reports34 + (
+        ]
+
+        reports35 = copy(reports34) + [
             "ovirt_imageio",
-        )
+        ]
+
+        # In 3.6 general plugin was split by date and host
+        reports36 = copy(reports35) + [
+            "date",
+            "host",
+        ]
+        reports36.remove("general")
+
         self.configuration['reports3'] = ",".join(reports3)
         self.configuration['reports32'] = ",".join(reports32)
         self.configuration['reports33'] = ",".join(reports33)
         self.configuration['reports34'] = ",".join(reports34)
         self.configuration['reports35'] = ",".join(reports35)
+        self.configuration['reports36'] = ",".join(reports36)
+
         # these are the reports that will work with rhev2.2 hosts
         self.configuration['bc_reports'] = \
             "vdsm,general,networking,hardware,process,yum,filesys"
@@ -737,7 +753,10 @@ class HyperVisorData(CollectorBase):
 
         cmd = """%(ssh_cmd)s "
 VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' sos | /bin/sed 's/\.//'`;
-if [ "$VERSION" -ge "35" ]; then
+if [ "$VERSION" -ge "36" ]; then
+    /usr/sbin/sosreport {option} {log_size} {dump_volume_chains} --batch \
+        --all-logs -o logs,%(reports)s,%(reports36)s
+elif [ "$VERSION" -ge "35" ]; then
     /usr/sbin/sosreport {option} {log_size} {dump_volume_chains} --batch \
         --all-logs -o logs,%(reports)s,%(reports35)s
 elif [ "$VERSION" -ge "34" ]; then
@@ -754,7 +773,7 @@ elif [ "$VERSION" -ge "30" ]; then
         -o logs,%(reports)s,%(reports3)s
 elif [ "$VERSION" -ge "22" ]; then
     /usr/sbin/sosreport {option} {log_size} --batch -k general.all_logs=True \
-        -o %(reports)s
+        -o general,%(reports)s
 elif [ "$VERSION" -ge "17" ]; then
     /usr/sbin/sosreport {option} {log_size} --no-progressbar -k
         general.all_logs=True -o %(bc_reports)s
