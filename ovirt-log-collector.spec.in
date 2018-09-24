@@ -21,12 +21,6 @@
 %global		__python_sitelib %{python2_sitelib}
 %endif
 
-%if 0%{?fedora}
-%global ovirt_rh_postgresql95 0
-%else
-%global ovirt_rh_postgresql95 1
-%endif
-
 %global		package_version @PACKAGE_VERSION@
 %global		package_name @PACKAGE_NAME@
 
@@ -66,24 +60,6 @@ BuildRequires:	python2-devel
 %description
 Log Collector tool for oVirt Engine
 
-%package analyzer
-Summary:	Log Collector for oVirt Engine - Analysis tools
-Requires:	rubygem-asciidoctor
-Requires:	libxml2
-Requires:	openssl
-
-%if %{ovirt_rh_postgresql95}
-Requires:       rh-postgresql95-postgresql-server
-%else
-Requires:       postgresql-server
-%endif
-
-Requires:	coreutils
-License:	ASL 2.0 and GPLv2+
-
-%description analyzer
-This package contains tools to help analyze oVirt Log Collector archives
-
 %prep
 %setup -q -n %{package_name}-%{package_version}
 
@@ -111,15 +87,6 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %{__python_sitelib}/ovirt_log_collector/
 %{_bindir}/ovirt-log-collector
 %{_mandir}/man8/ovirt-log-collector.8*
-
-%files analyzer
-%doc AUTHORS
-%license COPYING
-%license COPYING-GPL
-%{_bindir}/ovirt-log-collector-analyzer
-%dir %{_datadir}/%{name}/analyzer
-%{_datadir}/%{name}/analyzer/
-%{_mandir}/man8/ovirt-log-collector-analyzer.8*
 
 %changelog
 * Wed Nov 29 2017 Sandro Bonazzola <sbonazzo@redhat.com> - 4.2.0-1

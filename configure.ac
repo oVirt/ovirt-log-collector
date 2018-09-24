@@ -82,10 +82,7 @@ AC_CONFIG_FILES([
 	src/ovirt-log-collector
 	src/Makefile
 	src/helper/Makefile
-	src/inventory_report/Makefile
-	src/inventory_report/inventory-profile
 	src/logrotate.d/Makefile
-	src/inventory_report/man/Makefile
 	po/Makefile.in
 ])
 AC_CONFIG_FILES([po/Makefile], [AM_POSTPROCESS_PO_MAKEFILE])
