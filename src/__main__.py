@@ -1261,8 +1261,10 @@ class LogCollector(object):
 
             if archiveSize >= 1000:
                 msg += _(
-                    '\nYou can use the following filters in the next '
-                    'execution -c, -d, -H to reduce the archive size.'
+                    '\nYou can use the following filters -c, -d, -H in the '
+                    'next execution to limit the number of Datacenters,\n'
+                    'Clusters or Hosts that are collected in order to '
+                    'reduce the archive size.'
                 )
         return msg
 
