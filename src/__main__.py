@@ -35,6 +35,7 @@ import tempfile
 import textwrap
 import atexit
 import time
+import platform
 import socket
 import sos
 import stat
@@ -106,6 +107,27 @@ try:
     _ = t.ugettext
 except AttributeError:
     _ = t.gettext
+
+
+def parse_config_file(config_file):
+    """
+    Parse config files without section like /etc/os-release
+    and return a dict. If file not found None is returned.
+    """
+    parsed = {}
+
+    try:
+        with open(config_file, "r") as data:
+            for line in data.readlines():
+                if "=" not in line:
+                    continue
+                key, val = line.split("=", 1)
+                parsed[key] = val.strip()[1:-1]
+    except IOError:
+        logging.error("%s doesn't exist" % config_file)
+        raise
+
+    return parsed
 
 
 def get_pg_var(dbconf_param, user=None):
@@ -937,6 +959,21 @@ class ENGINEData(CollectorBase):
             "-k rpm.rpmva=off",
             "-k apache.log=True",
         ]
+
+        if (
+            'yum.yum-history-info' in self._plugins or
+            'dnf.history-info' in self._plugins
+        ):
+            distro = platform.linux_distribution(
+                full_distribution_name=0
+            )[0].lower()
+
+            version_id = parse_config_file("/etc/os-release")["VERSION_ID"]
+            if distro in ('redhat', 'centos') and float(version_id) <= 7.99:
+                opts.append('-k yum.yum-history-info=on')
+            else:
+                opts.append('-k dnf.history-info=on -k dnf.history=on')
+
         sensitive_keys = {
             self._engine_plugin: 'sensitive_keys',
             'ovirt_engine_dwh': 'dwh_sensitive_keys',
