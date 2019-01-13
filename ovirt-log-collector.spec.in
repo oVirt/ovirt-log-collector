@@ -12,7 +12,7 @@
 #  limitations under the License.
 #
 
-%if 0%{?fedora}
+%if 0%{?fedora} || 0%{?rhel} >= 8
 %global		with_python3 1
 %global		__python_bin %{__python3}
 %global		__python_sitelib %{python3_sitelib}
@@ -22,24 +22,20 @@
 %endif
 
 %global		package_version @PACKAGE_VERSION@
-%global		package_name @PACKAGE_NAME@
 
 Summary:	Log Collector for oVirt Engine
-Name:		%{package_name}
+Name:		@PACKAGE_NAME@
 Version:	@PACKAGE_RPM_VERSION@
 Release:	@PACKAGE_RPM_RELEASE@%{?release_suffix}%{?dist}
 License:	ASL 2.0
 URL:		http://www.ovirt.org
-Source0:	http://resources.ovirt.org/pub/src/%{package_name}/%{package_name}-%{package_version}.tar.gz
+Source0:	http://resources.ovirt.org/pub/src/%{name}/%{name}-%{package_version}.tar.gz
 
 BuildArch:	noarch
 
 Requires:	logrotate
 Requires:	openssh-clients
 Requires:	sos >= 3.3
-
-Requires:	python2-ovirt-engine-lib
-
 BuildRequires:	gettext
 
 %if 0%{?with_python3}
@@ -54,6 +50,7 @@ Requires:	python
 Requires:	python-dateutil
 Requires:	python-lxml
 Requires:	python-ovirt-engine-sdk4 >= 4.2.0
+Requires:	python2-ovirt-engine-lib
 BuildRequires:	python2-devel
 %endif
 
@@ -61,11 +58,11 @@ BuildRequires:	python2-devel
 Log Collector tool for oVirt Engine
 
 %prep
-%setup -q -n %{package_name}-%{package_version}
+%setup -q -n %{name}-%{package_version}
 
 %build
 %configure \
-	--docdir="%{_docdir}/%{package_name}-%{version}" \
+	--docdir="%{_docdir}/%{name}-%{version}" \
 	--disable-python-syntax-check \
 	PYTHON="%{__python_bin}"
 make %{?_smp_mflags}
@@ -80,10 +77,10 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %files
 %doc AUTHORS
 %license COPYING
-%dir %{_localstatedir}/log/ovirt-engine/%{package_name}
+%dir %{_localstatedir}/log/ovirt-engine/%{name}
 %dir %{_sysconfdir}/ovirt-engine/logcollector.conf.d
 %config(noreplace) %{_sysconfdir}/ovirt-engine/logcollector.conf
-%config(noreplace) %{_sysconfdir}/logrotate.d/%{package_name}
+%config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
 %{__python_sitelib}/ovirt_log_collector/
 %{_bindir}/ovirt-log-collector
 %{_mandir}/man8/ovirt-log-collector.8*
