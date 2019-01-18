@@ -1282,24 +1282,25 @@ class LogCollector(object):
 
         with_kerberos = bool(self.conf.get("kerberos"))
 
-        try:
-            self.conf.prompt("engine", msg="hostname of oVirt Engine")
-            if not with_kerberos:
-                self.conf.prompt(
-                    "user",
-                    msg="REST API username for oVirt Engine"
-                )
-                self.conf.getpass(
-                    "passwd",
-                    msg="REST API password for the %s oVirt Engine user" % (
-                        self.conf.get("user")
+        if not self.conf.get("quiet") and not self.conf.get("batch"):
+            try:
+                self.conf.prompt("engine", msg="hostname of oVirt Engine")
+                if not with_kerberos:
+                    self.conf.prompt(
+                        "user",
+                        msg="REST API username for oVirt Engine"
                     )
+                    self.conf.getpass(
+                        "passwd",
+                        msg="REST API password for the %s oVirt Engine user" % (
+                            self.conf.get("user")
+                        )
+                    )
+            except Configuration.SkipException:
+                logging.info(
+                    "Will not collect hypervisor list from oVirt Engine API."
                 )
-        except Configuration.SkipException:
-            logging.info(
-                "Will not collect hypervisor list from oVirt Engine API."
-            )
-            raise
+                raise
 
         try:
             return hypervisors.get_all(self.conf.get("engine"),
@@ -1506,7 +1507,7 @@ host=%(host_pattern)s):" % self.conf)
         hosts = self.conf.get("hosts")
 
         if hosts:
-            if not self.conf.get("quiet"):
+            if not self.conf.get("quiet") and not self.conf.get("batch"):
                 # Check if there are more than MAX_WARN_HOSTS_COUNT hosts
                 # to collect from
                 if len(hosts) >= MAX_WARN_HOSTS_COUNT:
@@ -1752,6 +1753,12 @@ to continue.
         "", "--quiet", dest="quiet",
         action="store_true", default=False,
         help="reduce console output (default=False)"
+    )
+
+    parser.add_option(
+        "", "--batch", dest="batch",
+        action="store_true", default=False,
+        help="batch mode - do not prompt interactively (default=False)"
     )
 
     parser.add_option(
