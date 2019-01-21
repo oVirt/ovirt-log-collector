@@ -16,7 +16,7 @@ ovirt\-log\-collector \- oVirt Log Collector
 The \fBovirt\-log\-collector\fP command gathers data from many different components (logs, databases, and environmental information) associated with an instance of a oVirt Enterprise Virtualization Engine Manager. The tool is intended to be run from the Linux system on which the is running as the root user.\&
 
 .PP
-The \fBovirt\-log\-collector\fP will, by default, attempt to interact with the oVirt Engine REST API. This command typically gets the oVirt Engine's hostname and port number (engine=) and user name (user=) from the \fB/etc/engine/logcollector.conf\fP file. Alternatively, you can provide the user name and password from the command line. The user name and password are authenticated by the authentication service associated with the oVirt Engine.  Currently, a special local account (admin), Red Hat IPA server, and Microsoft Active Directory server is supported for this task.
+The \fBovirt\-log\-collector\fP will, by default, attempt to interact with the oVirt Engine REST API. This command typically gets the oVirt Engine's hostname and port number (engine=) and user name (user=) from the \fB/etc/ovirt-engine/logcollector.conf\fP file. Alternatively, you can provide the user name and password from the command line. The user name and password are authenticated by the authentication service associated with the oVirt Engine.  Currently, a special local account (admin), Red Hat IPA server, and Microsoft Active Directory server is supported for this task.
 .PP
 
 Central to the \fBovirt\-log\-collector\fP command is a series of plug\-ins to the \fBsosreport\fP(1) application. These plug\-ins and other components gather information about hypervisors managed by the oVirt Engine into a single archive (a sort of \fBsosreport\fP(1) of sosreports).
@@ -60,7 +60,7 @@ Local directory where reports are copied (default=/tmp/logcollector). Please not
 
 .IP "\fB\-\-config\-file=PATH\fP"
 
-Path to the configuration file (default=/etc/engine/logcollector.conf).\&
+Path to the configuration file (default=/etc/ovirt-engine/logcollector.conf).\&
 
 .IP "\fB\-\-ticket\-number=TICKET\fP"
 
@@ -258,7 +258,7 @@ Likewise, you can gather data based on data center. Here, all hosts from the exa
 .br
 
 .SH "CONFIGURATION FILE"
-To get configuration information, \fBovirt\-log\-collector\fP refers to the \fB/etc/engine/logcollector.conf\fP configuration file. To set defaults for any of the options described in this man page, uncomment the settings you want in this file. Here examples of a few lines from that file:
+To get configuration information, \fBovirt\-log\-collector\fP refers to the \fB/etc/ovirt-engine/logcollector.conf\fP configuration file. To set defaults for any of the options described in this man page, uncomment the settings you want in this file. Here examples of a few lines from that file:
 
 .PP
 
@@ -312,7 +312,7 @@ The program encountered a problem gathering data but was able to continue.\&
 .SH "FILES"
 .nf
 
-/etc/engine/logcollector.conf
+/etc/ovirt-engine/logcollector.conf
 
 /tmp/logcollector
 
