@@ -1292,9 +1292,10 @@ class LogCollector(object):
                     )
                     self.conf.getpass(
                         "passwd",
-                        msg="REST API password for the %s oVirt Engine user" % (
-                            self.conf.get("user")
-                        )
+                        msg=(
+                            "REST API password for the %{user} "
+                            "oVirt Engine user"
+                        ).format(user=self.conf.get("user"))
                     )
             except Configuration.SkipException:
                 logging.info(
@@ -2092,7 +2093,7 @@ The directory is: %s'""" % (conf["local_scratch_dir"]))
                     hosts_present = collector.set_hosts(True)
                 elif not conf.get("no_hypervisor"):
                     hosts_present = collector.set_hosts()
-            except Exception as e:
+            except Exception:
                 pass
             collector.get_engine_data()
             collector.get_postgres_data()
@@ -2119,7 +2120,7 @@ The directory is: %s'""" % (conf["local_scratch_dir"]))
                     "No hypervisors were found, therefore no hypervisor \
 data will be listed.")
 
-    except KeyboardInterrupt as k:
+    except KeyboardInterrupt:
         print("Exiting on user cancel.")
     except Exception as e:
         multilog(logging.error, e)
@@ -2128,7 +2129,7 @@ data will be listed.")
         try:
             logging.debug("command: %s" % conf.command)
             # multilog(logging.debug, pprint.pformat(conf))
-        except:
+        except Exception:
             pass
         multilog(logging.debug, traceback.format_exc())
         sys.exit(ExitCodes.CRITICAL)
