@@ -719,6 +719,7 @@ class HyperVisorData(CollectorBase):
         reports36 = copy(reports35) + [
             "date",
             "host",
+            "ovirt_node"
         ]
         reports36.remove("general")
 
