@@ -1585,6 +1585,8 @@ host=%(host_pattern)s):" % self.conf)
         hosts = self.conf.get("hosts")
         dump_chains = {}
         for datacenter, cluster, host, is_spm, is_up in hosts:
+            if datacenter not in dump_chains:
+                dump_chains[datacenter] = None
             if not is_up:
                 continue
             if datacenter not in dump_chains:
