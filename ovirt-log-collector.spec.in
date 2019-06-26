@@ -35,7 +35,13 @@ BuildArch:	noarch
 
 Requires:	logrotate
 Requires:	openssh-clients
-Requires:	sos >= 3.7
+
+%if 0%{?centos}
+Requires: sos >= 3.6
+%else
+Requires: sos >= 3.7
+%endif
+
 BuildRequires:	gettext
 
 %if 0%{?with_python3}
@@ -86,6 +92,9 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %{_mandir}/man8/ovirt-log-collector.8*
 
 %changelog
+* Wed Jun 26 2019 Sandro Bonazzola <sbonazzo@redhat.com> - 4.3.3-2
+- CentOS still miss sos 3.7 while it's availabled in Fedora and RHEL 7.7 beta.
+
 * Tue Jun 25 2019 Sandro Bonazzola <sbonazzo@redhat.com> - 4.3.3-1
 - 4.3.3-1
 
