@@ -719,7 +719,8 @@ class HyperVisorData(CollectorBase):
         reports36 = copy(reports35) + [
             "date",
             "host",
-            "ovirt_node"
+            "ovirt_node",
+            "ovn_host"
         ]
         reports36.remove("general")
 
@@ -1066,7 +1067,8 @@ class ENGINEData(CollectorBase):
         if self.sos_version >= '36':
             sos_plugins.extend([
                 "date",
-                "host"
+                "host",
+                "ovn_central"
             ])
             # rhv_analyzer plugin included in sos 3.6.5
             if 'RhvLogCollectorAnalyzer' in self._plugins:
