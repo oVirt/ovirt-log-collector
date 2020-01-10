@@ -77,5 +77,6 @@ class HyperVisorDataTest(unittest.TestCase):
             "ssh -i /tmp/foobar localhost"
         )
 
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,11 +1,11 @@
-make
 autoconf
 automake
 gettext-devel
 git
-ovirt-engine-sdk-python
-python2-devel
-python-pep8
+make
 pyflakes
+python2-devel
+python-ovirt-engine-sdk4
+python-pep8
 sos
 yum-utils

@@ -164,13 +164,13 @@ def get_pg_var(dbconf_param, user=None):
                     user and
                     not line.startswith("#")
                 ):
-                        dbcreds = line.split(":", 4)
-                        if (
-                            dbcreds and
-                            len(dbcreds) >= 4 and
-                            dbcreds[3] == user
-                        ):
-                            return dbcreds[field[dbconf_param]]
+                    dbcreds = line.split(":", 4)
+                    if (
+                        dbcreds and
+                        len(dbcreds) >= 4 and
+                        dbcreds[3] == user
+                    ):
+                        return dbcreds[field[dbconf_param]]
     except IOError as ioe:
         if ioe.errno != errno.ENOENT:
             raise ioe
@@ -541,100 +541,100 @@ class Configuration(dict):
 
 
 class CollectorBase(object):
-        def __init__(self,
-                     hostname,
-                     configuration=None,
-                     **kwargs):
-            self.hostname = hostname
-            if configuration:
-                self.configuration = configuration.copy()
+    def __init__(self,
+                 hostname,
+                 configuration=None,
+                 **kwargs):
+        self.hostname = hostname
+        if configuration:
+            self.configuration = configuration.copy()
+        else:
+            self.configuration = {}
+        self.prep()
+        self.caller = Caller(self.configuration)
+
+    def prep(self):
+        self.configuration['ssh_cmd'] = self.format_ssh_command()
+        self.configuration['scp_cmd'] = self.format_ssh_command(cmd="scp")
+
+    def get_key_file(self):
+        return self.configuration.get("key_file")
+
+    def get_ssh_user(self):
+        return "%s@" % DEFAULT_SSH_USER
+
+    def parse_sosreport_stdout(self, stdout):
+        def reportFinder(line):
+            if fnmatch.fnmatch(line, '*sosreport-*tar*'):
+                return line
             else:
-                self.configuration = {}
-            self.prep()
-            self.caller = Caller(self.configuration)
+                return None
 
-        def prep(self):
-            self.configuration['ssh_cmd'] = self.format_ssh_command()
-            self.configuration['scp_cmd'] = self.format_ssh_command(cmd="scp")
+        def md5Finder(line):
+            if fnmatch.fnmatch(line, 'The md5sum is*'):
+                return line
+            else:
+                return None
 
-        def get_key_file(self):
-            return self.configuration.get("key_file")
+        try:
+            lines = stdout.splitlines()
+            fileAry = list(filter(reportFinder, lines))
+            self.configuration["filename"] = None
+            self.configuration["path"] = None
+            if fileAry is not None:
+                if len(fileAry) > 0 and fileAry[0] is not None:
+                    path = fileAry[0].strip()
+                    filename = os.path.basename(path)
+                    self.configuration["filename"] = filename
+                    if os.path.isabs(path):
+                        self.configuration["path"] = path
+                    else:
+                        self.configuration["path"] = os.path.join(
+                            self.configuration["local_tmp_dir"], filename
+                        )
+            if self.configuration["filename"] is None:
+                raise NoSosReportError("Could not parse sosreport output")
+            fileAry = list(filter(md5Finder, lines))
+            self.configuration["checksum"] = None
+            if fileAry is not None and len(fileAry) > 0:
+                if fileAry[0] is not None:
+                    md5sum = fileAry[0].partition(": ")[-1]
+                    self.configuration["checksum"] = md5sum
 
-        def get_ssh_user(self):
-            return "%s@" % DEFAULT_SSH_USER
+            logging.debug("filename(%s)" % self.configuration["filename"])
+            logging.debug("path(%s)" % self.configuration["path"])
+            logging.debug("checksum(%s)" % self.configuration["checksum"])
+        except IndexError as e:
+            logging.debug("message(%s)" % e)
+            logging.debug(
+                "parse_sosreport_stdout: " + traceback.format_exc()
+            )
+            raise Exception(
+                "Could not parse sosreport output to determine filename"
+            )
 
-        def parse_sosreport_stdout(self, stdout):
-            def reportFinder(line):
-                if fnmatch.fnmatch(line, '*sosreport-*tar*'):
-                    return line
-                else:
-                    return None
+    def format_ssh_command(self, cmd="ssh"):
+        cmd = "/usr/bin/%s " % cmd
 
-            def md5Finder(line):
-                if fnmatch.fnmatch(line, 'The md5sum is*'):
-                    return line
-                else:
-                    return None
+        # disable reading from stdin
+        if cmd.startswith("/usr/bin/ssh"):
+            cmd += "-n "
 
-            try:
-                lines = stdout.splitlines()
-                fileAry = list(filter(reportFinder, lines))
-                self.configuration["filename"] = None
-                self.configuration["path"] = None
-                if fileAry is not None:
-                    if len(fileAry) > 0 and fileAry[0] is not None:
-                        path = fileAry[0].strip()
-                        filename = os.path.basename(path)
-                        self.configuration["filename"] = filename
-                        if os.path.isabs(path):
-                            self.configuration["path"] = path
-                        else:
-                            self.configuration["path"] = os.path.join(
-                                self.configuration["local_tmp_dir"], filename
-                            )
-                if self.configuration["filename"] is None:
-                    raise NoSosReportError("Could not parse sosreport output")
-                fileAry = list(filter(md5Finder, lines))
-                self.configuration["checksum"] = None
-                if fileAry is not None and len(fileAry) > 0:
-                    if fileAry[0] is not None:
-                        md5sum = fileAry[0].partition(": ")[-1]
-                        self.configuration["checksum"] = md5sum
+        if "ssh_port" in self.configuration:
+            port_flag = "-p" if cmd.startswith("/usr/bin/ssh") else "-P"
+            cmd += port_flag + " %(ssh_port)s " % self.configuration
 
-                logging.debug("filename(%s)" % self.configuration["filename"])
-                logging.debug("path(%s)" % self.configuration["path"])
-                logging.debug("checksum(%s)" % self.configuration["checksum"])
-            except IndexError as e:
-                logging.debug("message(%s)" % e)
-                logging.debug(
-                    "parse_sosreport_stdout: " + traceback.format_exc()
-                )
-                raise Exception(
-                    "Could not parse sosreport output to determine filename"
-                )
+        if self.get_key_file():
+            cmd += "-i %s " % self.get_key_file()
 
-        def format_ssh_command(self, cmd="ssh"):
-            cmd = "/usr/bin/%s " % cmd
+        # ignore host key checking
+        cmd += "-oStrictHostKeyChecking=no "
+        # keep alive the connection
+        cmd += '-oServerAliveInterval=%d ' % SSH_SERVER_ALIVE_INTERVAL
 
-            # disable reading from stdin
-            if cmd.startswith("/usr/bin/ssh"):
-                cmd += "-n "
+        cmd += self.get_ssh_user()
 
-            if "ssh_port" in self.configuration:
-                port_flag = "-p" if cmd.startswith("/usr/bin/ssh") else "-P"
-                cmd += port_flag + " %(ssh_port)s " % self.configuration
-
-            if self.get_key_file():
-                cmd += "-i %s " % self.get_key_file()
-
-            # ignore host key checking
-            cmd += "-oStrictHostKeyChecking=no "
-            # keep alive the connection
-            cmd += '-oServerAliveInterval=%d ' % SSH_SERVER_ALIVE_INTERVAL
-
-            cmd += self.get_ssh_user()
-
-            return cmd + "%s" % self.hostname
+        return cmd + "%s" % self.hostname
 
 
 class HyperVisorData(CollectorBase):
@@ -776,7 +776,7 @@ class HyperVisorData(CollectorBase):
             self.configuration['reports'] += ",gluster"
 
         cmd = """%(ssh_cmd)s "
-VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' sos | /bin/sed 's/\.//'`;
+VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' sos | /bin/sed 's/\\.//'`;
 if [ "$VERSION" -ge "36" ]; then
     /usr/sbin/sosreport {option} {log_size} {dump_volume_chains} --batch \
         --all-logs -o logs,%(reports)s,%(reports36)s

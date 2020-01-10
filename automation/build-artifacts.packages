@@ -1,11 +1,11 @@
-make
 autoconf
 automake
+dnf-utils
 gettext-devel
 git
-ovirt-engine-sdk-python
-python2-devel
-python-pep8
-pyflakes
+make
+python3-devel
+python3-ovirt-engine-sdk4
+python3-pycodestyle
+python3-pyflakes
 sos
-dnf-utils
