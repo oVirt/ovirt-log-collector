@@ -570,8 +570,8 @@ class CollectorBase(object):
             else:
                 return None
 
-        def md5Finder(line):
-            if fnmatch.fnmatch(line, 'The md5sum is*'):
+        def sha256Finder(line):
+            if fnmatch.fnmatch(line, 'The sha256sum is*'):
                 return line
             else:
                 return None
@@ -594,12 +594,12 @@ class CollectorBase(object):
                         )
             if self.configuration["filename"] is None:
                 raise NoSosReportError("Could not parse sosreport output")
-            fileAry = list(filter(md5Finder, lines))
+            fileAry = list(filter(sha256Finder, lines))
             self.configuration["checksum"] = None
             if fileAry is not None and len(fileAry) > 0:
                 if fileAry[0] is not None:
-                    md5sum = fileAry[0].partition(": ")[-1]
-                    self.configuration["checksum"] = md5sum
+                    sha256sum = fileAry[0].partition(": ")[-1]
+                    self.configuration["checksum"] = sha256sum
 
             logging.debug("filename(%s)" % self.configuration["filename"])
             logging.debug("path(%s)" % self.configuration["path"])
@@ -1148,14 +1148,14 @@ class PostgresData(CollectorBase):
             )
             stdout = self.caller.call(cmdline)
             self.parse_sosreport_stdout(stdout)
-            # Prepend postgresql- to the .md5 file that is produced by SOS
+            # Prepend postgresql- to the .sha256 file that is produced by SOS
             # so that it is easy to distinguish from the other N reports
             # that are all related to hypervisors.
             os.rename(
-                "%s.md5" % (self.configuration["path"]),
+                "%s.sha256" % (self.configuration["path"]),
                 os.path.join(
                     self.configuration["local_scratch_dir"],
-                    "postgresql-%s.md5" % self.configuration["filename"]
+                    "postgresql-%s.sha256" % self.configuration["filename"]
                 )
             )
         # Prepend postgresql- to the PostgreSQL SOS report
@@ -1255,7 +1255,7 @@ class LogCollector(object):
 
             msg = _(
                 'Log files have been collected and placed in {path}\n'
-                'The MD5 for this file is {checksum} and its size is {size}'
+                'The sha256 for this file is {checksum} and its size is {size}'
             ).format(
                 path=self.conf["path"],
                 size=size,
