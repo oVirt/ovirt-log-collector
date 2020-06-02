@@ -1068,7 +1068,8 @@ class ENGINEData(CollectorBase):
             sos_plugins.extend([
                 "date",
                 "host",
-                "ovn_central"
+                "ovn_central",
+                "grafana",
             ])
             # rhv_analyzer plugin included in sos 3.6.5
             if 'RhvLogCollectorAnalyzer' in self._plugins:
