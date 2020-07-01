@@ -258,7 +258,7 @@ class Caller(object):
         _cmd = cmd % self.configuration
         return shlex.split(_cmd)
 
-    def call(self, cmds):
+    def call(self, cmds, raise_on_error=True):
         """Uses the configuration to fork a subprocess and run cmds."""
         _cmds = self.prep(cmds)
         logging.debug("calling(%s)" % _cmds)
@@ -276,7 +276,12 @@ class Caller(object):
         if returncode == 0:
             return stdout.decode("utf-8")
         else:
-            raise Exception(stderr.decode("utf-8"))
+            if raise_on_error:
+                raise Exception(stderr.decode("utf-8"))
+            else:
+                # Do nothing. We already logged above the errors, should be
+                # enough for debugging issues.
+                pass
 
 
 class Configuration(dict):
@@ -857,7 +862,8 @@ fi
                 )
                 self.caller.call('%(ssh_cmd)s "/bin/rm %(path)s*"')
                 stdout = self.caller.call(
-                    '%(ssh_cmd)s "/bin/ls -lRZ /etc /var /rhev"'
+                    '%(ssh_cmd)s "/bin/ls -lRZ /etc /var /rhev"',
+                    raise_on_error=False
                 )
                 self.configuration['selinux_dir'] = os.path.join(
                     self.configuration.get('hypervisor_dir'),
