@@ -1149,14 +1149,27 @@ class PostgresData(CollectorBase):
             )
             stdout = self.caller.call(cmdline)
             self.parse_sosreport_stdout(stdout)
-            # Prepend postgresql- to the .sha256 file that is produced by SOS
+
+            # Prepend postgresql- to the extension file that is produced by SOS
             # so that it is easy to distinguish from the other N reports
             # that are all related to hypervisors.
+
+            # Files extension output for FIPS mode
+            md5_file = "%s.md5" % self.configuration["path"]
+            sha256_file = "%s.sha256" % self.configuration["path"]
+
+            # FIPS mode disabled
+            if os.path.exists(md5_file):
+                sumfile_path = md5_file
+            # FIPS mode enabled
+            elif os.path.exists(sha256_file):
+                sumfile_path = sha256_file
+
             os.rename(
-                "%s.sha256" % (self.configuration["path"]),
+                sumfile_path,
                 os.path.join(
                     self.configuration["local_scratch_dir"],
-                    "postgresql-%s.sha256" % self.configuration["filename"]
+                    "postgresql-%s" % os.path.basename(sumfile_path)
                 )
             )
         # Prepend postgresql- to the PostgreSQL SOS report
@@ -1243,10 +1256,10 @@ class LogCollector(object):
         shutil.rmtree(self.conf["local_tmp_dir"])
         caller.call("%(compressor)s -1 '%(report)s'")
         os.chmod(self.conf["path"], stat.S_IRUSR | stat.S_IWUSR)
-        md5_out = caller.call("md5sum '%(compressed_report)s'")
-        checksum = md5_out.split()[0]
-        with open("%s.md5" % self.conf["path"], 'w') as checksum_file:
-            checksum_file.write(md5_out)
+        sha256_out = caller.call("sha256sum '%(compressed_report)s'")
+        checksum = sha256_out.split()[0]
+        with open("%s.sha256" % self.conf["path"], 'w') as checksum_file:
+            checksum_file.write(sha256_out)
 
         msg = ''
         if os.path.exists(self.conf["path"]):
