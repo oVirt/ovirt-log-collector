@@ -781,7 +781,8 @@ class HyperVisorData(CollectorBase):
             self.configuration['reports'] += ",gluster"
 
         cmd = """%(ssh_cmd)s "
-VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' sos | /bin/sed 's/\\.//'`;
+VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' \
+    sos | /bin/sed 's/\\.//' | /bin/sed 's/\\..//'`;
 if [ "$VERSION" -ge "36" ]; then
     /usr/sbin/sosreport {option} {log_size} {dump_volume_chains} --batch \
         --all-logs -o logs,%(reports)s,%(reports36)s
