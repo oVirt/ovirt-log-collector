@@ -12,14 +12,6 @@
 #  limitations under the License.
 #
 
-%if 0%{?fedora} || 0%{?rhel} >= 8
-%global		with_python3 1
-%global		__python_bin %{__python3}
-%global		__python_sitelib %{python3_sitelib}
-%else
-%global		__python_bin %{__python2}
-%global		__python_sitelib %{python2_sitelib}
-%endif
 
 %global		package_version @PACKAGE_VERSION@
 
@@ -38,21 +30,12 @@ Requires:	openssh-clients
 Requires:	sos >= 3.7
 BuildRequires:	gettext
 
-%if 0%{?with_python3}
 Requires:	python3
 Requires:	python3-dateutil
 Requires:	python3-lxml
-Requires:	python3-ovirt-engine-sdk4 >= 4.3.2
+Requires:	python3-ovirt-engine-sdk4 >= 4.4.4
 Requires:	python%{python3_pkgversion}-ovirt-engine-lib
 BuildRequires:	python3-devel
-%else
-Requires:	python
-Requires:	python-dateutil
-Requires:	python-lxml
-Requires:	python-ovirt-engine-sdk4 >= 4.3.2
-Requires:	python2-ovirt-engine-lib
-BuildRequires:	python2-devel
-%endif
 
 %description
 Log Collector tool for oVirt Engine
@@ -64,7 +47,7 @@ Log Collector tool for oVirt Engine
 %configure \
 	--docdir="%{_docdir}/%{name}-%{version}" \
 	--disable-python-syntax-check \
-	PYTHON="%{__python_bin}"
+	PYTHON="%{__python3}"
 make %{?_smp_mflags}
 
 %check
@@ -81,11 +64,16 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %dir %{_sysconfdir}/ovirt-engine/logcollector.conf.d
 %config(noreplace) %{_sysconfdir}/ovirt-engine/logcollector.conf
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
-%{__python_sitelib}/ovirt_log_collector/
+%{python3_sitelib}/ovirt_log_collector/
 %{_bindir}/ovirt-log-collector
 %{_mandir}/man8/ovirt-log-collector.8*
 
 %changelog
+* Wed Oct 07 2020 Sandro Bonazzola <sbonazzo@redhat.com> - 4.4.4-1
+- Fixes BZ#1877479
+- Simplify spec file targeting python3 only.
+- Release 4.4.4-1
+
 * Tue Jul 07 2020 Douglas Schilling Landgraf <dougsland@redhat.com> - 4.4.3-1
 - Do not fail on 'ls -lRZ' errors | BZ#1644646
 - compress: use md5 or sha256 for postgresql .tar.gz | BZ#1854071

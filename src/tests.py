@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python3
 
 # FIXME: these tests are broken and should be fixed/reworked. please note
 # that code was converted to python3 just for consistency.
