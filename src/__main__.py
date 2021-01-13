@@ -1079,7 +1079,7 @@ class ENGINEData(CollectorBase):
                 "grafana",
             ])
             # rhv_analyzer plugin included in sos 3.6.5
-            if 'RhvLogCollectorAnalyzer' in self._plugins:
+            if 'rhv_analyzer' in self._plugins:
                 sos_plugins.extend([
                     "rhv_analyzer",
                 ])
