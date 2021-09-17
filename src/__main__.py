@@ -35,10 +35,10 @@ import tempfile
 import textwrap
 import atexit
 import time
-import platform
 import socket
 import sos
 import stat
+import distro
 
 from copy import copy
 from functools import partial
@@ -973,12 +973,12 @@ class ENGINEData(CollectorBase):
             'yum.yum-history-info' in self._plugins or
             'dnf.history-info' in self._plugins
         ):
-            distro = platform.linux_distribution(
+            this_distro = distro.linux_distribution(
                 full_distribution_name=0
             )[0].lower()
-
             version_id = parse_config_file("/etc/os-release")["VERSION_ID"]
-            if distro in ('redhat', 'centos') and float(version_id) <= 7.99:
+            if this_distro in ('redhat', 'centos') \
+               and float(version_id) <= 7.99:
                 opts.append('-k yum.yum-history-info=on')
             else:
                 opts.append('-k dnf.history-info=on -k dnf.history=on')

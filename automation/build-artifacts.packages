@@ -5,6 +5,7 @@ gettext-devel
 git
 make
 python3-devel
+python3-distro
 python3-ovirt-engine-sdk4
 python3-pycodestyle
 python3-pyflakes
