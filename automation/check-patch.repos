@@ -1,4 +1,1 @@
-ovirt-master-snapshot,http://resources.ovirt.org/pub/ovirt-master-snapshot/rpm/$distro
-ovirt-master-snapshot-static,http://resources.ovirt.org/pub/ovirt-master-snapshot-static/rpm/$distro
-el8collection,https://copr-be.cloud.fedoraproject.org/results/sbonazzo/EL8_collection/epel-8-x86_64/
-
+build-artifacts.repos
