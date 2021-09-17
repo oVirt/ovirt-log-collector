@@ -8,10 +8,7 @@ import gettext
 import ovirtsdk4
 
 t = gettext.translation('hypervisors', fallback=True)
-try:
-    _ = t.ugettext
-except AttributeError:
-    _ = t.gettext
+_ = t.gettext
 
 
 class ENGINETree(object):

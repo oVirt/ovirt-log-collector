@@ -39,6 +39,8 @@ import socket
 import sos
 import stat
 import distro
+import configparser
+import glob
 
 from copy import copy
 from functools import partial
@@ -49,12 +51,6 @@ from ovirt_engine import configfile
 
 from .helper import hypervisors
 from ovirt_log_collector import config
-
-
-try:
-    raw_input
-except NameError:
-    raw_input = input
 
 
 DEFAULT_SSH_USER = 'root'
@@ -225,7 +221,7 @@ def multilog(logger, msg):
         logger(line)
 
 
-def get_from_prompt(msg, default=None, prompter=raw_input):
+def get_from_prompt(msg, default=None, prompter=input):
     try:
         value = prompter(msg)
         if value.strip():
@@ -386,13 +382,6 @@ class Configuration(dict):
                     self[option.dest] = opt_value
 
     def from_file(self, configFile):
-        try:
-            import ConfigParser
-        except ImportError:
-            import configparser as ConfigParser
-
-        import glob
-
         configs = []
         configDir = '%s.d' % configFile
         if os.path.exists(configFile):
@@ -403,7 +392,7 @@ class Configuration(dict):
             )
         )
 
-        cp = ConfigParser.ConfigParser()
+        cp = configparser.ConfigParser()
         cp.read(configs)
 
         # backward compatibility with existing setup
@@ -434,7 +423,7 @@ class Configuration(dict):
             )
             self.from_option_groups(new_options, self.parser)
             self.from_options(new_options, self.parser)
-        except ConfigParser.NoSectionError:
+        except configparser.NoSectionError:
             pass
 
     def from_args(self, args):
@@ -444,7 +433,7 @@ class Configuration(dict):
 
     def prompt(self, key, msg):
         if key not in self:
-            self._prompt(raw_input, key, msg)
+            self._prompt(input, key, msg)
 
     def getpass(self, key, msg):
         if key not in self:
