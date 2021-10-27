@@ -5,7 +5,7 @@ install-sh
 py-compile
 missing
 ovirt-log-collector.spec
-Makefile
+/Makefile
 Makefile.in
 aclocal.m4
 autom4te.cache
@@ -26,3 +26,7 @@ src/inventory_report/inventory-profile
 .gitreview
 intl
 ovirt-log-collector*.tar.gz
+src/Makefile
+src/helper/Makefile
+src/logrotate.d/Makefile
+
