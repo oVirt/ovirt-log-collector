@@ -1,0 +1,97 @@
+---
+name: Check patch
+
+permissions:
+  pull-requests: read
+  contents: read
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-el8:
+
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/centos/centos:stream8
+
+    steps:
+    - name: prepare env
+      run: |
+          echo ${{ github.base_ref }}
+          echo ${{ github.ref }}
+          mkdir -p ${PWD}/tmp.repos/BUILD
+          yum install -y --setopt=tsflags=nodocs autoconf automake gettext-devel git systemd make git rpm-build
+
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: autoreconf
+      run: autoreconf -ivf
+
+    - name: configure
+      run: ./configure
+
+    - name: run distcheck
+      run: make -j distcheck
+
+    - name: Build RPM
+      run: |
+        dnf builddep ovirt-log-collector.spec
+        rpmbuild -D "_topdir ${PWD}/tmp.repos" -D "release_suffix .$(date -u +%Y%m%d%H%M%S).git$(git rev-parse --short HEAD)" -ta ./ovirt-log-collector-*.tar.gz
+
+    - name: Collect artifacts
+      run: |
+          mkdir -p exported-artifacts
+          find tmp.repos -iname \*rpm -exec mv "{}" exported-artifacts/ \;
+          mv ./*tar.gz exported-artifacts/
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: artifacts
+        path: exported-artifacts/
+
+
+  build-el9:
+    # Building only on master as we don't support el9 in 4.4.
+    runs-on: ubuntu-latest
+    container:
+      image: quay.io/centos/centos:stream9
+    if: contains(github.base_ref, 'master') || contains(github.ref, 'master')
+    steps:
+    - name: prepare env
+      run: |
+          mkdir -p ${PWD}/tmp.repos/BUILD
+          yum install -y --setopt=tsflags=nodocs autoconf automake gettext-devel git systemd make git rpm-build
+
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: autoreconf
+      run: autoreconf -ivf
+
+    - name: configure
+      run: ./configure
+
+    - name: run distcheck
+      run: make -j distcheck
+
+    - name: Build RPM
+      run: |
+        dnf builddep ovirt-log-collector.spec
+        rpmbuild -D "_topdir ${PWD}/tmp.repos" -D "release_suffix .$(date -u +%Y%m%d%H%M%S).git$(git rev-parse --short HEAD)" -ta ./ovirt-log-collector-*.tar.gz
+
+    - name: Collect artifacts
+      run: |
+          mkdir -p exported-artifacts
+          find tmp.repos -iname \*rpm -exec mv "{}" exported-artifacts/ \;
+          mv ./*tar.gz exported-artifacts/
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: artifacts
+        path: exported-artifacts/
