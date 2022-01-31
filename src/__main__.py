@@ -772,7 +772,10 @@ class HyperVisorData(CollectorBase):
         cmd = """%(ssh_cmd)s "
 VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' \
     sos | /bin/sed 's/\\.//' | /bin/sed 's/\\..//'`;
-if [ "$VERSION" -ge "36" ]; then
+if [ "$VERSION" -ge "40" ]; then
+    /usr/sbin/sos report {option} {log_size} {dump_volume_chains} --batch \
+        --all-logs -o logs,%(reports)s,%(reports36)s
+elif [ "$VERSION" -ge "36" ]; then
     /usr/sbin/sosreport {option} {log_size} {dump_volume_chains} --batch \
         --all-logs -o logs,%(reports)s,%(reports36)s
 elif [ "$VERSION" -ge "35" ]; then
@@ -812,7 +815,14 @@ fi
 
         dump_chains_option = ""
         if self.dump_volume_chains:
-            plugins = self.caller.call("%(ssh_cmd)s sosreport --list-plugins")
+            if self.sos_version >= '40':
+                plugins = self.caller.call(
+                    "%(ssh_cmd)s sos report --list-plugins"
+                )
+            else:
+                plugins = self.caller.call(
+                    "%(ssh_cmd)s sosreport --list-plugins"
+                )
             if 'vdsm.dump-volume-chains' in plugins:
                 dump_chains_option = '-k vdsm.dump-volume-chains'
             else:
@@ -910,7 +920,10 @@ class ENGINEData(CollectorBase):
     def __init__(self, hostname, configuration=None, **kwargs):
         super(ENGINEData, self).__init__(hostname, configuration)
         self.sos_version = sos.__version__.replace('.', '')
-        self._plugins = self.caller.call('sosreport --list-plugins')
+        if self.sos_version >= '40':
+            self._plugins = self.caller.call('sos report --list-plugins')
+        else:
+            self._plugins = self.caller.call('sosreport --list-plugins')
         if 'ovirt.sensitive_keys' in self._plugins:
             self._engine_plugin = 'ovirt'
         elif 'ovirt-engine.sensitive_keys' in self._plugins:
@@ -1087,10 +1100,18 @@ class ENGINEData(CollectorBase):
         if 'ovirt_engine_reports' in self._plugins:
             self.configuration['reports'] += ',ovirt_engine_reports'
 
-        self.caller.call(
-            "sosreport --batch --build \
-            --tmp-dir='%(local_working_dir)s' -o %(reports)s %(sos_options)s"
-        )
+        if self.sos_version >= '40':
+            self.caller.call(
+                "sos report --batch --build \
+                --tmp-dir='%(local_working_dir)s' -o %(reports)s \
+                %(sos_options)s"
+            )
+        else:
+            self.caller.call(
+                "sosreport --batch --build \
+                --tmp-dir='%(local_working_dir)s' -o %(reports)s \
+                %(sos_options)s"
+            )
 
 
 class PostgresData(CollectorBase):
@@ -1137,11 +1158,16 @@ class PostgresData(CollectorBase):
                 plugin=self._postgres_plugin,
             )
             os.putenv('PGPASSWORD', str(self.configuration.get('pg_pass')))
+            if self.sos_version >= '40':
+                sos_cmd = 'sos report'
+            else:
+                sos_cmd = 'sosreport'
             cmdline = (
-                '/usr/sbin/sosreport --batch -o {plugin} '
+                '/usr/sbin/{sos_cmd} --batch -o {plugin} '
                 '--tmp-dir=%(local_scratch_dir)s ' + opt
             ).format(
                 plugin=self._postgres_plugin,
+                sos_cmd=sos_cmd,
             )
             stdout = self.caller.call(cmdline)
             self.parse_sosreport_stdout(stdout)
