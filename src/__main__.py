@@ -821,7 +821,7 @@ fi
         cmd = partial(cmd, dump_volume_chains=dump_chains_option)
 
         if self.configuration.get('log_size'):
-            cmd = cmd(log_size='-k logs.log_days=1 --log-size={size}'.format(
+            cmd = cmd(log_size='--log-size={size}'.format(
                 size=self.configuration.get('log_size')
             ))
         else:
@@ -996,7 +996,7 @@ class ENGINEData(CollectorBase):
 
         if self.configuration.get("log_size"):
             opts.append(
-                "-k logs.log_days=1 --log-size=%s" %
+                "--log-size=%s" %
                 self.configuration.get('log_size')
             )
 
@@ -1122,7 +1122,7 @@ class PostgresData(CollectorBase):
             opt += '--ticket-number=%(ticket_number)s '
 
         if self.configuration.get("log_size"):
-            opt += '-k logs.log_days=1 --log-size=%(log_size)s '
+            opt += '--log-size=%(log_size)s '
 
         if sos.__version__.replace('.', '') < '30':
             opt += '--report '
