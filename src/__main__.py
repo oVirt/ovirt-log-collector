@@ -1734,9 +1734,9 @@ if __name__ == '__main__':
         )
 
     usage_string = "\n".join((
-        "Usage: %prog [options] list",
-        "       %prog [options] collect"
-    ))
+        "Usage: {prog} [options] list",
+        "       {prog} [options] collect"
+    )).format(prog="ovirt-log-collector")
 
     epilog_string = """\nReturn values:
     0: The program ran to completion with no errors.
