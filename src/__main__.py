@@ -1119,6 +1119,7 @@ class PostgresData(CollectorBase):
     def __init__(self, hostname, configuration=None, **kwargs):
         super(PostgresData, self).__init__(hostname, configuration)
         self._postgres_plugin = 'postgresql'
+        self.sos_version = sos.__version__.replace('.', '')
 
     def get_key_file(self):
         """
@@ -1145,7 +1146,7 @@ class PostgresData(CollectorBase):
         if self.configuration.get("log_size"):
             opt += '--log-size=%(log_size)s '
 
-        if sos.__version__.replace('.', '') < '30':
+        if self.sos_version < '30':
             opt += '--report '
 
         if self.configuration.get('pg_pass'):
