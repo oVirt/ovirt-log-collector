@@ -650,6 +650,7 @@ class HyperVisorData(CollectorBase):
                  dump_volume_chains=False,
                  **kwargs):
         super(HyperVisorData, self).__init__(hostname, configuration)
+        self.sos_version = sos.__version__.replace('.', '')
         self.semaphore = semaphore
         self.queue = queue
         self.gluster_enabled = gluster_enabled
