@@ -1789,7 +1789,8 @@ to continue.
         help="maximum size of log to collect in MiB (NOTE: this is a "
              "limit for the output of each individual sos plugin, not a "
              "limit on a size of the total output from the host)",
-        metavar="SIZE"
+        metavar="SIZE",
+        type="int",
     )
 
     parser.add_option(
