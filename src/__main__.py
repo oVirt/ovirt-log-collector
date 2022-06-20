@@ -775,25 +775,25 @@ VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' \
     sos | /bin/sed 's/\\.//' | /bin/sed 's/\\..//'`;
 if [ "$VERSION" -ge "40" ]; then
     /usr/sbin/sos report {option} {log_size} {dump_volume_chains} --batch \
-        {all_logs} -o logs,%(reports)s,%(reports36)s
+        {all_logs} -o {logs}%(reports)s,%(reports36)s
 elif [ "$VERSION" -ge "36" ]; then
     /usr/sbin/sosreport {option} {log_size} {dump_volume_chains} --batch \
-        {all_logs} -o logs,%(reports)s,%(reports36)s
+        {all_logs} -o {logs}%(reports)s,%(reports36)s
 elif [ "$VERSION" -ge "35" ]; then
     /usr/sbin/sosreport {option} {log_size} {dump_volume_chains} --batch \
-        {all_logs} -o logs,%(reports)s,%(reports35)s
+        {all_logs} -o {logs}%(reports)s,%(reports35)s
 elif [ "$VERSION" -ge "34" ]; then
     /usr/sbin/sosreport {option} {log_size} --batch {all_logs} \
-        -o logs,%(reports)s,%(reports34)s
+        -o {logs}%(reports)s,%(reports34)s
 elif [ "$VERSION" -ge "33" ]; then
     /usr/sbin/sosreport {option} {log_size} --batch {all_logs} \
-        -o logs,%(reports)s,%(reports33)s
+        -o {logs}%(reports)s,%(reports33)s
 elif [ "$VERSION" -ge "32" ]; then
     /usr/sbin/sosreport {option} {log_size} --batch {all_logs} \
-        -o logs,%(reports)s,%(reports32)s
+        -o {logs}%(reports)s,%(reports32)s
 elif [ "$VERSION" -ge "30" ]; then
     /usr/sbin/sosreport {option} {log_size} --batch -k logs.all_logs=True \
-        -o logs,%(reports)s,%(reports3)s
+        -o {logs}%(reports)s,%(reports3)s
 elif [ "$VERSION" -ge "22" ]; then
     /usr/sbin/sosreport {option} {log_size} --batch -k general.all_logs=True \
         -o general,%(reports)s
@@ -832,14 +832,19 @@ fi
         cmd = partial(cmd, dump_volume_chains=dump_chains_option)
 
         if self.configuration.get('log_size'):
+            if self.configuration.get('log_size') >= 100:
+                logs = 'logs,'
+            else:
+                logs = ''
             cmd = cmd(
                 log_size='--log-size={size}'.format(
                     size=self.configuration.get('log_size')
                 ),
                 all_logs='',
+                logs=logs,
             )
         else:
-            cmd = cmd(log_size="", all_logs='--all-logs')
+            cmd = cmd(log_size="", all_logs='--all-logs', logs='logs,')
 
         return self.caller.call(cmd)
 
