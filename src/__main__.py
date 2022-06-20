@@ -1011,6 +1011,9 @@ class ENGINEData(CollectorBase):
                 "--ticket-number=%s" % self.configuration.get("ticket_number")
             )
 
+        if self.sos_version < '30':
+            opts.append('--report')
+
         if self.configuration.get("log_size"):
             opts.append(
                 "--log-size=%s" %
