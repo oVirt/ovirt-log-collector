@@ -1098,9 +1098,16 @@ class ENGINEData(CollectorBase):
             sos_plugins.append('ovirt_provider_ovn')
         self.configuration["sos_options"] = self.build_options()
         self.configuration["reports"] = ",".join(sos_plugins)
+        # We only want to enable the logs plugin if we gather all logs
+        # (disregarding the size limit) OR if the limit is set to 100 MB
+        # or more, which is the lower default limit of the logs plugin
+        # Reference:
+        # https://github.com/sosreport/sos/issues/1029
         if (
-            'logs.all_logs' in self.configuration['sos_options'] or
-            '--all-logs' in self.configuration['sos_options']
+               ('logs.all_logs' in self.configuration['sos_options'] or
+                '--all-logs' in self.configuration['sos_options']) or
+               ('log_size' in self.configuration.keys() and
+                self.configuration.get("log_size") >= 100)
         ):
             self.configuration['reports'] += ',logs'
         if 'ovirt_engine_dwh.sensitive_keys' in self._plugins:
