@@ -775,21 +775,21 @@ VERSION=`/bin/rpm -q --qf '[%%{{VERSION}}]' \
     sos | /bin/sed 's/\\.//' | /bin/sed 's/\\..//'`;
 if [ "$VERSION" -ge "40" ]; then
     /usr/sbin/sos report {option} {log_size} {dump_volume_chains} --batch \
-        --all-logs -o logs,%(reports)s,%(reports36)s
+        {all_logs} -o logs,%(reports)s,%(reports36)s
 elif [ "$VERSION" -ge "36" ]; then
     /usr/sbin/sosreport {option} {log_size} {dump_volume_chains} --batch \
-        --all-logs -o logs,%(reports)s,%(reports36)s
+        {all_logs} -o logs,%(reports)s,%(reports36)s
 elif [ "$VERSION" -ge "35" ]; then
     /usr/sbin/sosreport {option} {log_size} {dump_volume_chains} --batch \
-        --all-logs -o logs,%(reports)s,%(reports35)s
+        {all_logs} -o logs,%(reports)s,%(reports35)s
 elif [ "$VERSION" -ge "34" ]; then
-    /usr/sbin/sosreport {option} {log_size} --batch --all-logs \
+    /usr/sbin/sosreport {option} {log_size} --batch {all_logs} \
         -o logs,%(reports)s,%(reports34)s
 elif [ "$VERSION" -ge "33" ]; then
-    /usr/sbin/sosreport {option} {log_size} --batch --all-logs \
+    /usr/sbin/sosreport {option} {log_size} --batch {all_logs} \
         -o logs,%(reports)s,%(reports33)s
 elif [ "$VERSION" -ge "32" ]; then
-    /usr/sbin/sosreport {option} {log_size} --batch --all-logs \
+    /usr/sbin/sosreport {option} {log_size} --batch {all_logs} \
         -o logs,%(reports)s,%(reports32)s
 elif [ "$VERSION" -ge "30" ]; then
     /usr/sbin/sosreport {option} {log_size} --batch -k logs.all_logs=True \
@@ -832,11 +832,14 @@ fi
         cmd = partial(cmd, dump_volume_chains=dump_chains_option)
 
         if self.configuration.get('log_size'):
-            cmd = cmd(log_size='--log-size={size}'.format(
-                size=self.configuration.get('log_size')
-            ))
+            cmd = cmd(
+                log_size='--log-size={size}'.format(
+                    size=self.configuration.get('log_size')
+                ),
+                all_logs='',
+            )
         else:
-            cmd = cmd(log_size="")
+            cmd = cmd(log_size="", all_logs='--all-logs')
 
         return self.caller.call(cmd)
 
@@ -1013,16 +1016,17 @@ class ENGINEData(CollectorBase):
                 "--log-size=%s" %
                 self.configuration.get('log_size')
             )
+        else:
+            if self.sos_version < '30':
+                opts.append('--report')
+                opts.append("-k general.all_logs=True")
+            elif self.sos_version < '32':
+                opts.append("-k logs.all_logs=True")
+            else:
+                opts.append("--all-logs")
 
         if self.configuration.get("upload"):
             opts.append("--upload=%s" % self.configuration.get("upload"))
-        if self.sos_version < '30':
-            opts.append('--report')
-            opts.append("-k general.all_logs=True")
-        elif self.sos_version < '32':
-            opts.append("-k logs.all_logs=True")
-        else:
-            opts.append("--all-logs")
         return " ".join(opts)
 
     def sosreport(self):
