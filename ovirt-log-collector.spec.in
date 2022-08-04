@@ -27,7 +27,7 @@ BuildArch:	noarch
 
 Requires:	logrotate
 Requires:	openssh-clients
-Requires:	sos >= 3.7
+Requires:	sos >= 4.3-2
 BuildRequires:	gettext
 
 Requires:	python3
