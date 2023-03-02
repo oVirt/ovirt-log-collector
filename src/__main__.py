@@ -38,7 +38,6 @@ import time
 import socket
 import sos
 import stat
-import distro
 import configparser
 import glob
 
@@ -667,7 +666,6 @@ class HyperVisorData(CollectorBase):
             "networking",
             "hardware",
             "process",
-            "yum",
             "filesys",
             "devicemapper",
             "selinux",
@@ -728,7 +726,7 @@ class HyperVisorData(CollectorBase):
 
         # these are the reports that will work with rhev2.2 hosts
         self.configuration['bc_reports'] = \
-            "vdsm,general,networking,hardware,process,yum,filesys"
+            "vdsm,general,networking,hardware,process,filesys"
 
     def get_time_diff(self, stdout):
         h_time = dateutil.parser.parse(stdout.strip())
@@ -980,20 +978,6 @@ class ENGINEData(CollectorBase):
             "-k apache.log=True",
         ]
 
-        if (
-            'yum.yum-history-info' in self._plugins or
-            'dnf.history-info' in self._plugins
-        ):
-            this_distro = distro.linux_distribution(
-                full_distribution_name=0
-            )[0].lower()
-            version_id = parse_config_file("/etc/os-release")["VERSION_ID"]
-            if this_distro in ('redhat', 'centos') \
-               and float(version_id) <= 7.99:
-                opts.append('-k yum.yum-history-info=on')
-            else:
-                opts.append('-k dnf.history-info=on -k dnf.history=on')
-
         sensitive_keys = {
             self._engine_plugin: 'sensitive_keys',
             'ovirt_engine_dwh': 'dwh_sensitive_keys',
@@ -1045,7 +1029,6 @@ class ENGINEData(CollectorBase):
             "networking",
             "hardware",
             "process",
-            "yum",
             "filesys",
             "devicemapper",
             "selinux",
