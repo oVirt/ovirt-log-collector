@@ -1,103 +1,69 @@
 ---
 name: Check patch
 
-permissions:
-  pull-requests: read
-  contents: read
-
 on:
   push:
+    branches:
+      [master]
   pull_request:
+    branches:
+      [master]
+  workflow_dispatch:
 
 jobs:
-  build-el8:
-
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: centos-stream-9
+            container-name: el9stream
+          - name: centos-stream-10
+            container-name: el10stream
+
+    name: Build on ${{ matrix.name }}
+
+    env:
+      ARTIFACTS_DIR: exported-artifacts
+
     container:
-      image: quay.io/centos/centos:stream8
-
+      image: quay.io/ovirt/buildcontainer:${{ matrix.container-name }}
+    
     steps:
-    - name: prepare env
-      run: |
-          echo ${{ github.base_ref }}
-          echo ${{ github.ref }}
-          mkdir -p ${PWD}/tmp.repos/BUILD
+      - name: Mark repository as safe
+        run: git config --global --add safe.directory "$(pwd)"
+
+      - name: Prepare environment
+        run: |
           dnf install -y --setopt=tsflags=nodocs autoconf automake gettext-devel git systemd make git rpm-build dnf-plugins-core python3-devel
-          dnf copr enable -y ovirt/ovirt-master-snapshot centos-stream-8
-          dnf install -y ovirt-release-master
           dnf install -y --setopt=tsflags=nodocs python3-pycodestyle python3-pyflakes
+      
+      - uses: ovirt/checkout-action@main
+        with:
+          fetch-depth: 0
+      
+      - name: Autoreconf
+        run: autoreconf -ivf
 
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
+      - name: Configure
+        run: ./configure
 
-    - name: autoreconf
-      run: autoreconf -ivf
-
-    - name: configure
-      run: ./configure
-
-    - name: run distcheck
-      run: make -j distcheck
-
-    - name: Build RPM
-      run: |
-        dnf builddep ovirt-log-collector.spec
-        rpmbuild -D "_topdir ${PWD}/tmp.repos" -D "release_suffix .$(date -u +%Y%m%d%H%M%S).git$(git rev-parse --short HEAD)" -ta ./ovirt-log-collector-*.tar.gz
-
-    - name: Collect artifacts
-      run: |
+      - name: Run distcheck
+        run: make -j distcheck
+      
+      - name: Build RPM
+        run: |
+          dnf builddep ovirt-log-collector.spec
+          rpmbuild -D "_topdir ${PWD}/tmp.repos" -D "release_suffix .$(date -u +%Y%m%d%H%M%S).git$(git rev-parse --short HEAD)" -ta ./ovirt-log-collector-*.tar.gz
+        
+      - name: Collect artifacts
+        run: |
           mkdir -p exported-artifacts
           find tmp.repos -iname \*rpm -exec mv "{}" exported-artifacts/ \;
-          mv ./*tar.gz exported-artifacts/
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: artifacts
-        path: exported-artifacts/
-
-
-  build-el9:
-    # Building only on master as we don't support el9 in 4.4.
-    runs-on: ubuntu-latest
-    container:
-      image: quay.io/centos/centos:stream9
-    if: contains(github.base_ref, 'master') || contains(github.ref, 'master')
-    steps:
-    - name: prepare env
-      run: |
-          mkdir -p ${PWD}/tmp.repos/BUILD
-          dnf install -y --setopt=tsflags=nodocs autoconf automake gettext-devel git systemd make git rpm-build dnf-plugins-core python3-devel
-          dnf copr enable -y ovirt/ovirt-master-snapshot centos-stream-9
-          dnf install -y ovirt-release-master
-          dnf install -y --setopt=tsflags=nodocs python3-pycodestyle python3-pyflakes
-
-    - uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
-
-    - name: autoreconf
-      run: autoreconf -ivf
-
-    - name: configure
-      run: ./configure
-
-    - name: run distcheck
-      run: make -j distcheck
-
-    - name: Build RPM
-      run: |
-        dnf builddep ovirt-log-collector.spec
-        rpmbuild -D "_topdir ${PWD}/tmp.repos" -D "release_suffix .$(date -u +%Y%m%d%H%M%S).git$(git rev-parse --short HEAD)" -ta ./ovirt-log-collector-*.tar.gz
-
-    - name: Collect artifacts
-      run: |
-          mkdir -p exported-artifacts
-          find tmp.repos -iname \*rpm -exec mv "{}" exported-artifacts/ \;
-          mv ./*tar.gz exported-artifacts/
-
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: artifacts
-        path: exported-artifacts/
+          mv ./*tar.gz exported-artifacts/ 
+      
+      - name: Upload artifacts
+        uses: ovirt/upload-rpms-action@main
+        with:
+          directory: ${{ env.ARTIFACTS_DIR }}
