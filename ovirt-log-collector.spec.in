@@ -29,6 +29,7 @@ Requires:	logrotate
 Requires:	openssh-clients
 Requires:	sos >= 4.3-2
 BuildRequires:	gettext
+BuildRequires:	make
 
 Requires:	python3
 Requires:	python3-dateutil
