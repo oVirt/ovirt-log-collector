@@ -70,6 +70,9 @@ make %{?_smp_mflags} install DESTDIR="%{buildroot}"
 %{_mandir}/man8/ovirt-log-collector.8*
 
 %changelog
+* Mon Oct 20 2025 Jean-Louis Dupond <jean-louis@dupond.be> - 4.5.1-1
+- Build for CentOS 10
+
 * Mon Mar 06 2023 Sandro Bonazzola <sbonazzo@redhat.com> - 4.5.0-1
 - The sos yum plugin output is not collected anymore
 - Fixes BZ#2174894
