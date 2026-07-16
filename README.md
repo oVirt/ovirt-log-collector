@@ -1,5 +1,4 @@
 # oVirt Log Collector
-[![Copr build status](https://copr.fedorainfracloud.org/coprs/ovirt/ovirt-master-snapshot/package/ovirt-log-collector/status_image/last_build.png)](https://copr.fedorainfracloud.org/coprs/ovirt/ovirt-master-snapshot/package/ovirt-log-collector/)
 
 Welcome to the oVirt Log Collector source repository.
 This repository is hosted on [GitHub:ovirt-log-collector](https://github.com/oVirt/ovirt-log-collector)
