@@ -18,11 +18,15 @@ define([VERSION_MAJOR], [4])
 define([VERSION_MINOR], [5])
 define([VERSION_FIX], [2])
 define([VERSION_NUMBER], VERSION_MAJOR[.]VERSION_MINOR[.]VERSION_FIX)
-define([VERSION_SUFFIX], [_master])
 
-AC_INIT([ovirt-log-collector], VERSION_NUMBER[]VERSION_SUFFIX)
+AC_INIT([ovirt-log-collector], VERSION_NUMBER)
 PACKAGE_RPM_VERSION="VERSION_NUMBER"
-PACKAGE_RPM_RELEASE="0.0.$(echo VERSION_SUFFIX | sed 's/^_//')"
+
+AC_ARG_VAR([PACKAGE_RPM_RELEASE],
+    [RPM release field (default: 0.master for development, release number for release builds)])
+AS_IF([test -z "$PACKAGE_RPM_RELEASE"],
+    [PACKAGE_RPM_RELEASE="0.master"])
+
 AC_SUBST([PACKAGE_RPM_VERSION])
 AC_SUBST([PACKAGE_RPM_RELEASE])
 

@@ -51,16 +51,19 @@ dist_noinst_SCRIPTS = \
 	$(NULL)
 
 TMPREPOS = tmp.repos
+RPMBUILD_ARGS := --define="_topdir `pwd`/$(TMPREPOS)"
+RPMBUILD_ARGS += $(if $(RELEASE_SUFFIX),--define="release_suffix $(RELEASE_SUFFIX)")
+
 srpm:	dist
 	rm -fr "$(TMPREPOS)"
 	mkdir -p $(TMPREPOS)/{SPECS,RPMS,SRPMS,SOURCES}
-	rpmbuild --define="_topdir `pwd`/$(TMPREPOS)" -ts "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.gz"
+	rpmbuild $(RPMBUILD_ARGS) -ts "$(PACKAGE_TARNAME)-$(PACKAGE_VERSION).tar.gz"
 	@echo
 	@echo "srpm available at '$(TMPREPOS)'"
 	@echo
 
 rpm:	srpm
-	rpmbuild --define="_topdir `pwd`/$(TMPREPOS)" --rebuild "$(TMPREPOS)"/SRPMS/*.src.rpm
+	rpmbuild $(RPMBUILD_ARGS) --rebuild "$(TMPREPOS)"/SRPMS/*.src.rpm
 	@echo
 	@echo "rpm(s) available at '$(TMPREPOS)'"
 	@echo
